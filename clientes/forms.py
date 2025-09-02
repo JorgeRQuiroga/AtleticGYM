@@ -16,7 +16,7 @@ class ClienteForm(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Juan'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Pérez'}),
-            'dni': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 30111222'}),
+            'dni': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 30111222'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 3874123456'}),
             'emergencia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 3874000000'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Ej: juan@example.com'}),

@@ -5,12 +5,18 @@ from .models import Usuario
 class UsuarioForm(forms.ModelForm):
     password = forms.CharField(
         label="Contraseña",
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: ********'
+        }),
         required=True
     )
     password_confirm = forms.CharField(
         label="Confirmar Contraseña",
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: ********'
+        }),
         required=True
     )
     groups = forms.ModelChoiceField(
@@ -31,24 +37,39 @@ class UsuarioForm(forms.ModelForm):
             'email', 'dni', 'telefono',
             'password', 'password_confirm', 'groups'
         ]
+        labels = {
+            'username': 'Usuario',
+            'first_name': 'Nombre',
+            'last_name': 'Apellido',
+            'email': 'Correo Electrónico',
+            'dni': 'DNI',
+            'telefono': 'Teléfono',
+        }
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: juanp'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Juan'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Pérez'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Ej: juan@example.com'}),
+            'dni': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'text',
+                'placeholder': 'Ej: 30111222',
+                'inputmode': 'numeric',
+                'pattern': '[0-9]*'
+            }),
+            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 3874123456'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Campos obligatorios (excepto teléfono)
-        self.fields['username'].required = True
-        self.fields['first_name'].required = True
-        self.fields['last_name'].required = True
-        self.fields['email'].required = True
-        self.fields['dni'].required = True
-        self.fields['password'].required = True
-        self.fields['password_confirm'].required = True
-        self.fields['groups'].required = True
-        self.fields['telefono'].required = False
+        # Lista de campos obligatorios
+        campos_obligatorios = ['username', 'first_name', 'last_name', 'email', 'dni', 'password', 'password_confirm', 'groups']
+        for campo in campos_obligatorios:
+            self.fields[campo].required = True
 
-        # Estilos visuales
-        for field in self.fields.values():
-            field.widget.attrs.update({'class': 'input-estilo'})
+        # Campo opcional
+        self.fields['telefono'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
