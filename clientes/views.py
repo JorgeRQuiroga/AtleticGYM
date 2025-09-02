@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 from django.shortcuts import render
 
 # Create your views here.
-=======
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -52,4 +50,3 @@ def cliente_eliminar(request, pk):
         messages.success(request, "Cliente eliminado.")
         return redirect('cliente_listar')
     return render(request, 'cliente_eliminar.html', {'cliente': cliente})
->>>>>>> remotes/origin/Rama_Yamil

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # This is an auto-generated Django model module.
 # You'll have to do the following manually to clean this up:
 #   * Rearrange models' order
@@ -48,18 +47,17 @@ class Cobros(models.Model):
 
 
 class Cobrosxmetodopago(models.Model):
-    pk = models.CompositePrimaryKey('ID_COBRO', 'ID_METODO')
-    id_cobro = models.ForeignKey(Cobros, models.DO_NOTHING, db_column='ID_COBRO')  # Field name made lowercase.
-    id_metodo = models.ForeignKey('Metodopago', models.DO_NOTHING, db_column='ID_METODO')  # Field name made lowercase.
-    monto_pago = models.DecimalField(db_column='Monto_Pago', max_digits=8, decimal_places=0)  # Field name made lowercase.
+    id_cobro = models.ForeignKey(Cobros, models.DO_NOTHING, db_column='ID_COBRO')
+    id_metodo = models.ForeignKey('Metodopago', models.DO_NOTHING, db_column='ID_METODO')
+    monto_pago = models.DecimalField(db_column='Monto_Pago', max_digits=8, decimal_places=0)
 
     class Meta:
         managed = False
         db_table = 'CobrosXMetodoPago'
+        unique_together = (('id_cobro', 'id_metodo'),)
 
 
 class Detallecobros(models.Model):
-    pk = models.CompositePrimaryKey('ID_SERVICIO', 'ID_COBRO')
     id_servicio = models.ForeignKey('Servicios', models.DO_NOTHING, db_column='ID_SERVICIO')  # Field name made lowercase.
     id_cobro = models.ForeignKey(Cobros, models.DO_NOTHING, db_column='ID_COBRO')  # Field name made lowercase.
     monto = models.DecimalField(db_column='Monto', max_digits=10, decimal_places=0, blank=True, null=True)  # Field name made lowercase.
@@ -67,16 +65,17 @@ class Detallecobros(models.Model):
     class Meta:
         managed = False
         db_table = 'DetalleCobros'
+        unique_together = (('id_servicio', 'id_cobro'),)
 
 
 class Estadoxmembresias(models.Model):
-    pk = models.CompositePrimaryKey('ID_ESTADO', 'ID_MEMBRESIA')
     id_estado = models.ForeignKey('Estados', models.DO_NOTHING, db_column='ID_ESTADO')  # Field name made lowercase.
     id_membresia = models.ForeignKey('Membresias', models.DO_NOTHING, db_column='ID_MEMBRESIA')  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'EstadoXMembresias'
+        unique_together = (('id_estado', 'id_membresia'),)
 
 
 class Estados(models.Model):
@@ -250,7 +249,7 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
-=======
+
 from django.db import models
 
 class Cliente(models.Model):
@@ -270,4 +269,3 @@ class AsistenciaCliente(models.Model):
 
     def __str__(self):
         return f"{self.cliente.nombre} - {self.fecha_hora.strftime('%d/%m/%Y %H:%M')}"
->>>>>>> remotes/origin/Rama_Yamil

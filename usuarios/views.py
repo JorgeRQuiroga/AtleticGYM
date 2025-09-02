@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 from django.shortcuts import render
 
 # Create your views here.
-=======
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
@@ -164,4 +162,3 @@ def usuario_eliminar(request, pk):
         messages.success(request, 'Usuario eliminado correctamente.')
         return redirect('usuario_listar')
     return render(request, 'usuario_eliminar.html', {'usuario': usuario})
->>>>>>> remotes/origin/Rama_Yamil

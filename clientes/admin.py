@@ -1,8 +1,6 @@
 from django.contrib import admin
-<<<<<<< HEAD
 
 # Register your models here.
-=======
 from .models import Cliente
 
 class ClienteAdmin(admin.ModelAdmin):
@@ -12,4 +10,3 @@ class ClienteAdmin(admin.ModelAdmin):
     ordering = ['apellido', 'nombre']
 
 admin.site.register(Cliente, ClienteAdmin)
->>>>>>> remotes/origin/Rama_Yamil
