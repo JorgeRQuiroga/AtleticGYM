@@ -1,0 +1,79 @@
+/* Fondo principal del login */
+.login-bg {
+    background-image: url('img/login_fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh;
+    position: relative;
+}
+
+/* Centrado absoluto del formulario */
+.login-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 420px;
+}
+
+/* Tarjeta oscura personalizada */
+.bg-dark-custom {
+    background-color: #1a1d29 !important;
+    border: none;
+}
+
+/* Gradiente naranja para encabezados o secciones */
+.bg-gradient-orange {
+    background: linear-gradient(45deg, #e67e22, #d35400) !important;
+    border-bottom: 3px solid #e67e22;
+}
+
+/* Botón naranja personalizado */
+.btn-orange {
+    background-color: #e67e22;
+    border-color: #e67e22;
+    color: #fff;
+    font-weight: 600;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-orange:hover {
+    background-color: #d35400;
+    border-color: #d35400;
+}
+
+/* Fondo sutil para inputs */
+.bg-secondary-subtle {
+    background-color: #2e3440 !important;
+    border: none;
+    color: #ecf0f1;
+}
+
+/* Colores de texto */
+.text-light {
+    color: #ecf0f1 !important;
+}
+
+.text-white {
+    color: #f5f6fa !important;
+}
+
+/* Inputs grandes con bordes redondeados */
+.form-control-lg {
+    border-radius: 0.5rem;
+}
+
+/* Botón de mostrar contraseña */
+.btn-outline-light {
+    border: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Título estilizado */
+.card h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+}
