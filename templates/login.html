@@ -18,7 +18,7 @@
         body.login-bg {
             position: relative;
             min-height: 100vh;
-            background-image: url("{% static 'img/login_fondo.jpg' %}");
+            background-image: url("{% static 'img/asistencia_fondo.jpeg' %}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -30,7 +30,7 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Oscurece el fondo */
+            background-color: rgba(0, 0, 0, 0.4); /* Oscurece el fondo */
             z-index: 1;
         }
 
@@ -42,45 +42,47 @@
 </head>
 <body class="login-bg d-flex justify-content-center align-items-center">
 
-    <div class="card shadow-lg p-4 rounded-4 bg-dark bg-opacity-75 text-white" style="width: 100%; max-width: 420px;">
-        <div class="text-center mb-4">
-            <h3 class="fw-bold"><i class="bi bi-barbell me-2"></i> ATLETIX GYM</h3>
-            <p class="text-muted small">Acceso al sistema</p>
-        </div>
+    <div class="card shadow-lg p-4 rounded-4 bg-dark text-white" style="width: 100%; max-width: 520px;">
+       <div class="text-center mb-4">
+           <h2 class="fw-bold fs-1"><i class="bi bi-barbell me-2"></i> ATLETIX GYM S.A.S.</h2>
+           <h4 class="fw-semibold text-light mt-3">Inicie Sesión</h4>
+           <p class="text-light">Ingrese su usuario y contraseña para continuar</p>
+       </div>
 
-        <form method="post" id="login-form">
-            {% csrf_token %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+       <form method="post" id="login-form">
+           {% csrf_token %}
+           {% if messages %}
+               {% for message in messages %}
+                   <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                       {{ message }}
+                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                   </div>
+               {% endfor %}
+           {% endif %}
 
-            <div class="mb-3">
-                <label for="username" class="form-label">Usuario</label>
-                <input type="text" class="form-control form-control-lg bg-secondary-subtle border-0 text-white" id="username" name="username" required autofocus>
-            </div>
+           <div class="mb-3">
+               <label for="username" class="form-label fw-semibold fs-5">Usuario</label>
+               <input type="text" class="form-control form-control-lg bg-secondary-subtle border-0 text-white" id="username" name="username" required autofocus>
+           </div>
 
-            <div class="mb-4">
-                <label for="password" class="form-label">Contraseña</label>
-                <div class="input-group">
-                    <input type="password" class="form-control form-control-lg bg-secondary-subtle border-0 text-white" id="password" name="password" required>
-                    <button type="button" class="btn btn-outline-light" onclick="verClave()">
-                        <i class="bi bi-eye-fill" id="password-icon"></i>
-                    </button>
-                </div>
-            </div>
+           <div class="mb-4">
+               <label for="password" class="form-label fw-semibold fs-5">Contraseña</label>
+               <div class="input-group">
+                   <input type="password" class="form-control form-control-lg bg-secondary-subtle border-0 text-white" id="password" name="password" required>
+                   <button type="button" class="btn btn-outline-light" onclick="verClave()">
+                       <i class="bi bi-eye-fill" id="password-icon"></i>
+                   </button>
+               </div>
+           </div>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-warning btn-lg">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Entrar
-                </button>
-            </div>
-        </form>
-    </div>
+           <div class="d-grid">
+               <button type="submit" class="btn btn-bordo btn-lg fw-bold">
+                   <i class="bi bi-box-arrow-in-right me-2"></i> Entrar
+               </button>
+           </div>
+       </form>
+   </div>
+
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
