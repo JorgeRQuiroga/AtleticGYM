@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Estado de Caja</h2>
+{% if caja %}
+  <p><strong>Usuario:</strong> {{ caja.usuario.username }}</p>
+  <p><strong>Estado:</strong> {{ caja.estado }}</p>
+  <p><strong>Fecha apertura:</strong> {{ caja.fecha_apertura }}</p>
+  <p><strong>Monto apertura:</strong> ${{ caja.monto_apertura }}</p>
+  {% if caja.estado == 'cerrada' %}
+    <p><strong>Fecha cierre:</strong> {{ caja.fecha_cierre }}</p>
+    <p><strong>Total en caja:</strong> ${{ caja.monto_cierre }}</p>
+  {% else %}
+    <a href="{% url 'caja_cerrar' %}" class="btn btn-danger">Cerrar Caja</a>
+  {% endif %}
+{% else %}
+  <p>No hay caja abierta actualmente.</p>
+  <a href="{% url 'caja_abrir' %}" class="btn btn-success">Abrir Caja</a>
+{% endif %}
+
+<div class="mt-4">
+  <a href="{% url 'home' %}" class="btn btn-secondary">Volver al Inicio</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Cerrar Caja</h2>
+<p><strong>Usuario:</strong> {{ usuario.username }}</p>
+<p><strong>Fecha apertura:</strong> {{ caja.fecha_apertura }}</p>
+<p><strong>Monto apertura:</strong> ${{ caja.monto_apertura }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  <p>El monto final se calculará automáticamente.</p>
+  <button type="submit" class="btn btn-danger">Cerrar Caja</button>
+</form>
+{% endblock %}

@@ -9,20 +9,18 @@
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- CSS personalizado -->
     <link rel="stylesheet" href="{% static 'css/asistencia.css' %}">
 </head>
-<body class="d-flex justify-content-center align-items-center">
+<body class="d-flex justify-content-center align-items-center bg-dark vh-100">
 
     <!-- Botón volver -->
-    <a href="{% url 'home' %}" class="btn btn-outline-light btn-back">
-        <i class="bi bi-arrow-left-circle me-1"></i> Volver al inicio
+    <a href="{% url 'asistencia_listar' %}" class="btn btn-outline-light btn-back position-absolute top-0 start-0 m-3">
+        <i class="bi bi-arrow-left-circle me-1"></i> Volver
     </a>
 
-    <div class="card p-4 text-white" style="width: 100%; max-width: 420px;">
+    <div class="card p-4 text-white shadow-lg animate__animated animate__fadeInUp" style="width: 100%; max-width: 420px;">
         <div class="text-center mb-4">
-            <h3 class="fw-bold"><i class="bi bi-barbell me-2"></i> ATLETIX GYM</h3>
+            <h3 class="fw-bold text-success"><i class="bi bi-barbell me-2"></i> ATLETIX GYM</h3>
             <p class="text-muted small">Registro de asistencia</p>
         </div>
 
@@ -35,18 +33,34 @@
             {% endfor %}
         {% endif %}
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="d-grid mt-3">
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-check-circle me-1"></i> Registrar asistencia
-                </button>
+        {% if cliente %}
+            <div class="text-center mb-3 animate__animated animate__fadeInDown">
+                <h4 class="fw-bold text-light">¡Bienvenido, {{ cliente.nombre }} {{ cliente.apellido }}!</h4>
+                <p class="mb-1"><i class="bi bi-person-badge-fill me-1"></i> DNI: {{ cliente.dni }}</p>
+                <p class="mb-1"><i class="bi bi-phone-fill me-1"></i> Teléfono: {{ cliente.telefono }}</p>
+                <p class="mb-1"><i class="bi bi-envelope-fill me-1"></i> Email: {{ cliente.email }}</p>
+                {% if cliente.grupo %}
+                    <p class="mb-1"><i class="bi bi-people-fill me-1"></i> Grupo: {{ cliente.grupo.nombre }}</p>
+                {% endif %}
+                <p class="mt-3 text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Asistencia registrada correctamente</p>
             </div>
-        </form>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_dni" class="form-label">Ingrese su DNI</label>
+                    {{ form.dni }}
+                </div>
+                <div class="d-grid mt-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Registrar asistencia
+                    </button>
+                </div>
+            </form>
+        {% endif %}
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/registrar_asistencia.js' %}"></script>
 </body>
 </html>

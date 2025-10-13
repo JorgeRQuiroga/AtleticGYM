@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h1>Servicios</h1>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <a href="{% url 'servicio_agregar' %}" class="btn btn-primary mb-3">
+    + Nuevo Servicio
+  </a>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for servicio in page_obj %}
+        <tr>
+          <td>{{ servicio.nombre }}</td>
+          <td>{{ servicio.cantidad }}</td>
+          <td>{{ servicio.precio }}</td>
+          <td>{{ servicio.get_estado_display }}</td>
+          <td>
+            <a href="{% url 'servicio_editar' servicio.pk %}" class="btn btn-sm btn-secondary">
+              Editar
+            </a>
+            <a href="{% url 'servicio_eliminar' servicio.pk %}" class="btn btn-sm btn-danger">
+              Borrar
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">No hay servicios registrados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if page_obj.has_other_pages %}
+    <nav>
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">«</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">»</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock %}

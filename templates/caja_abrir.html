@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Abrir Caja</h2>
+<p><strong>Usuario:</strong> {{ usuario.username }}</p>
+<p><strong>Monto sugerido:</strong> ${{ monto_sugerido }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    {{ form.monto_apertura.label_tag }}
+    {{ form.monto_apertura }}
+    <small class="form-text text-muted">Puedes editar este monto si es necesario.</small>
+  </div>
+  <button type="submit" class="btn btn-success">Abrir Caja</button>
+</form>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>Confirmar Eliminación</h1>
+
+<p>¿Seguro que deseas borrar “<strong>{{ servicio.nombre }}</strong>”?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+  <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-link">Cancelar</a>
+</form>
+
+{% endblock %}

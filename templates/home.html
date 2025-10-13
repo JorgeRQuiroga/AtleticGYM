@@ -1,16 +1,20 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base_home.html" %}
+{% block title %}Inicio{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="text-center text-primary fw-bold mb-4">
-        Panel Principal
-    </h1>
-    <p class="lead text-center">Estás en el panel principal del sistema.</p>
-    <hr class="my-4">
+{% if user.is_authenticated %}
+<div class="mt-4 text-center mb-4">
+  <h1>AtletixGYM</h1>
+</div>
 
-    <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
-        
-    </div>
+<div class="text-center">
+  <div class="d-grid gap-3 col-6 mx-auto mt-4">
+    <a href="{% url 'caja_abrir' %}" class="btn btn-dark btn-lg">💲 Cajas</a>
+    <a href="#" class="btn btn-dark btn-lg">👥 Cobros</a>
+    <a href="#" class="btn btn-dark btn-lg">🏋️ Servicios</a>
+  </div>
+  {% else %}
+    <p>Por favor ingresa o regístrate para continuar.</p>
+  {% endif %}
 </div>
 {% endblock %}

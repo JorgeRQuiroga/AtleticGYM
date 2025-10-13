@@ -40,9 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'usuarios',
     'clientes',
+    'servicios',
+    'login',
+    'cajas',
+    'cobros',
 ]
 
-AUTH_USER_MODEL = 'usuarios.Usuario'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -81,9 +84,9 @@ WSGI_APPLICATION = 'ATLETIX_GYM.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'atleticgym',
+        'NAME': 'atletixgym_db',
         'USER': 'root',
-        'PASSWORD': '45054588',
+        'PASSWORD': '112233',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -131,6 +134,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/home/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+
+AUTH_USER_MODEL = 'auth.User'

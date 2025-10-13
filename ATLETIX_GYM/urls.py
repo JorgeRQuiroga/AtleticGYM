@@ -1,10 +1,14 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from ATLETIX_GYM import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', lambda request: redirect('login')),
+    path('', views.home, name='home'),
+    path('login/', include('login.urls')),
+    path('caja/', include('cajas.urls')),
     path('usuarios/', include('usuarios.urls')),
     path('clientes/', include('clientes.urls')),
+    path('servicios/', include('servicios.urls')),
 ]

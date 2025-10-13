@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Cobro{% endblock %}
+{% block content %}
+<h2>Nuevo Cobro</h2>
+<p><strong>Usuario:</strong> {{ request.user.username }}</p>
+<p><strong>Caja abierta desde:</strong> {{ caja.fecha_apertura }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="mb-3">
+    {{ form.servicio.label_tag }} {{ form.servicio }} {{ form.servicio.errors }}
+  </div>
+  <div class="mb-3">
+    {{ form.descripcion.label_tag }} {{ form.descripcion }} {{ form.descripcion.errors }}
+  </div>
+  <button class="btn btn-primary" type="submit">Registrar cobro</button>
+  <a class="btn btn-secondary" href="{% url 'cobros_lista' %}">Volver</a>
+</form>
+{% endblock %}
