@@ -1,7 +1,7 @@
 from functools import wraps
 from django.shortcuts import redirect
 from django.contrib import messages
-from apertura_y_cierre_de_caja.models import Caja
+from cajas.models import Caja
 
 def caja_abierta_required(view_func):
     @wraps(view_func)

@@ -5,7 +5,7 @@ from .models import Servicio
 class ServicioForm(forms.ModelForm):
     class Meta:
         model = Servicio
-        fields = ['nombre', 'cantidad', 'precio', 'estado']
+        fields = ['nombre', 'cantidad_clases', 'precio', 'activo']
         labels = {'nombre':   'Nombre del Servicio', 'cantidad': 'Cantidad de Clases', 'precio':   'Precio', 'estado':   'Estado',}
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Yoga para principiantes'}),

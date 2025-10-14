@@ -1,12 +1,16 @@
 from django.db import models
-from django.core.validators import RegexValidator
 
 class Servicio(models.Model):
-    nombre   = models.CharField('Nombre', max_length=50)
-    cantidad = models.CharField('Cantidad de Clases',max_length=10, default='0', validators=[RegexValidator(regex=r'^\d+$', message='Solo dígitos permitidos')])
-    precio   = models.CharField('Precio', max_length=15, default='0.00', validators=[RegexValidator(regex=r'^\d+(\.\d{1,2})?$', message='Formato inválido: use solo números con hasta dos decimales')])
-    ESTADOS  = [(True, 'Activo'), (False, 'Inactivo')]
-    estado   = models.BooleanField('Estado', default=True, choices=ESTADOS)
+    nombre = models.CharField(max_length=100)
+    cantidad_clases = models.IntegerField()
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Servicio"
+        verbose_name_plural = "Servicios"
+        ordering = ['nombre']
 
     def __str__(self):
-        return f"{self.nombre} [{self.get_estado_display()}]"
+        return f"{self.nombre} - ${self.precio}"
+

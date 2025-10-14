@@ -35,7 +35,7 @@ def nuevo_cobro(request):
 def lista_cobros(request):
     caja = request.caja_abierta
     cobros = Cobro.objects.filter(caja=caja).order_by('-fecha_hora')
-    return render(request, 'lista_cobros.html', {'cobros': cobros, 'caja': caja})
+    return render(request, 'cobros_lista.html', {'cobros': cobros, 'caja': caja})
 
 @login_required
 @caja_abierta_required
