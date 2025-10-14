@@ -4,10 +4,10 @@
 <p><strong>Usuario:</strong> {{ usuario.username }}</p>
 <p><strong>Fecha apertura:</strong> {{ caja.fecha_apertura }}</p>
 <p><strong>Monto apertura:</strong> ${{ caja.monto_apertura }}</p>
+<p><strong>Total en caja:</strong> ${{ caja.total_en_caja }}</p>
 
 <form method="post">
   {% csrf_token %}
-  <p>El monto final se calculará automáticamente.</p>
   <button type="submit" class="btn btn-danger">Cerrar Caja</button>
 </form>
 {% endblock %}

@@ -11,7 +11,7 @@ def caja_abierta_required(view_func):
         abierto = Caja.objects.filter(usuario=request.user, estado='abierta').first()
         if not abierto:
             messages.warning(request, "No hay una caja abierta. Debes abrirla antes de registrar cobros.")
-            return redirect('estado_caja')
+            return redirect('caja_abrir')
         request.caja_abierta = abierto
         return view_func(request, *args, **kwargs)
     return _wrapped

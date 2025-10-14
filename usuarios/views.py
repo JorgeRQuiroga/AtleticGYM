@@ -6,10 +6,8 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseForbidden
-from .forms import UsuarioForm, AsisForm
-from .models import Asistencia, Empleado
+from .forms import UsuarioForm
 from django.contrib.auth.models import User as Usuario
-from clientes.models import Cliente, AsistenciaCliente
 from usuarios.forms import EmpleadoForm
 
 # --- Helpers de permisos ---
@@ -23,79 +21,6 @@ def es_empleado(user):
 @login_required
 def home(request):
     return render(request, 'home.html')
-
-# --- Asistencia ---
-@login_required
-def asistencia_listar(request):
-    asistencias_usuarios = Asistencia.objects.select_related('usuario')
-    asistencias_clientes = AsistenciaCliente.objects.select_related('cliente')
-    historial = []
-    for a in asistencias_usuarios:
-        historial.append({
-            'nombre': a.usuario.get_full_name() or a.usuario.username,
-            'tipo': 'Usuario',
-            'fecha': a.fecha_hora,
-        })
-
-    for a in asistencias_clientes:
-        historial.append({
-            'nombre': a.cliente.nombre,
-            'tipo': 'Cliente',
-            'fecha': a.fecha_hora,
-        })
-
-    historial.sort(key=lambda x: x['fecha'], reverse=True)
-    return render(request, 'asistencia_listar.html', {'historial': historial})
-
-def registrar_asistencia(request):
-    form = AsisForm()
-    persona = None
-    tipo = None
-    ya_registrado = False
-
-    if request.method == 'POST':
-        form = AsisForm(request.POST)
-        if form.is_valid():
-            dni = form.cleaned_data['dni']
-            hoy = date.today()
-
-            # Buscar usuario
-            usuario = Usuario.objects.filter(dni=dni).first()
-            if usuario:
-                persona = usuario
-                tipo = 'usuario'
-                ya_registrado = Asistencia.objects.filter(usuario=usuario, fecha_hora__date=hoy).exists()
-                if ya_registrado:
-                    messages.warning(request, f"{usuario.first_name}, ya registraste tu asistencia hoy.")
-                else:
-                    Asistencia.objects.create(usuario=usuario)
-                    messages.success(request, f"¡Bienvenido {usuario.first_name} {usuario.last_name}! Asistencia registrada.")
-                return render(request, 'registrar_asistencia.html', {
-                    'form': form,
-                    'persona': persona,
-                    'tipo': tipo,
-                    'ya_registrado': ya_registrado
-                })
-
-            # Buscar cliente
-            cliente = Cliente.objects.filter(dni=dni).first()
-            if cliente:
-                persona = cliente
-                tipo = 'cliente'
-                ya_registrado = AsistenciaCliente.objects.filter(cliente=cliente, fecha_hora__date=hoy).exists()
-                if ya_registrado:
-                    messages.warning(request, f"{cliente.nombre}, ya registraste tu asistencia hoy.")
-                else:
-                    AsistenciaCliente.objects.create(cliente=cliente)
-                    messages.success(request, f"¡Bienvenido {cliente.nombre}! Asistencia registrada.")
-                return render(request, 'registrar_asistencia.html', {
-                    'form': form,
-                    'persona': persona,
-                    'tipo': tipo,
-                    'ya_registrado': ya_registrado
-                })
-            messages.error(request, "No se encontró ningún usuario o cliente con ese DNI.")
-    return render(request, 'registrar_asistencia.html', {'form': form})
 
 # --- Gestión de usuarios ---
 @login_required

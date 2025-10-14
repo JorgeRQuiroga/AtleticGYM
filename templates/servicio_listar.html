@@ -4,13 +4,7 @@
 {% block content %}
   <h1>Servicios</h1>
 
-  {% if messages %}
-    {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
-
-  <a href="{% url 'servicio_agregar' %}" class="btn btn-primary mb-3">
+  <a href="{% url 'servicios:servicio_agregar' %}" class="btn btn-primary mb-3">
     + Nuevo Servicio
   </a>
 
@@ -32,12 +26,35 @@
           <td>{{ servicio.precio }}</td>
           <td>{{ servicio.get_estado_display }}</td>
           <td>
-            <a href="{% url 'servicio_editar' servicio.pk %}" class="btn btn-sm btn-secondary">
+            <a href="{% url 'servicios:servicio_editar' servicio.pk %}" class="btn btn-sm btn-secondary">
               Editar
             </a>
-            <a href="{% url 'servicio_eliminar' servicio.pk %}" class="btn btn-sm btn-danger">
+            <!-- Botón que abre el modal -->
+            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarEliminar{{ servicio.pk }}">
               Borrar
-            </a>
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="confirmarEliminar{{ servicio.pk }}" tabindex="-1" aria-labelledby="modalLabel{{ servicio.pk }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel{{ servicio.pk }}">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    ¿Seguro que deseas borrar “<strong>{{ servicio.nombre }}</strong>”?
+                  </div>
+                  <div class="modal-footer">
+                    <form method="post" action="{% url 'servicios:servicio_eliminar' servicio.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </td>
         </tr>
       {% empty %}

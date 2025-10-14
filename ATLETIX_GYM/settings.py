@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'login',
     'cajas',
     'cobros',
+    'membresias',
+    'asistencias',
+    'empleados',
 ]
 
 
@@ -86,7 +89,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'atletixgym_db',
         'USER': 'root',
-        'PASSWORD': '45054588',
+        'PASSWORD': '112233',
         'HOST': 'localhost',
         'PORT': '3306',
     }

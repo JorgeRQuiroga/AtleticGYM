@@ -20,6 +20,8 @@ def abrir_caja(request):
             caja.usuario = request.user
             caja.estado = 'abierta'
             caja.fecha_apertura = timezone.now()
+            caja.total_en_caja = caja.monto_apertura
+
             caja.save()
             return redirect('caja_estado')
     else:
@@ -38,9 +40,9 @@ def cerrar_caja(request):
     if request.method == 'POST':
         # Aquí deberías calcular el total real de la caja (ventas, ingresos, etc.)
         # Para este ejemplo, usamos el mismo monto de apertura como placeholder
-        total_calculado = caja.monto_apertura  # Reemplazar con lógica real
+        # total_calculado = caja.total_en_caja 
 
-        caja.monto_cierre = total_calculado
+        caja.monto_cierre = caja.total_en_caja
         caja.estado = 'cerrada'
         caja.fecha_cierre = timezone.now()
         caja.save()

@@ -2,13 +2,14 @@ from django.db import models
 from django.conf import settings
 from servicios.models import Servicio
 from cajas.models import Caja
+from django.utils import timezone
+from clientes.models import Cliente
 
 User = settings.AUTH_USER_MODEL
 
-
 class Cobro(models.Model):
     caja = models.ForeignKey(Caja, on_delete=models.PROTECT, related_name='cobros')
-    #cliente = models.ForeignKey(User, on_delete=models.PROTECT)
+    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='cobros')
     total = models.DecimalField(max_digits=10, decimal_places=2)
     descripcion = models.CharField(max_length=255, blank=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)

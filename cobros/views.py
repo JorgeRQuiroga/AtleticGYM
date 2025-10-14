@@ -27,7 +27,7 @@ def nuevo_cobro(request):
             return redirect('cobros_lista')
     else:
         form = CobroForm()
-    return render(request, 'nuevo_cobro.html', {'form': form, 'caja': caja})
+    return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
 
 
 @login_required
@@ -42,4 +42,4 @@ def lista_cobros(request):
 def detalle_cobro(request, pk):
     caja = request.caja_abierta
     cobro = get_object_or_404(Cobro, pk=pk, caja=caja)
-    return render(request, 'detalle_cobro.html', {'cobro': cobro, 'caja': caja})
+    return render(request, 'cobros_detalle.html', {'cobro': cobro, 'caja': caja})

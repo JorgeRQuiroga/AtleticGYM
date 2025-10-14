@@ -11,7 +11,8 @@
   <div class="d-grid gap-3 col-6 mx-auto mt-4">
     <a href="{% url 'caja_abrir' %}" class="btn btn-dark btn-lg">💲 Cajas</a>
     <a href="{% url 'cobros_lista' %}" class="btn btn-dark btn-lg">👥 Cobros</a>
-    <a href="#" class="btn btn-dark btn-lg">🏋️ Servicios</a>
+    <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-dark btn-lg">🏋️ Servicios</a>
+    <a href="{% url 'membresias:membresias_menu' %}" class="btn btn-dark btn-lg"> membresias</a>
   </div>
   {% else %}
     <p>Por favor ingresa o regístrate para continuar.</p>

@@ -98,13 +98,3 @@ class EmpleadoForm(forms.ModelForm):
         model = Empleado
         fields = ['dni', 'telefono']
 
-class AsisForm(forms.Form):
-    dni = forms.IntegerField(
-        label="Ingrese su DNI",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Ej: 30111222',
-            'inputmode': 'numeric',
-            'pattern': '[0-9]*'
-        })
-    )

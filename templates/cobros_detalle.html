@@ -2,9 +2,9 @@
 {% block title %}Detalle Cobro{% endblock %}
 {% block content %}
 <h2>Detalle de Cobro</h2>
-<p><strong>Usuario:</strong> {{ cobro.usuario.username }}</p>
-<p><strong>Importe:</strong> ${{ cobro.importe }}</p>
-<p><strong>Fecha:</strong> {{ cobro.fecha }}</p>
+<p><strong>Usuario:</strong> {{ cobro.caja.usuario.username }}</p>
+<p><strong>Importe:</strong> ${{ cobro.total }}</p>
+<p><strong>Fecha:</strong> {{ cobro.fecha_hora }}</p>
 <p><strong>Descripción:</strong> {{ cobro.descripcion }}</p>
 <a class="btn btn-secondary" href="{% url 'cobros_lista' %}">Volver</a>
 {% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <h1 class="mb-4">Menú de Membresías</h1>
+
+  <div class="d-flex flex-column align-items-center gap-3">
+
+    <!-- Botón para abrir modal de inscripción -->
+    <button class="btn btn-success btn-lg w-50"
+            data-bs-toggle="modal"
+            data-bs-target="#modalInscripcion">
+      + Inscribir nuevo alumno
+    </button>
+
+    <!-- Botón para listar clientes -->
+    <a href="{% url 'membresias:membresias_lista' %}" class="btn btn-primary btn-lg w-50">
+      👥 Mostrar todos los clientes
+    </a>
+
+    <!-- Botón para volver al home -->
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg w-50">
+       Volver al Inicio
+    </a>
+  </div>
+</div>
+
+<!-- Modal de inscripción (reutiliza el que ya tenés hecho) -->
+<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Inscribir Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
+          {% csrf_token %}
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.nombre.label }}</label>
+              {{ form.nombre }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.apellido.label }}</label>
+              {{ form.apellido }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.dni.label }}</label>
+              {{ form.dni }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.telefono.label }}</label>
+              {{ form.telefono }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.emergencia.label }}</label>
+              {{ form.emergencia }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.domicilio.label }}</label>
+              {{ form.domicilio }}
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">{{ form.email.label }}</label>
+              {{ form.email }}
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">{{ form.servicio.label }}</label>
+              {{ form.servicio }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.cantidad_clases.label }}</label>
+              {{ form.cantidad_clases }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.fecha_fin.label }}</label>
+              {{ form.fecha_fin }}
+            </div>
+            <div class="col-md-12 form-check mt-2">
+              {{ form.activa }} <label class="form-check-label">{{ form.activa.label }}</label>
+            </div>
+          </div>
+          <div class="mt-3 text-end">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -5,9 +5,9 @@
 <p><strong>Usuario:</strong> {{ request.user.username }}</p>
 <a class="btn btn-success mb-3" href="{% url 'cobros_nuevo' %}">Nuevo cobro</a>
 <table class="table">
-  <thead><tr><th>Fecha</th><th>Importe</th><th>Mas detalles</th><th>Servicio</th></tr></thead>
+  <thead><tr><th>Fecha</th><th>Importe</th><th>Tipo de cobro</th><th>Detalles</th><th>Servicio</th></tr></thead>
   <tbody>
-    {% for c in cobro %}
+    {% for c in cobros %}
       <tr>
         <td>{{ c.fecha_hora }}</td>
         <td>{{ c.total }}</td>

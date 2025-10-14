@@ -14,3 +14,6 @@ class Servicio(models.Model):
     def __str__(self):
         return f"{self.nombre} - ${self.precio}"
 
+    def soft_delete(self):
+        self.activo = False
+        self.save()
