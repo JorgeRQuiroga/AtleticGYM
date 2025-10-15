@@ -5,6 +5,7 @@ from .models import Cobro
 from .forms import CobroForm
 from .decorators import caja_abierta_required
 from servicios.models import Servicio
+from clientes.models import Cliente
 
 @login_required
 @caja_abierta_required
@@ -16,6 +17,7 @@ def nuevo_cobro(request):
             cobro = form.save(commit=False)
             cobro.usuario = request.user
             cobro.caja = caja
+            cobro.cliente = form.cleaned_data['cliente'].cliente  # Asignar el cliente desde la membresía seleccionada
             if cobro.servicio:
                 cobro.importe = cobro.servicio.precio
             cobro.save()

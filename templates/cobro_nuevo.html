@@ -9,12 +9,16 @@
   {% csrf_token %}
   {{ form.non_field_errors }}
   <div class="mb-3">
+    {{ form.cliente.label_tag }} {{ form.cliente }} {{ form.cliente.errors }}
+
+  </div>
+  <div class="mb-3">
     {{ form.servicio.label_tag }} {{ form.servicio }} {{ form.servicio.errors }}
   </div>
   <div class="mb-3">
     {{ form.descripcion.label_tag }} {{ form.descripcion }} {{ form.descripcion.errors }}
   </div>
   <button class="btn btn-primary" type="submit">Registrar cobro</button>
-  <a class="btn btn-secondary" href="{% url 'cobros_lista' %}">Volver</a>
+  <a class="btn btn-danger " href="{% url 'cobros_lista' %}">Cancelar</a>
 </form>
 {% endblock %}

@@ -5,13 +5,13 @@
 <p><strong>Usuario:</strong> {{ request.user.username }}</p>
 <a class="btn btn-success mb-3" href="{% url 'cobros_nuevo' %}">Nuevo cobro</a>
 <table class="table">
-  <thead><tr><th>Fecha</th><th>Importe</th><th>Tipo de cobro</th><th>Detalles</th><th>Servicio</th></tr></thead>
+  <thead><tr><th>Fecha</th><th>Importe</th><th>Cliente</th><th>Detalles</th><th>Servicio</th></tr></thead>
   <tbody>
     {% for c in cobros %}
       <tr>
         <td>{{ c.fecha_hora }}</td>
         <td>{{ c.total }}</td>
-        <td>{{ c.descripcion }}</td>
+        <td>{{ c.cliente.nombre }} {{ c.cliente.apellido }}    {{ c.cliente.dni }}</td>
         <td><a href="{% url 'cobros_detalle' c.pk %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
         <td>{{ c.servicio.nombre }}</td>
       </tr>

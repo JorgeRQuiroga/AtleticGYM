@@ -21,7 +21,7 @@ class MembresiaInscripcionForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Documento de identidad'})
     )
     telefono = forms.CharField(
-        required=True, 
+        required=False, 
         label="Teléfono",
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono principal'})
     )
