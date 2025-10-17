@@ -12,7 +12,6 @@ class Asistencia(models.Model):
     ]
 
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
-    cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.CASCADE)
     empleado = models.ForeignKey(Empleado, null=True, blank=True, on_delete=models.CASCADE)
     membresia = models.ForeignKey(Membresia, null=True, blank=True, on_delete=models.SET_NULL)
     fecha_hora = models.DateTimeField(default=timezone.now)

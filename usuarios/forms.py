@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User as Usuario
-from usuarios.models import Empleado
+from empleados.models import Empleado
 from django.contrib.auth import get_user_model
 
 class UsuarioForm(forms.ModelForm):

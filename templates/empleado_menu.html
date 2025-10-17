@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container py-5 text-center">
+  <h1 class="mb-4">Menú de Empleados</h1>
+
+  <div class="d-flex flex-column align-items-center gap-3">
+
+    <!-- Botón para ir a la página de alta de empleado -->
+    <a href="{% url 'empleados:empleado_agregar' %}" class="btn btn-success btn-lg w-50">
+      + Nuevo Empleado
+    </a>
+
+    <!-- Botón para listar empleados -->
+    <a href="{% url 'empleados:empleado_lista' %}" class="btn btn-primary btn-lg w-50">
+      👥 Mostrar todos los empleados
+    </a>
+
+    <!-- Botón para volver al home -->
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg w-50">
+       Volver al Inicio
+    </a>
+  </div>
+</div>
+{% endblock %}
