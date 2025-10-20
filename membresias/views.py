@@ -3,8 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import MembresiaInscripcionForm
 from .models import Membresia
+from cobros.decorators import caja_abierta_required
 
 @login_required
+@caja_abierta_required
 def inscribir_cliente(request):
     if request.method == 'POST':
         form = MembresiaInscripcionForm(request.POST)

@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 
 @login_required
 def empleado_menu(request):
-    return render(request, 'empleados:empleado_menu.html')
+    return render(request, 'empleado_menu.html')
 
 # --- Listar con búsqueda ---
 @login_required
@@ -45,41 +45,42 @@ def empleado_agregar(request):
         form = EmpleadoForm(request.POST)
         if form.is_valid():
             dni = form.cleaned_data['dni']
-            empleado = Empleado.objects.filter(dni=dni).first()
+            empleado_existente = Empleado.objects.filter(dni=dni).first()
 
-            if empleado and getattr(empleado, "activo", True):
-                messages.error(request, "Ya existe un empleado activo con ese DNI.")
+            if empleado_existente:
+                if hasattr(empleado_existente, 'reactivar'):
+                    empleado_existente.reactivar()
+                else:
+                    empleado_existente.activo = True
+                    empleado_existente.fecha_baja = None
+                    empleado_existente.save()
+                messages.success(request, f"Empleado {empleado_existente.nombre} reactivado correctamente.")
                 return redirect('empleados:empleado_lista')
 
-            elif empleado and not getattr(empleado, "activo", True):
-                empleado.activo = True
-                empleado.fecha_baja = None
-                empleado.save()
-                messages.success(request, f"Empleado {empleado.nombre} {empleado.apellido} reactivado correctamente.")
-                return redirect('empleados:empleado_lista')
+            # Crear nuevo empleado
+            empleado = form.save(commit=False)
 
-            else:
-                empleado = form.save(commit=False)
-                if not empleado.user:
-                    empleado.user = User.objects.create_user(
-                        username=empleado.dni,
-                        password="contraseña_temporal",
-                        first_name=empleado.nombre,
-                        last_name=empleado.apellido
-                    )
-                empleado.save()
+            if not empleado.user:
+                empleado.user = User.objects.create_user(
+                    username=empleado.dni,
+                    password="contraseña_temporal",
+                    first_name=empleado.nombre,
+                    last_name=empleado.apellido
+                )
 
-                grupo = form.cleaned_data.get('grupo')
-                if grupo and empleado.user:
-                    empleado.user.groups.clear()
-                    empleado.user.groups.add(grupo)
+            empleado.save()
 
-                messages.success(request, "Empleado registrado correctamente.")
-                return redirect('empleados:empleados:empleado_lista')
+            grupo = form.cleaned_data.get('grupo')
+            if grupo and empleado.user:
+                empleado.user.groups.clear()
+                empleado.user.groups.add(grupo)
+
+            messages.success(request, "Empleado registrado correctamente.")
+            return redirect('empleados:empleado_lista')
     else:
         form = EmpleadoForm()
 
-    return render(request, 'empleado_form.html', {'form': form})
+    return render(request, 'empleado_menu.html', {'form': form})
 
 # --- Editar ---
 @login_required
