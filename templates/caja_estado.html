@@ -13,12 +13,12 @@
     <a href="{% url 'caja_cerrar' %}" class="btn btn-danger">Cerrar Caja</a>
   {% endif %}
 {% else %}
-  <p>No hay caja abierta actualmente.</p>
-  <a href="{% url 'caja_abrir' %}" class="btn btn-success">Abrir Caja</a>
+  <div class="alert alert-info" role="alert">
+    <h4 class="alert-heading"><i class="bi bi-info-circle-fill me-2"></i>Caja Cerrada</h4>
+    <p>No hay ninguna caja abierta actualmente.</p>
+    <hr>
+    <p class="mb-0">Para abrir una nueva caja, dirígete a la sección de <strong>Cobros</strong> o cualquier otra área que requiera una caja activa.</p>
+  </div>
 {% endif %}
-
-<div class="mt-4">
-  <a href="{% url 'home' %}" class="btn btn-secondary">Volver al Inicio</a>
-</div>
 
 {% endblock %}

@@ -1,23 +1,76 @@
 {% extends "base.html" %}
 {% block title %}Cobros{% endblock %}
 {% block content %}
-<h2>Cobros - Caja abierta</h2>
-<p><strong>Usuario:</strong> {{ request.user.username }}</p>
-<a class="btn btn-success mb-3" href="{% url 'cobros_nuevo' %}">Nuevo cobro</a>
-<table class="table">
-  <thead><tr><th>Fecha</th><th>Importe</th><th>Cliente</th><th>Detalles</th><th>Servicio</th></tr></thead>
-  <tbody>
-    {% for c in cobros %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Cobros de membresias</h1>
+  <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detallesCaja" aria-expanded="false" aria-controls="detallesCaja">
+    <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
+  </button>
+</div>
+
+<!-- Detalles de la caja colapsables -->
+<div class="collapse" id="detallesCaja">
+  <div class="card card-body bg-dark border-secondary mb-4">
+    <div class="row">
+      <div class="col-md-3"><strong>Usuario:</strong> {{ request.user.username }}</div>
+      <div class="col-md-3"><strong>Apertura:</strong> {{ caja.fecha_apertura }}</div>
+      <div class="col-md-3"><strong>Monto Inicial:</strong> ${{ caja.monto_apertura }}</div>
+      <div class="col-md-3"><strong>Total Actual:</strong> <span class="badge bg-success fs-6">${{ caja.total_en_caja }}</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Botones de acción centrados -->
+<div class="d-flex justify-content-center gap-3 mb-4">
+  <a class="btn btn-success" href="{% url 'cobros_nuevo' %}"><i class="bi bi-plus-circle me-1"></i> Nuevo Cobro</a>
+  <a class="btn btn-primary" href=""><i class="bi bi-person-plus me-1"></i> Nueva Inscripción</a>
+  <a class="btn btn-danger" href="{% url 'caja_cerrar' %}"><i class="bi bi-door-closed me-1"></i> Cerrar Caja</a>
+</div>
+
+<hr class="border-secondary">
+
+<!-- Sección de la lista de cobros colapsable -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="text-light">Historial de Cobros</h4>
+  <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#listaCobrosCollapse" aria-expanded="true" aria-controls="listaCobrosCollapse">
+    Ocultar / Mostrar
+  </button>
+</div>
+
+<div class="collapse show" id="listaCobrosCollapse">
+  <table class="table table-hover table-bordered align-middle text-center" id="tablaCobros">
+    <thead class="table-dark">
       <tr>
-        <td>{{ c.fecha_hora }}</td>
-        <td>{{ c.total }}</td>
-        <td>{{ c.cliente.nombre }} {{ c.cliente.apellido }}    {{ c.cliente.dni }}</td>
-        <td><a href="{% url 'cobros_detalle' c.pk %}" class="btn btn-sm btn-outline-primary">Ver</a></td>
-        <td>{{ c.servicio.nombre }}</td>
+        <th>#</th>
+        <th>Cliente</th>
+        <th>DNI</th>
+        <th>Servicio</th>
+        <th>Precio</th>
+        <th>Metodo de Pago</th>
+        <th>Fecha y Hora</th>
+        <th>Usuario</th>
+        <th>Detalles</th>
       </tr>
-    {% empty %}
-      <tr><td colspan="5">No hay cobros registrados en esta caja.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {% for c in cobros %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ c.cliente.apellido }}, {{ c.cliente.nombre }}</td>
+          <td> {{ c.cliente.dni }}</td>
+          <td>{{ c.servicio.nombre }}</td>
+          <td>{{ c.servicio.precio }}</td>
+          <td>{{ c.get_metodo_pago_display }}</td>
+          <td>{{ c.fecha_hora }}</td>
+          <td>{{ c.usuario }}</td>
+          <td> <a href="{% url 'cobros_detalle' c.id %}" class="btn btn-info btn-sm">Ver</a> </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" class="text-center">No hay cobros registrados en esta caja.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
 {% endblock %}

@@ -1,12 +1,15 @@
 /* Fondo principal del login */
 .login-bg {
-    background-image: url('img/login_fondo.jpg');
+    /* CORRECCIÓN: Se usa una ruta relativa desde la carpeta 'css' a la 'img' */
+    /* Asegúrate de que 'fondo.jpeg' exista en 'static/img/' */
+    background-image: url("../img/fondo.jpeg"); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     height: 100vh;
+    min-height: 100vh;
     position: relative;
-}
+} 
 
 /* Centrado absoluto del formulario */
 .login-card {
@@ -20,44 +23,44 @@
 
 /* Tarjeta oscura personalizada */
 .bg-dark-custom {
-    background-color: #1a1d29 !important;
+    background-color: #111111 !important; /* negro absoluto */
     border: none;
 }
 
-/* Gradiente naranja para encabezados o secciones */
-.bg-gradient-orange {
-    background: linear-gradient(45deg, #e67e22, #d35400) !important;
-    border-bottom: 3px solid #e67e22;
+/* Gradiente destacado (antes naranja) → ahora escala de grises */
+.bg-gradient-highlight {
+    background: linear-gradient(45deg, #222222, #555555) !important;
+    border-bottom: 3px solid #555555;
 }
 
-/* Botón naranja personalizado */
-.btn-orange {
-    background-color: #e67e22;
-    border-color: #e67e22;
-    color: #fff;
+/* Botón destacado (antes naranja) → gris medio/oscuro */
+.btn-highlight {
+    background-color: #444444;
+    border-color: #444444;
+    color: #ffffff;
     font-weight: 600;
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.btn-orange:hover {
-    background-color: #d35400;
-    border-color: #d35400;
+.btn-highlight:hover {
+    background-color: #222222;
+    border-color: #222222;
 }
 
 /* Fondo sutil para inputs */
 .bg-secondary-subtle {
-    background-color: #2e3440 !important;
+    background-color: #2b2b2b !important; /* gris oscuro homogéneo */
     border: none;
-    color: #ecf0f1;
+    color: #f5f5f5;
 }
 
 /* Colores de texto */
 .text-light {
-    color: #ecf0f1 !important;
+    color: #dddddd !important;
 }
 
 .text-white {
-    color: #f5f6fa !important;
+    color: #ffffff !important;
 }
 
 /* Inputs grandes con bordes redondeados */
@@ -69,11 +72,26 @@
 .btn-outline-light {
     border: none;
     background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+    color: #ffffff;
 }
 
 /* Título estilizado */
 .card h3 {
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
+    color: #ffffff; /* asegurar contraste */
+}
+
+/* Botón bordó personalizado */
+.btn-bordo {
+    background-color: #c0392b; /* Bordó claro */
+    border-color: #c0392b;
+    color: #fff;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-bordo:hover {
+    background-color: #c0392b; /* un poco más oscuro al pasar */
+    border-color: #c0392b;
+    transform: scale(1.02);
 }

@@ -1,16 +1,44 @@
-{% extends 'base.html' %}
+{% extends 'base_sin_sidebar.html' %} {# Usamos una base sin menú para una vista más limpia #}
 {% block content %}
-<h2>Abrir Caja</h2>
-<p><strong>Usuario:</strong> {{ usuario.username }}</p>
-<p><strong>Monto sugerido:</strong> ${{ monto_sugerido }}</p>
 
-<form method="post">
-  {% csrf_token %}
-  <div class="mb-3">
-    {{ form.monto_apertura.label_tag }}
-    {{ form.monto_apertura }}
-    <small class="form-text text-muted">Puedes editar este monto si es necesario.</small>
+<div class="modal fade" id="abrirCajaModal" tabindex="-1" aria-labelledby="abrirCajaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header bg-success border-0">
+        <h5 class="modal-title" id="abrirCajaModalLabel"><i class="bi bi-box-arrow-in-right me-2"></i> Apertura de Caja Requerida</h5>
+        <!-- No hay botón de cierre para forzar la acción -->
+      </div>
+      <div class="modal-body">
+        <p class="text-light">Debes abrir la caja para poder continuar.</p>
+        <hr class="border-secondary">
+        <p><strong>Usuario:</strong> {{ usuario.username }}</p>
+        <p><strong>Monto sugerido (cierre anterior):</strong> ${{ monto_sugerido }}</p>
+
+        <form method="post">
+          {% csrf_token %}
+          <!-- Incluimos el campo 'next' para que se mantenga en el POST -->
+          <input type="hidden" name="next" value="{{ next }}">
+          <div class="mb-3">
+            {{ form.monto_apertura.label_tag }}
+            {{ form.monto_apertura }}
+            <small class="form-text text-muted">Puedes editar este monto si es necesario.</small>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success btn-lg">Abrir Caja</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <button type="submit" class="btn btn-success">Abrir Caja</button>
-</form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var myModal = new bootstrap.Modal(document.getElementById('abrirCajaModal'), {
+      backdrop: 'static', // Evita que el modal se cierre al hacer clic fuera
+      keyboard: false     // Evita que el modal se cierre con la tecla Escape
+    });
+    myModal.show();
+  });
+</script>
 {% endblock %}

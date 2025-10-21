@@ -2,27 +2,47 @@
 {% load static %}
 
 {% block content %}
-<h1 class="mb-4">Membresías</h1>
+<h1>Membresías</h1>
 
 <!-- Botón que abre el modal -->
 <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
   + Inscribir Cliente
 </button>
 
-<table class="table table-striped table-hover">
+<table class="table table-hover table-bordered align-middle text-center" id="tablaMembresias">
   <thead class="table-dark">
     <tr>
+      <th>#</th>
+      <th>Estado</th>
       <th>Cliente</th>
       <th>DNI</th>
       <th>Servicio</th>
+      <th>Vencimiento</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for m in membresias %}
       <tr>
-        <td>{{ m.cliente.nombre }} {{ m.cliente.apellido }}</td>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          {% if m.activa %}
+            <span class="badge bg-success">Activa</span>
+          {% else %}
+            <span class="badge bg-secondary">Inactiva</span>
+          {% endif %}
+        </td>
+        <td>{{ m.cliente.apellido }}, {{ m.cliente.nombre }}</td>
         <td>{{ m.cliente.dni }}</td>
-        <td>{{ m.servicio }}</td>
+        <td>{{ m.servicio.nombre }}</td>
+        <td>{{ m.fecha_fin }}</td>
+        <td>
+          <a href="" class="btn btn-success btn-sm">Renovar</a>
+          <a href="" class="btn btn-info btn-sm">Ver</a>
+          <a href="" class="btn btn-warning btn-sm">Editar</a>
+          <a href="" class="btn btn-danger btn-sm">Eliminar</a>
+        </td>
+
       </tr>
     {% empty %}
       <tr><td colspan="5" class="text-center">No hay membresías registradas.</td></tr>
