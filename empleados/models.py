@@ -20,7 +20,3 @@ class Empleado(models.Model):
         self.activo = False
         self.fecha_baja = timezone.now()
         self.save()
-    def reactivar(self):
-        self.activo = True
-        self.fecha_baja = None
-        self.save()

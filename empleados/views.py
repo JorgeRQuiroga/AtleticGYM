@@ -7,14 +7,18 @@ from django.db.models import Q
 from .models import Empleado
 from .forms import EmpleadoForm
 from django.contrib.auth.models import User
+from empleados.forms import EmpleadoForm
+
 
 @login_required
 def empleado_menu(request):
-    return render(request, 'empleados:empleado_menu.html')
+    form = EmpleadoForm()
+    return render(request, 'empleado_menu.html', {'form': form})
 
 # --- Listar con búsqueda ---
 @login_required
 def empleado_lista(request):
+    form = EmpleadoForm()
     query = request.GET.get('q', '')
     empleados = Empleado.objects.all()
 
@@ -34,52 +38,43 @@ def empleado_lista(request):
 
     return render(request, 'empleado_lista.html', {
         'page_obj': page_obj,
-        'query': query
+        'query': query,
+        'form' : form
     })
 
 
-# --- Agregar ---
+# # --- Agregar ---
 @login_required
 def empleado_agregar(request):
     if request.method == 'POST':
         form = EmpleadoForm(request.POST)
         if form.is_valid():
-            dni = form.cleaned_data['dni']
-            empleado = Empleado.objects.filter(dni=dni).first()
-
-            if empleado and getattr(empleado, "activo", True):
-                messages.error(request, "Ya existe un empleado activo con ese DNI.")
-                return redirect('empleados:empleado_lista')
-
-            elif empleado and not getattr(empleado, "activo", True):
+            dni_nuevo = request.POST.get('dni')
+            empleado = Empleado.objects.get(dni=dni_nuevo)
+            if empleado:
                 empleado.activo = True
-                empleado.fecha_baja = None
+                
+            if not empleado.user:
+                empleado.user = User.objects.create_user(
+                    username=empleado.dni,
+                    password="112233",
+                    first_name=empleado.nombre,
+                    last_name=empleado.apellido,
+                    email=None
+                )
                 empleado.save()
-                messages.success(request, f"Empleado {empleado.nombre} {empleado.apellido} reactivado correctamente.")
-                return redirect('empleados:empleado_lista')
-
-            else:
-                empleado = form.save(commit=False)
-                if not empleado.user:
-                    empleado.user = User.objects.create_user(
-                        username=empleado.dni,
-                        password="contraseña_temporal",
-                        first_name=empleado.nombre,
-                        last_name=empleado.apellido
-                    )
-                empleado.save()
-
                 grupo = form.cleaned_data.get('grupo')
                 if grupo and empleado.user:
                     empleado.user.groups.clear()
                     empleado.user.groups.add(grupo)
 
                 messages.success(request, "Empleado registrado correctamente.")
-                return redirect('empleados:empleados:empleado_lista')
+                return redirect('empleado_menu')
     else:
         form = EmpleadoForm()
 
     return render(request, 'empleado_form.html', {'form': form})
+
 
 # --- Editar ---
 @login_required
@@ -102,5 +97,5 @@ def empleado_eliminar(request, pk):
     if request.method == 'POST':
         empleado.dar_baja()
         messages.success(request, "Empleado eliminado correctamente.")
-        return redirect('empleados:empleado_lista')
+        return redirect('empleado_lista')
     return render(request, 'empleado_eliminar.html', {'empleado': empleado})
