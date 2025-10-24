@@ -1,30 +1,20 @@
 from django import forms
+from django.contrib.auth.models import User
 from .models import Empleado
-from django.contrib.auth.models import Group
+from datetime import date
 
 class EmpleadoForm(forms.ModelForm):
-    grupo = forms.ModelChoiceField(
-        queryset=Group.objects.all(),
-        required=False,
-        label="Rol (Grupo)",
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
     class Meta:
         model = Empleado
-        fields = ['user', 'nombre', 'apellido', 'dni', 'domicilio', 'telefono']
-        labels = {
-            'user': 'Usuario del sistema',
-            'nombre': 'Nombre',
-            'apellido': 'Apellido',
-            'dni': 'DNI',
-            'domicilio': 'Domicilio',
-            'telefono': 'Teléfono',
-        }
+        fields = ['dni', 'nombre', 'apellido', 'telefono', 'domicilio']
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-select'}),
-            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
-            'apellido': forms.TextInput(attrs={'class': 'form-control'}),
-            'dni': forms.TextInput(attrs={'class': 'form-control'}),
-            'domicilio': forms.TextInput(attrs={'class': 'form-control'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'direccion': forms.Textarea(attrs={'rows': 3}),
         }
+    
+    def clean_dni(self):
+        dni = self.cleaned_data['dni']
+        if self.instance.pk:
+            # Si estamos editando, excluir el propio empleado de la búsqueda
+            if Empleado.objects.filter(dni=dni).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Ya existe un empleado con este DNI")
+        return dni
