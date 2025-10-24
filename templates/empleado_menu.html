@@ -8,11 +8,7 @@
 
     <!-- Botón para ir a la página de alta de empleado -->
   <button class="btn btn-primary btn-lg w-50" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
-<<<<<<< HEAD
-    + Agregar nuevo empleado
-=======
     ➕ Agregar nuevo empleado
->>>>>>> 41fc0f498bbe392b130faa0efd2d1cbcf6113344
   </button>
 
     <!-- Botón para listar empleados -->
@@ -26,11 +22,6 @@
     </a>
   </div>
 </div>
-<<<<<<< HEAD
-
-
-{% include 'empleado_agregar.html' %}
-=======
 <div class="modal fade" id="modalEmpleado" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -42,8 +33,6 @@
         {% csrf_token %}
         <div class="modal-body">
           <div class="row g-3">
-            <div class="col-md-6">{{ form.user.label_tag }}{{ form.user }}</div>
-            <div class="col-md-6">{{ form.grupo.label_tag }}{{ form.grupo }}</div>
             <div class="col-md-6">{{ form.nombre.label_tag }}{{ form.nombre }}</div>
             <div class="col-md-6">{{ form.apellido.label_tag }}{{ form.apellido }}</div>
             <div class="col-md-6">{{ form.dni.label_tag }}{{ form.dni }}</div>
@@ -59,5 +48,4 @@
     </div>
   </div>
 </div>
->>>>>>> 41fc0f498bbe392b130faa0efd2d1cbcf6113344
 {% endblock %}

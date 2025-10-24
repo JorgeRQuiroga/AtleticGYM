@@ -53,11 +53,12 @@ def empleado_agregar(request):
             empleado = Empleado.objects.get(dni=dni_nuevo)
             if empleado:
                 empleado.activo = True
+            empleado.save()
                 
             if not empleado.user:
                 empleado.user = User.objects.create_user(
                     username=empleado.dni,
-                    password="112233",
+                    password=empleado.dni,
                     first_name=empleado.nombre,
                     last_name=empleado.apellido,
                     email=None
