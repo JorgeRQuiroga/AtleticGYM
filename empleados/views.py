@@ -42,7 +42,6 @@ def empleado_lista(request):
 
 
 # --- Agregar ---
-
 @login_required
 @transaction.atomic
 def empleado_agregar(request):
