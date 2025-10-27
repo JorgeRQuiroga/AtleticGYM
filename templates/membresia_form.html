@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="content-card">
+    <h2 class="mb-4 text-primary">Inscripción de Membresía</h2>
+
+    <!-- Mostrar errores -->
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-6">
+        {{ form.nombre.label_tag }} {{ form.nombre }}
+      </div>
+      <div class="col-md-6">
+        {{ form.apellido.label_tag }} {{ form.apellido }}
+      </div>
+      <div class="col-md-6">
+        {{ form.dni.label_tag }} {{ form.dni }}
+      </div>
+      <div class="col-md-6">
+        {{ form.telefono.label_tag }} {{ form.telefono }}
+      </div>
+      <div class="col-md-6">
+        {{ form.emergencia.label_tag }} {{ form.emergencia }}
+      </div>
+      <div class="col-md-6">
+        {{ form.domicilio.label_tag }} {{ form.domicilio }}
+      </div>
+      <div class="col-md-6">
+        {{ form.email.label_tag }} {{ form.email }}
+      </div>
+      <div class="col-md-6">
+        {{ form.servicio.label_tag }} {{ form.servicio }}
+      </div>
+      <div class="col-md-6">
+        {{ form.activa.label_tag }} {{ form.activa }}
+      </div>
+
+      <div class="col-12 mt-4">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="{% url 'membresias:membresias_lista' %}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
