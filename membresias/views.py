@@ -28,17 +28,21 @@ def inscribir_cliente(request):
 
 @login_required
 def lista_membresias(request):
+    form = MembresiaInscripcionForm()
     # Base queryset
-    membresias = Membresia.objects.select_related('cliente', 'servicio').all()
+    membresias = Membresia.objects.select_related('cliente', 'servicio').order_by('-activa', 'id')
 
     # --- Búsqueda ---
     query = request.GET.get('q')
     if query:
-        membresias = membresias.filter(
-            Q(cliente__dni__icontains=query) |
-            Q(cliente__nombre__icontains=query) |
-            Q(cliente__apellido__icontains=query)
-        )
+        terms = query.split()
+        for term in terms:
+            membresias = membresias.filter(
+                Q(cliente__dni__icontains=term) |
+                Q(cliente__nombre__icontains=term) |
+                Q(cliente__apellido__icontains=term)
+            )
+
 
     # --- Ordenamiento ---
     orden = request.GET.get('orden')
@@ -59,8 +63,18 @@ def lista_membresias(request):
         'membresias': membresias,
         'query': query,
         'orden': orden,
+        'form' : form
     })
 
+@login_required
+def borrar_membresia(request, membresia_id):
+    try:
+        membresia = Membresia.objects.get(id=membresia_id)
+        membresia.borrar()
+        messages.success(request, "Membresía eliminada correctamente.")
+    except Membresia.DoesNotExist:
+        messages.error(request, "La membresía no existe.")
+    return redirect('membresias:membresias_lista')
 
 @login_required
 def menu(request):

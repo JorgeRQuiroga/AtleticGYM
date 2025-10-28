@@ -11,13 +11,10 @@
       <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
         + Inscribir Cliente
       </button>
-      <a href="{% url 'membresias:membresias_inscribir' %}" class="btn btn-primary mb-3">
-        + Inscribir Cliente
-      </a>
       <!-- Tabla -->
       <form method="get" class="row g-3 mb-3">
       <div class="col-md-4">
-        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por DNI o nombre/apellido">
+        <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por DNI o nombre/apellido">
       </div>
       <div class="col-md-4">
         <select name="orden" class="form-select">
@@ -64,7 +61,7 @@
               <td>{{ m.fecha_fin }}</td>
               <td>
                 <a href="" class="btn btn-info btn-sm">Ver</a>
-                <a href="" class="btn btn-danger btn-sm">Eliminar</a>
+                <a href="{% url 'membresias:membresia_borrar' m.id %}" class="btn btn-danger btn-sm">Eliminar</a>
               </td>
             </tr>
           {% empty %}

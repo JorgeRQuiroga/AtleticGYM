@@ -74,8 +74,7 @@ class MembresiaInscripcionForm(forms.ModelForm):
         # Calcular fecha de fin automáticamente
         hoy = timezone.now().date()
         dias_a_sumar = getattr(servicio, 'cantidad_clases', 0)
-        fecha_fin = hoy + timedelta(days=dias_a_sumar)
-
+        fecha_fin = hoy + 30 * timedelta(days=1)
         # Crear membresía
         membresia = Membresia.objects.create(
             cliente=cliente,

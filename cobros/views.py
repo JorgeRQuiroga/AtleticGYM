@@ -7,6 +7,8 @@ from .decorators import caja_abierta_required
 from servicios.models import Servicio
 from clientes.models import Cliente
 from membresias.models import Membresia
+from django.http import JsonResponse
+from cajas.models import Caja
 
 @login_required
 @caja_abierta_required
@@ -23,6 +25,7 @@ def nuevo_cobro(request):
                 return render(request, 'cobro_nuevo.html', {'form': form})
 
             cobro = form.save(commit=False)
+            cobro.caja = Caja.objects.get(estado='abierta', usuario=request.user)
             cobro.cliente = membresia.cliente
             cobro.membresia = membresia
             cobro.importe = membresia.servicio.precio  # si aplica
@@ -48,3 +51,15 @@ def detalle_cobro(request, pk):
     caja = request.caja_abierta
     cobro = get_object_or_404(Cobro, pk=pk, caja=caja)
     return render(request, 'cobros_detalle.html', {'cobro': cobro, 'caja': caja})
+
+@login_required
+def buscar_dni(request):
+    q = request.GET.get('q', '')
+    resultados = []
+    if q:
+        clientes = Cliente.objects.filter(dni__icontains=q)[:10]
+        resultados = [
+            {"id": c.id, "dni": c.dni, "nombre": f"{c.apellido}, {c.nombre}"}
+            for c in clientes
+        ]
+    return JsonResponse(resultados, safe=False)
