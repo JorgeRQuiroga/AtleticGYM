@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Graficos de Membresias{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/graficos.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <header class="panel-header">
+            <h1>Dashboard de Asistencia</h1>
+            <div class="header-filter">
+                <label for="filter-mes">Período:</label>
+                <input type="month" id="filter-mes" value="2025-10">
+                <button id="btn-aplicar-periodo" class="btn btn-primary">Aplicar</button>
+            </div>
+            <form method="get" class="header-filter">
+                <label for="periodo">Período:</label>
+                <input type="month" id="periodo" name="periodo" value="{{ periodo_actual }}">
+                <button type="submit" class="btn btn-primary">Aplicar</button>
+            </form>
+        </header>
+
+        <!-- Cards de métricas principales -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Total Asistencias del Mes</span>
+                    <span class="metric-value" id="metric-total-mes">0</span>
+                    <span class="metric-subtitle"><!-- Django: {{ mes_actual }} --></span>
+                    <span class="metric-value" id="metric-total-mes">{{ total_asistencias_mes }}</span>
+                    <span class="metric-subtitle">{{ mes_actual_str }}</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-info">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Asistencias Hoy</span>
+                    <span class="metric-value" id="metric-hoy">0</span>
+                    <span class="metric-subtitle" id="metric-hoy-fecha"><!-- Fecha actual --></span>
+                    <span class="metric-value" id="metric-hoy">{{ asistencias_hoy }}</span>
+                    <span class="metric-subtitle" id="metric-hoy-fecha">{{ fecha_hoy_str }}</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-success">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Tasa de Asistencia</span>
+                    <span class="metric-value" id="metric-tasa">0%</span>
+                    <span class="metric-subtitle" id="metric-tasa-detalle">0 de 0 clientes activos</span>
+                    <span class="metric-value" id="metric-tasa">{{ tasa_asistencia|floatformat:1 }}%</span>
+                    <span class="metric-subtitle" id="metric-tasa-detalle">{{ clientes_asistieron_count }} de {{ clientes_activos_count }} clientes</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Promedio Diario</span>
+                    <span class="metric-value" id="metric-promedio">0</span>
+                    <span class="metric-value" id="metric-promedio">{{ promedio_diario|floatformat:1 }}</span>
+                    <span class="metric-subtitle">Asistencias por día</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-warning">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Horario Pico</span>
+                    <span class="metric-value" id="metric-horario-pico">--:--</span>
+                    <span class="metric-subtitle" id="metric-horario-pico-cantidad">0 asistencias</span>
+                    {% if horario_pico_data %}
+                        <span class="metric-value" id="metric-horario-pico">{{ horario_pico_data.hora|date:"H:00" }}</span>
+                        <span class="metric-subtitle" id="metric-horario-pico-cantidad">{{ horario_pico_data.cantidad }} asistencias</span>
+                    {% else %}
+                        <span class="metric-value" id="metric-horario-pico">--:--</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de clientes ausentes -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2>Clientes Ausentes +7 Días</h2>
+                <span class="table-count" id="ausentes-count">0 clientes</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="table table-hover table-bordered align-middle text-center" id="tablaAsistenciasAusentes">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th>DNI</th>
+                            <th>Última Asistencia</th>
+                            <th>Días Ausente</th>
+                            <th>Servicio/Membresía</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-ausentes-body">
+                        <!-- Django template: {% for cliente in clientes_ausentes %} -->
+                        <tr>
+                            <td>  </td> <!-- Django template: {{ forloop.counter }} -->
+                            <td> </td> <!-- Django template: {{ cliente.nombre }} -->
+                            <td> </td> <!-- Django template: {{ cliente.dni }} -->
+                            <td> </td> <!-- Django template: {{ cliente.ultima_asistencia|date:"d/m/Y" }} -->
+                            <td class="dias-ausente">  días</td> <!-- Django template: {{ cliente.dias_ausente }} -->
+                            <td> </td> <!-- Django template: {{ cliente.servicio }} -->
+                        </tr>
+                        <!-- {% endfor %} -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Gráficos principales -->
+        <div class="charts-grid">
+            <!-- Gráfico de asistencias por día de semana -->
+            <div class="chart-card chart-card-large">
+                <div class="chart-header">
+                    <h2>Asistencias por Día de Semana</h2>
+                    <span class="chart-subtitle">Promedio del mes</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-dias-semana"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de asistencias por franja horaria -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2>Asistencias por Franja Horaria</h2>
+                    <span class="chart-subtitle">Distribución del mes</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-franjas"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de evolución diaria -->
+            <div class="chart-card chart-card-full">
+                <div class="chart-header">
+                    <h2>Evolución Diaria del Mes</h2>
+                    <span class="chart-subtitle">Asistencias por día</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-evolucion"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

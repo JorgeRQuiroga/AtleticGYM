@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Graficos de Membresias{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/graficos.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <header class="panel-header">
+            <h1>Dashboard de Membresías</h1>
+            <div class="header-filter">
+                <label for="filter-mes">Período:</label>
+                <input type="month" id="filter-mes" value="2025-10">
+                <button id="btn-aplicar-periodo" class="btn btn-primary">Aplicar</button>
+            </div>
+        </header>
+
+        <!-- Cards de métricas principales -->
+        <div class="metrics-grid">
+            <div class="metric-card metric-card-success">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Clientes Activos</span>
+                    <span class="metric-value" id="metric-activos">0</span>
+                    <span class="metric-subtitle">Con membresía vigente</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-warning">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <line x1="23" y1="11" x2="17" y2="17"></line>
+                        <line x1="17" y1="11" x2="23" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Clientes Inactivos</span>
+                    <span class="metric-value" id="metric-inactivos">0</span>
+                    <span class="metric-subtitle">Membresía vencida</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Tasa de Retención</span>
+                    <span class="metric-value" id="metric-retencion">0%</span>
+                    <span class="metric-subtitle" id="metric-retencion-detalle">0 de 0 renovaron</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-alert">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Próximos Vencimientos</span>
+                    <span class="metric-value" id="metric-vencimientos">0</span>
+                    <span class="metric-subtitle">Vencen en los próximos 7 días</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-info">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Altas del Mes</span>
+                    <span class="metric-value" id="metric-altas">0</span>
+                    <span class="metric-subtitle">Nuevas membresías</span>
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-danger">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Bajas del Mes</span>
+                    <span class="metric-value" id="metric-bajas">0</span>
+                    <span class="metric-subtitle">Membresías canceladas</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos principales -->
+        <div class="charts-grid">
+            <!-- Gráfico de evolución de base activa -->
+            <div class="chart-card chart-card-full">
+                <div class="chart-header">
+                    <h2>Evolución de Base Activa</h2>
+                    <span class="chart-subtitle">Clientes activos últimos 12 meses</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-evolucion"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de altas vs bajas -->
+            <div class="chart-card chart-card-large">
+                <div class="chart-header">
+                    <h2>Altas vs Bajas Mensuales</h2>
+                    <span class="chart-subtitle">Comparativa últimos 12 meses</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-altas-bajas"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de distribución por servicios -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2>Distribución por Servicios</h2>
+                    <span class="chart-subtitle">Membresías activas</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-servicios"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

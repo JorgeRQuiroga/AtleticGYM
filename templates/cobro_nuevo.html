@@ -19,6 +19,6 @@
     {{ form.descripcion.label_tag }} {{ form.descripcion }} {{ form.descripcion.errors }}
   </div>
   <button class="btn btn-primary" type="submit">Registrar cobro</button>
-  <a class="btn btn-danger " href="{% url 'cobros_lista' %}">Cancelar</a>
+  <a class="btn btn-danger " href="{% url 'cobros:cobros_lista' %}">Cancelar</a>
 </form>
 {% endblock %}

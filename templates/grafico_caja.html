@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Graficos de Cajas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/graficos.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <header class="panel-header">
+            <h1>Graficos de Caja</h1>
+            <form method="get" class="header-filter">
+                <label for="periodo">Período:</label>
+                {# El valor se establece desde el contexto de la vista #}
+                <input type="month" id="periodo" name="periodo" value="{{ periodo_actual }}">
+                <button type="submit" class="btn btn-primary">Aplicar</button>
+            </form>
+        </header>
+
+        <!-- Cards de métricas principales -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Ingreso del Mes</span>
+                    <span class="metric-value" id="metric-ingreso-mes">${{ ingreso_mes|floatformat:2 }}</span>
+                    <span class="metric-subtitle">{{ mes_actual_str }}</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Día con Más Ingreso</span>
+                    {% if mejor_dia_data %}
+                        <span class="metric-value" id="metric-mejor-dia">{{ mejor_dia_data.dia|date:"d/m/Y" }}</span>
+                        <span class="metric-subtitle" id="metric-mejor-dia-monto">${{ mejor_dia_data.ingreso_diario|floatformat:2 }}</span>
+                    {% else %}
+                        <span class="metric-value" id="metric-mejor-dia">-</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Usuario Más Activo</span>
+                    {% if usuario_activo_data %}
+                        <span class="metric-value" id="metric-usuario-activo">{{ usuario_activo_data.caja__usuario__username }}</span>
+                        <span class="metric-subtitle" id="metric-usuario-transacciones">{{ usuario_activo_data.num_cobros }} transacciones</span>
+                    {% else %}
+                        <span class="metric-value" id="metric-usuario-activo">-</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="metric-card metric-card-alert">
+                <div class="metric-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Diferencias en Arqueos</span>
+                    <span class="metric-value" id="metric-diferencias">${{ diferencia_total|floatformat:2 }}</span>
+                    <span class="metric-subtitle" id="metric-diferencias-detalle">Sin discrepancias</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos principales -->
+        <div class="charts-grid">
+            <!-- Gráfico de ingresos semanales -->
+            <div class="chart-card chart-card-large">
+                <div class="chart-header">
+                    <h2>Ingresos de la Semana</h2>
+                    <span class="chart-subtitle">Últimos 7 días</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-semana"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de métodos de pago -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2>Métodos de Pago</h2>
+                    <span class="chart-subtitle">Distribución del mes</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-metodos-pago"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de ingresos anuales -->
+            <div class="chart-card chart-card-full">
+                <div class="chart-header">
+                    <h2>Ingresos del Año</h2>
+                    <span class="chart-subtitle">Comparativa mensual - 2025</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-año"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de ingresos por servicios -->
+            <div class="chart-card chart-card-full">
+                <div class="chart-header">
+                    <h2>Ingresos por Servicios</h2>
+                    <span class="chart-subtitle">Comparación del mes</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-servicios"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

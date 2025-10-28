@@ -1,0 +1,119 @@
+/* --- Estilos para la página de Gráficos --- */
+
+/* Encabezado del panel con título y filtro */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #444;
+    padding-bottom: 1rem;
+}
+
+.panel-header h1 {
+    margin-bottom: 0;
+}
+
+.header-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-filter label {
+    font-weight: 500;
+    color: #ccc;
+}
+
+.header-filter input[type="month"] {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+/* Grilla para las tarjetas de métricas */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.metric-card {
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border-left: 4px solid #c0392b; /* Borde bordó */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
+}
+
+.metric-card .metric-icon {
+    background-color: rgba(192, 57, 43, 0.1); /* Fondo bordó transparente */
+    color: #c0392b;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.metric-card.metric-card-alert .metric-icon {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.metric-card.metric-card-alert {
+    border-left-color: #e74c3c; /* Rojo para alertas */
+}
+
+.metric-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.metric-subtitle {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Grilla para los gráficos */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.chart-card-large { grid-column: 1 / -1; } /* Ocupa todo el ancho */
+

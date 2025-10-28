@@ -11,4 +11,5 @@ urlpatterns = [
     path('registrar/', RegistrarAsistenciaView.as_view(), name='asistencia_registrar'),
     # 3. La URL para que el admin vea el historial de asistencias
     path('lista/', views.lista_asistencias, name='asistencia_lista'),
+    path('grafico_asistencias/', views.grafico_asistencias, name='grafico_asistencias'),
 ]

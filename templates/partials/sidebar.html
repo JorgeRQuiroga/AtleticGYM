@@ -8,7 +8,9 @@
         <a href="{% url 'home' %}" class="nav-link text-light mb-2"><i class=""></i>Inicio</a>
         <a href="{% url 'membresias:membresias_lista' %}" class="nav-link text-light mb-2"><i class=""></i>Membresias</a>
 
-        <a href="" class="nav-link text-light mb-2"><i class=""></i>Edicion de Cobros/ falta crear</a>
+        <a href="{% url 'cobros:cobros_informe' %}" class="nav-link text-light mb-2"><i class=""></i>Gestion de Cobros</a>
+
+        <a href="{% url 'cajas:caja_arqueo' %}" class="nav-link text-light mb-2"><i class=""></i>Arqueo de caja</a>
 
         <a href="{% url 'servicios:servicio_listar' %}" class="nav-link text-light mb-2"><i class=""></i>Servicios</a>
 
@@ -16,9 +18,17 @@
         <a href="{% url 'asistencias:asistencia_opciones' %}" class="nav-link text-light mb-2"><i class=""></i>Asistencias</a>
         <a href="{% url 'empleados:empleado_menu' %}" class="nav-link text-light mb-2"><i class=""></i>Empleados</a>
 
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="collapse" href="#GraficosSubmenu" role="button" aria-expanded="false"> Graficos</a>
+          <div class="collapse submenu" id="GraficosSubmenu">
+            <a class="nav-link" href="{% url 'cajas:grafico_caja' %}">Graficos Caja</a>
+            <a class="nav-link" href="{% url 'membresias:grafico_membresias' %}">Graficos Membresias</a>
+            <a class="nav-link" href="{% url 'asistencias:grafico_asistencias' %}">Graficos Asistencia</a>
+          </div>
+        </li>
 
 
-
+        <div class="flex-grow-1"></div>
        <form action="{% url 'logout' %}" method="post">
           {% csrf_token %}
            <button type="submit" class="nav-link text-danger bg-transparent border-0">

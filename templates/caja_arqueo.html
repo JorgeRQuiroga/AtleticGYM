@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Cobros Informe{% endblock %}
+{% block content %}
+
+    <div class="container">
+        <header class="panel-header">
+            <h1>Arqueo de Caja</h1>
+        </header>
+
+        <!-- Filtros -->
+        <div class="filters-section mb-4 p-3 border border-secondary rounded">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="filter-usuario" class="form-label">Usuario</label>
+                    <select id="filter-usuario" class="form-select">
+                        <option value="">Todos los usuarios</option>
+                        <!-- Django template: {% for usuario in usuarios %} -->
+                        <option value="{{ usuario.id }}">{{ usuario.nombre }}</option>
+                        <!-- {% endfor %} -->
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filter-fecha-desde" class="form-label">Fecha Desde</label>
+                    <input type="date" id="filter-fecha-desde" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label for="filter-fecha-hasta" class="form-label">Fecha Hasta</label>
+                    <input type="date" id="filter-fecha-hasta" class="form-control">
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button id="btn-aplicar-filtros" class="btn btn-primary w-100">Aplicar</button>
+                    <button id="btn-limpiar-filtros" class="btn btn-secondary w-100">Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles de tabla -->
+        <div class="table-controls d-flex justify-content-between align-items-center mb-3">
+            <div class="records-info">
+                <span id="records-count">Mostrando {{ arqueos|length }} cierres</span>
+            </div>
+            <div class="records-per-page">
+                <label for="select-per-page" class="form-label me-2">Registros por página:</label>
+                <select id="select-per-page" class="form-select d-inline-block w-auto">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla de arqueos -->
+        <div class="table-wrapper">
+            <table class="table table-hover table-bordered align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Usuario</th>
+                        <th>Fecha Apertura</th>
+                        <th>Valor Apertura</th>
+                        <th>Fecha Cierre</th>
+                        <th>Valor Cierre</th>
+                        <th>Monto Contado</th>
+                        <th>Diferencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-arqueo-body">
+                    {% for arqueo in arqueos %}
+                        <tr data-id="{{ arqueo.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ arqueo.usuario.username }}</td>
+                            <td>{{ arqueo.fecha_apertura|date:"d/m/Y H:i" }}</td>
+                            <td>${{ arqueo.monto_apertura|floatformat:2 }}</td>
+                            <td>{{ arqueo.fecha_cierre|date:"d/m/Y H:i" }}</td>
+                            <td>${{ arqueo.monto_cierre|floatformat:2 }}</td>
+                            <td>${{ arqueo.monto_cierre|floatformat:2 }}</td>
+                            <td>$ 0.00 </td>
+                            <td> Correcto </td>
+                            <td><button class="btn btn-sm btn-info" onclick="alert('Funcionalidad no implementada')">Ver</button></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" class="text-center py-4">No hay arqueos de caja registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination" id="pagination">
+            <!-- Generado dinámicamente por JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal de detalle -->
+    <div id="modal-detalle" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Detalle del Arqueo</h2>
+                <button class="btn-close" onclick="cerrarModalDetalle()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detalle-grid">
+                    <div class="detalle-section">
+                        <h3>Información General</h3>
+                        <div class="detalle-row">
+                            <span class="label">Usuario:</span>
+                            <span class="value" id="detalle-usuario"></span>
+                        </div>
+                        <div class="detalle-row">
+                            <span class="label">Estado:</span>
+                            <span class="value" id="detalle-estado"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalle-section">
+                        <h3>Apertura de Caja</h3>
+                        <div class="detalle-row">
+                            <span class="label">Fecha y Hora:</span>
+                            <span class="value" id="detalle-fecha-apertura"></span>
+                        </div>
+                        <div class="detalle-row">
+                            <span class="label">Valor Inicial:</span>
+                            <span class="value" id="detalle-valor-apertura"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalle-section">
+                        <h3>Cierre de Caja</h3>
+                        <div class="detalle-row">
+                            <span class="label">Fecha y Hora:</span>
+                            <span class="value" id="detalle-fecha-cierre"></span>
+                        </div>
+                        <div class="detalle-row">
+                            <span class="label">Valor Esperado:</span>
+                            <span class="value" id="detalle-valor-cierre"></span>
+                        </div>
+                        <div class="detalle-row">
+                            <span class="label">Monto Contado:</span>
+                            <span class="value" id="detalle-monto-contado"></span>
+                        </div>
+                        <div class="detalle-row highlight">
+                            <span class="label">Diferencia:</span>
+                            <span class="value" id="detalle-diferencia"></span>
+                        </div>
+                    </div>
+
+                    <div class="detalle-section full-width">
+                        <h3>Resumen de Transacciones</h3>
+                        <div class="resumen-grid">
+                            <div class="resumen-item">
+                                <span class="resumen-label">Total Cobros:</span>
+                                <span class="resumen-value" id="detalle-total-cobros"></span>
+                            </div>
+                            <div class="resumen-item">
+                                <span class="resumen-label">Total Gastos:</span>
+                                <span class="resumen-value" id="detalle-total-gastos"></span>
+                            </div>
+                            <div class="resumen-item">
+                                <span class="resumen-label">Cantidad Transacciones:</span>
+                                <span class="resumen-value" id="detalle-cantidad-transacciones"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detalle-section full-width" id="detalle-observaciones-section">
+                        <h3>Observaciones</h3>
+                        <p id="detalle-observaciones"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cerrar-modal" class="btn btn-secondary" onclick="cerrarModalDetalle()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

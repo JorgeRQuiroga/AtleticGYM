@@ -42,3 +42,7 @@ def menu(request):
     else:
         form = MembresiaInscripcionForm()
     return render(request, 'membresias_menu.html', {'form': form})
+
+
+def grafico_membresias(request):
+    return render(request, 'grafico_membresias.html')

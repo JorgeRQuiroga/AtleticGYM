@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Cobros Informe{% endblock %}
+{% block content %}
+    <div class="container" >
+        <header class="panel-header">
+            <h1>Gestión de Cobros</h1>
+        </header>
+
+        <!-- Filtros -->
+        <div class="filters-section mb-4 p-3 border border-secondary rounded">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6 col-lg-3">
+                    <label for="filter-cliente" class="form-label">Cliente</label>
+                    <input type="text" id="filter-cliente" class="form-control" placeholder="Buscar por nombre de cliente">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filter-usuario" class="form-label">Usuario</label>
+                    <select id="filter-usuario" class="form-select">
+                        <option value="">Todos los usuarios</option>
+                        <!-- Django template: {% for usuario in usuarios %} -->
+                        <option value="{{ usuario.id }}">{{ usuario.nombre }}</option>
+                        <!-- {% endfor %} -->
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filter-servicio" class="form-label">Servicio</label>
+                    <select id="filter-servicio" class="form-select">
+                        <option value="">Todos los servicios</option>
+                        <!-- Django template: {% for servicio in servicios %} -->
+                        <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+                        <!-- {% endfor %} -->
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filter-metodo" class="form-label">Método de Pago</label>
+                    <select id="filter-metodo" class="form-select">
+                        <option value="">Todos los métodos</option>
+                        <!-- Django template: {% for metodo in metodos_pago %} -->
+                        <option value="{{ metodo.id }}">{{ metodo.nombre }}</option>
+                        <!-- {% endfor %} -->
+                    </select>
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="filter-fecha-desde" class="form-label">Fecha Desde</label>
+                    <input type="date" id="filter-fecha-desde" class="form-control">
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="filter-fecha-hasta" class="form-label">Fecha Hasta</label>
+                    <input type="date" id="filter-fecha-hasta" class="form-control">
+                </div>
+                <div class="col-md-4 col-lg-6 d-flex gap-2">
+                    <button id="btn-aplicar-filtros" class="btn btn-primary w-100">Aplicar Filtros</button>
+                    <button id="btn-limpiar-filtros" class="btn btn-secondary w-100">Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles de tabla -->
+        <div class="table-controls d-flex justify-content-between align-items-center mb-3">
+            <div class="records-info">
+                <span id="records-count">Mostrando 0 de 0 registros</span>
+            </div>
+            <div class="records-per-page">
+                <label for="select-per-page" class="form-label me-2">Registros por página:</label>
+                <select id="select-per-page" class="form-select d-inline-block w-auto">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla de cobros -->
+        <div class="table-wrapper" id="cobros-table-wrapper">
+            <table class="table table-hover table-bordered align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>DNI</th>
+                        <th>Servicio</th>
+                        <th>Precio</th>
+                        <th>Método de Pago</th>
+                        <th>Fecha y Hora</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cobro in cobros %}
+                    <tr data-id="{{ cobro.id }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ cobro.cliente.nombre }} {{ cobro.cliente.apellido }}</td>
+                        <td>{{ cobro.cliente.dni }}</td>
+                        <td>{{ cobro.servicio.nombre }}</td>
+                        <td>${{ cobro.total|floatformat:2 }}</td>
+                        <td>Efectivo</td>
+                        <td>{{ cobro.fecha_hora|date:"d/m/Y H:i" }}</td>
+                        <td>{{ cobro.caja.usuario.username }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-delete" onclick="confirmarEliminacion({{ cobro.id }}, '{{ cobro.cliente }}')">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination" id="pagination">
+            <!-- Generado dinámicamente por JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal de confirmación -->
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirmar Eliminación</h2>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar el cobro del cliente <strong id="modal-cliente-nombre"></strong>?</p>
+                <p class="modal-warning">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancelar" class="btn btn-secondary">Cancelar</button>
+                <button id="btn-confirmar" class="btn btn-danger">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

@@ -10,7 +10,7 @@
     <p><strong>Fecha cierre:</strong> {{ caja.fecha_cierre }}</p>
     <p><strong>Total en caja:</strong> ${{ caja.monto_cierre }}</p>
   {% else %}
-    <a href="{% url 'caja_cerrar' %}" class="btn btn-danger">Cerrar Caja</a>
+    <a href="{% url 'cajas:caja_cerrar' %}" class="btn btn-danger">Cerrar Caja</a>
   {% endif %}
 {% else %}
   <div class="alert alert-info" role="alert">

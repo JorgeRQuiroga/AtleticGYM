@@ -55,3 +55,6 @@ class RegistrarAsistenciaView(View):
 def lista_asistencias(request):
     asistencias = Asistencia.objects.select_related('membresia__cliente', 'membresia__servicio').order_by('-fecha_hora')[:100]
     return render(request, 'asistencia_lista.html', {'asistencias': asistencias})
+
+def grafico_asistencias(request):
+    return render(request, 'grafico_asistencias.html')
