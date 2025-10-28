@@ -23,7 +23,7 @@
 <!-- Botones de acción centrados -->
 <div class="d-flex justify-content-center gap-3 mb-4">
   <a class="btn btn-success" href="{% url 'cobros_nuevo' %}"><i class="bi bi-plus-circle me-1"></i> Nuevo Cobro</a>
-  <a class="btn btn-primary" href=""><i class="bi bi-person-plus me-1"></i> Nueva Inscripción</a>
+  <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalInscripcion"><i class="bi bi-person-plus me-1"></i> Nueva Inscripción</a>
   <a class="btn btn-danger" href="{% url 'caja_cerrar' %}"><i class="bi bi-door-closed me-1"></i> Cerrar Caja</a>
 </div>
 
@@ -38,15 +38,14 @@
 </div>
 
 <div class="collapse show" id="listaCobrosCollapse">
-  <table class="table table-hover table-bordered align-middle text-center" id="tablaCobros">
-    <thead class="table-dark">
+  <table class="table table-hover table-bordered align-middle text-center table-dark bg-dark text-light" id="tablaCobros">
+    <thead>
       <tr>
-        <th>#</th>
         <th>Cliente</th>
         <th>DNI</th>
         <th>Servicio</th>
         <th>Precio</th>
-        <th>Metodo de Pago</th>
+        <th>Método de Pago</th>
         <th>Fecha y Hora</th>
         <th>Usuario</th>
         <th>Detalles</th>
@@ -55,21 +54,132 @@
     <tbody>
       {% for c in cobros %}
         <tr>
-          <td>{{ forloop.counter }}</td>
           <td>{{ c.cliente.apellido }}, {{ c.cliente.nombre }}</td>
-          <td> {{ c.cliente.dni }}</td>
+          <td>{{ c.cliente.dni }}</td>
           <td>{{ c.servicio.nombre }}</td>
           <td>{{ c.servicio.precio }}</td>
-          <td>{{ c.get_metodo_pago_display }}</td>
+          <td>  {% for detalle in c.detalles_cobro.all %}
+                {{ detalle.metodoDePago }}
+              {% empty %}
+                <span class="text-muted">Sin detalle</span>
+              {% endfor %}
+          </td>
           <td>{{ c.fecha_hora }}</td>
-          <td>{{ c.usuario }}</td>
-          <td> <a href="{% url 'cobros_detalle' c.id %}" class="btn btn-info btn-sm">Ver</a> </td>
+          <td>{{ c.caja.usuario }}</td>
+          <td><a href="{% url 'cobros_detalle' c.id %}" class="btn btn-info btn-sm">Ver</a></td>
         </tr>
       {% empty %}
-        <tr><td colspan="9" class="text-center">No hay cobros registrados en esta caja.</td></tr>
+        <tr>
+          <td colspan="9" class="text-center">No hay cobros registrados en esta caja.</td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>
+</div>
+
+<!-- Modal Inscripción -->
+<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title text-primary">Inscribir Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
+            <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
+            <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
+            <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
+            <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
+            <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
+            <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
+            <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalDecision" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Tipo de Cobro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>¿El cobro es por una clase suelta o por un cliente con membresía?</p>
+        <button class="btn btn-outline-info me-2" id="btnClase">Por una clase</button>
+        <button class="btn btn-outline-success" id="btnCliente">Cliente con membresía</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Clase: método de pago -->
+<div class="modal fade" id="modalClasePago" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Pago por Clase</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formClase">
+          <label for="metodoClase">Método de Pago</label>
+          <select id="metodoClase" name="metodo_pago" class="form-select">
+            <option value="EF">Efectivo</option>
+            <option value="TR">Transferencia</option>
+          </select>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" id="btnConfirmarClase">Continuar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Clase: confirmación -->
+<div class="modal fade" id="modalClaseConfirmar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Pago</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        ¿Confirmar el pago de la clase?
+      </div>
+      <div class="modal-footer">
+        <button type="submit" form="formClase" class="btn btn-success">Sí, confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cliente: formulario actual de cobros -->
+<div class="modal fade" id="modalCliente" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Cobro a Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Aquí insertás el formulario actual de cobros -->
+        {% include "cobro_nuevo.html" %}
+      </div>
+    </div>
+  </div>
 </div>
 
 

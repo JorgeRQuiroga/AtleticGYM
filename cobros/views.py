@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Cobro
+from .models import Cobro, DetalleCobro, MetodoDePago
 from .forms import CobroForm
 from .decorators import caja_abierta_required
 from servicios.models import Servicio
@@ -9,41 +9,69 @@ from clientes.models import Cliente
 from membresias.models import Membresia
 from django.http import JsonResponse
 from cajas.models import Caja
+from membresias.forms import MembresiaInscripcionForm
 
 @login_required
 @caja_abierta_required
 def nuevo_cobro(request):
-    caja = request.caja_abierta
+    caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    if not caja:
+        messages.error(request, "No hay una caja abierta para registrar el cobro.")
+        return redirect('cobros_lista')
+
     if request.method == 'POST':
         form = CobroForm(request.POST)
         if form.is_valid():
             dni = form.cleaned_data['dni'].strip()
-            membresia = Membresia.objects.select_related('cliente').filter(cliente__dni__iexact=dni, activa=True).first()
+            cliente = get_object_or_404(Cliente, dni=dni)
+
+            # Buscar membresía activa
+            membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
 
             if not membresia:
-                messages.error(request, "No se encontró una membresía activa para ese DNI.")
-                return render(request, 'cobro_nuevo.html', {'form': form})
+                messages.error(request, "El cliente no tiene ninguna membresía registrada.")
+                return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
+
+            # Si la membresía existe pero está inactiva, reactivarla
+            if not membresia.activa:
+                membresia.activa = True
+                membresia.save()
 
             cobro = form.save(commit=False)
-            cobro.caja = Caja.objects.get(estado='abierta', usuario=request.user)
-            cobro.cliente = membresia.cliente
-            cobro.membresia = membresia
-            cobro.importe = membresia.servicio.precio  # si aplica
-            cobro.save()
+            cobro.caja = caja
+            cobro.cliente = cliente
 
-            messages.success(request, f"Cobro registrado para {membresia.cliente}.")
+            # Si el usuario no cambió el servicio, usar el de la membresía
+            servicio = form.cleaned_data.get('servicio') or membresia.servicio
+            cobro.servicio = servicio
+            cobro.total = servicio.precio
+            cobro.save()
+            if servicio != membresia.servicio:
+                membresia.servicio = servicio
+                membresia.save()
+            metodo_pago = form.cleaned_data['metodo_pago']
+            DetalleCobro.objects.create(
+                cobro=cobro,
+                servicio=servicio,
+                monto=cobro.total,
+                metodoDePago=metodo_pago
+            )
+            caja.total_en_caja += cobro.total
+            caja.save()
+            messages.success(request, f"Cobro registrado para {cliente}.")
             return redirect('cobros_lista')
     else:
         form = CobroForm()
-    return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
 
+    return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
 
 @login_required
 @caja_abierta_required
 def lista_cobros(request):
+    form = MembresiaInscripcionForm()
     caja = request.caja_abierta
     cobros = Cobro.objects.filter(caja=caja).order_by('-fecha_hora')
-    return render(request, 'cobros_lista.html', {'cobros': cobros, 'caja': caja})
+    return render(request, 'cobros_lista.html', {'cobros': cobros, 'caja': caja, 'form': form})
 
 @login_required
 @caja_abierta_required
