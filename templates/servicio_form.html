@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h1>
+    {% if servicio %}Editar Servicio{% else %}Nuevo Servicio{% endif %}
+  </h1>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-link">Cancelar</a>
+  </form>
+{% endblock %}

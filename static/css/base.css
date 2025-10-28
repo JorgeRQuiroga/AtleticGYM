@@ -96,7 +96,11 @@ body {
     margin-bottom: 20px;
 }
 
+<<<<<<< HEAD
+.text-primary{
+=======
 .text-primary {
+>>>>>>> main
     color: #c0392b !important; /* Bordó más claro y visible */
 }
 
@@ -120,3 +124,12 @@ body {
 .text-bordo {
     color: #c0392b  !important; /* Bordó clásico */
 }
+<<<<<<< HEAD
+
+h1 {
+  color: #c0392b !important;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+=======
+>>>>>>> main

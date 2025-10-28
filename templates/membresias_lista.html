@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex">
+  
+    <div class="container py-5">
+      <h1 class="mb-4">Membresías</h1>
+
+      <!-- Botón que abre el modal -->
+      <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
+        + Inscribir Cliente
+      </button>
+      <!-- Tabla -->
+      <form method="get" class="row g-3 mb-3">
+      <div class="col-md-4">
+        <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por DNI o nombre/apellido">
+      </div>
+      <div class="col-md-4">
+        <select name="orden" class="form-select">
+          <option value="">-- Ordenar por --</option>
+          <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Inscripción: Antiguo → Nuevo</option>
+          <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Inscripción: Nuevo → Antiguo</option>
+          <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre: A → Z</option>
+          <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre: Z → A</option>
+          <option value="dni_asc" {% if orden == 'dni_asc' %}selected{% endif %}>DNI: Menor → Mayor</option>
+          <option value="dni_desc" {% if orden == 'dni_desc' %}selected{% endif %}>DNI: Mayor → Menor</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-primary">Aplicar</button>
+        <a href="{% url 'membresias:membresias_lista' %}" class="btn btn-secondary">Limpiar</a>
+      </div>
+    </form>
+      <table class="table table-hover table-bordered align-middle text-center table-dark" id="tablaMembresias">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>DNI</th>
+            <th>Servicio</th>
+            <th>Vencimiento</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in membresias %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                {% if m.activa %}
+                  <span class="badge bg-success">Activa</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactiva</span>
+                {% endif %}
+              </td>
+              <td>{{ m.cliente.apellido }}, {{ m.cliente.nombre }}</td>
+              <td>{{ m.cliente.dni }}</td>
+              <td>{{ m.servicio.nombre }}</td>
+              <td>{{ m.fecha_fin }}</td>
+              <td>
+                <a href="" class="btn btn-info btn-sm">Ver</a>
+                <a href="{% url 'membresias:membresia_borrar' m.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7" class="text-center">No hay membresías registradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Inscripción -->
+<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title text-primary">Inscribir Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
+            <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
+            <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
+            <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
+            <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
+            <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
+            <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
+            <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

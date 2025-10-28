@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container py-5 text-center">
+  <h1 class="mb-4">Menú de Empleados</h1>
+
+  <div class="d-flex flex-column align-items-center gap-3">
+
+    <!-- Botón para ir a la página de alta de empleado -->
+  <button class="btn btn-primary btn-lg w-50" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
+    ➕ Agregar nuevo empleado
+  </button>
+
+    <!-- Botón para listar empleados -->
+    <a href="{% url 'empleados:empleado_lista' %}" class="btn btn-primary btn-lg w-50">
+      👥 Mostrar todos los empleados
+    </a>
+
+    <!-- Botón para volver al home -->
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg w-50">
+       Volver al Inicio
+    </a>
+  </div>
+</div>
+<div class="modal fade" id="modalEmpleado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title text-primary">Registrar Empleado</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              {{ form.nombre.label_tag }} {{ form.nombre }}
+            </div>
+            <div class="col-md-6">
+              {{ form.apellido.label_tag }} {{ form.apellido }}
+            </div>
+            <div class="col-md-6">
+              {{ form.dni.label_tag }} {{ form.dni }}
+            </div>
+            <div class="col-md-6">
+              {{ form.telefono.label_tag }} {{ form.telefono }}
+            </div>
+            <div class="col-12">
+              {{ form.domicilio.label_tag }} {{ form.domicilio }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

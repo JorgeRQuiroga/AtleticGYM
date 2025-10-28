@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container py-5 text-center">
+  <h1 class="mb-4">
+    {% if empleado %}Editar Empleado{% else %}Nuevo Empleado{% endif %}
+  </h1>
+
+  <div class="d-flex flex-column align-items-center">
+    <div class="card w-75">
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3 text-start">
+            <div>
+              <label for="form-label">{{ form.user.label }}</label>
+              {{ form.user }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.nombre.label }}</label>
+              {{ form.nombre }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.apellido.label }}</label>
+              {{ form.apellido }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.dni.label }}</label>
+              {{ form.dni }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.telefono.label }}</label>
+              {{ form.telefono }}
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">{{ form.domicilio.label }}</label>
+              {{ form.domicilio }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.fecha_baja.label }}</label>
+              {{ form.fecha_baja }}
+            </div>
+          </div>
+
+          <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-success">
+              {% if empleado %}Actualizar{% else %}Guardar{% endif %}
+            </button>
+            <a href="{% url 'empleados:empleado_lista' %}" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,32 +1,23 @@
 {% extends "base.html" %}
-{% load static %}
+{% block title %}Inicio{% endblock %}
 
 {% block content %}
-{% if request.user.is_authenticated %}
-    <div class="text-center mb-4">
-        <div class="d-inline-block bg-dark border-start border-4 border-bordo rounded p-3 px-4 shadow-sm">
-            <h5 class="mb-0 text-light">
-                ¡Bienvenido,
-                {% if request.user.first_name or request.user.last_name %}
-                    {{ request.user.first_name }} {{ request.user.last_name }}
-                {% else %}
-                    {{ request.user.username }}
-                {% endif %}
-                !
-            </h5>
-        </div>
-    </div>
-{% endif %}
+{% if user.is_authenticated %}
+
 
 <div class="container py-5">
     <h1 class="text-center text-primary fw-bold mb-4">
         Panel Principal
     </h1>
-    <p class="lead text-center">Estás en el panel principal del sistema.</p>
+    <p class="lead text-center">
+        Bienvenido al sistema que impulsa tu gimnasio: gestión clara, control total y enfoque en el crecimiento.
+    </p>
     <hr class="my-4">
-
-    <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
-        <!-- Aquí puedes ir agregando botones o tarjetas del panel -->
+    <div class="d-grid gap-3 col-md-6 mx-auto">
+      <a href="{% url 'cobros_lista' %}" class="btn btn-primary btn-lg"> Cobros</a>
     </div>
+  {% else %}
+    <p>Por favor ingresa o regístrate para continuar.</p>
+  {% endif %}
 </div>
 {% endblock %}

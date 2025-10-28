@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center">
+    <h1 class="mb-4">Gestión de Asistencias</h1>
+    <p class="lead text-muted">Selecciona una opción para continuar.</p>
+  </div>
+
+  <!-- Botones -->
+  <div class="d-flex justify-content-center gap-4 mt-5">
+    <!-- Botón para abrir el modo TOTEM nueva pestaña -->
+    <a href="{% url 'asistencias:asistencia_registrar' %}" target="_blank" class="btn btn-success btn-lg"><i class="bi bi-person-check-fill me-2"></i> Abrir Modo TOTEM
+    
+    <!-- Botón para ver el historial de asistencias -->
+    <a href="{% url 'asistencias:asistencia_lista' %}" class="btn btn-primary btn-lg"><i class="bi bi-list-task me-2"></i> Ver Historial</a>
+  </div>
+</div>
+{% endblock %}

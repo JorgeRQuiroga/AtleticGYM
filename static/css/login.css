@@ -1,12 +1,15 @@
 /* Fondo principal del login */
 .login-bg {
-    background-image: url('img/login_fondo.jpg');
+    /* CORRECCIÓN: Se usa una ruta relativa desde la carpeta 'css' a la 'img' */
+    /* Asegúrate de que 'fondo.jpeg' exista en 'static/img/' */
+    background-image: url("../img/fondo.jpeg"); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     height: 100vh;
+    min-height: 100vh;
     position: relative;
-}
+} 
 
 /* Centrado absoluto del formulario */
 .login-card {
@@ -92,6 +95,8 @@
     border-color: #c0392b;
     transform: scale(1.02);
 }
+<<<<<<< HEAD
+=======
 
 
 body.login-bg {
@@ -117,3 +122,4 @@ body.login-bg::before {
     position: relative;
     z-index: 2;
 }
+>>>>>>> main

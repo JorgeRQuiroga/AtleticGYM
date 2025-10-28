@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between mb-4">
+    <h2 class="mb-3 mb-sm-0">Gestión de Clientes</h2>
+    <p class="text-secondary mb-0">Acciones rápidas</p>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-6">
+      <a href="{% url 'cliente_listar' %}" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center">
+        <i class="bi bi-people-fill me-2 fs-5"></i>
+        <span class="fs-5">Ver clientes</span>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <a href="{% url 'cliente_agregar' %}" class="btn btn-success w-100 py-3 d-flex align-items-center justify-content-center">
+        <i class="bi bi-person-plus-fill me-2 fs-5"></i>
+        <span class="fs-5">Agregar cliente</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="mt-4 text-muted">
+    <small>
+      Usá "Ver clientes" para listar, buscar y paginar clientes. Usá "Agregar cliente" para crear uno nuevo.
+    </small>
+  </div>
+</div>
+{% endblock %}
