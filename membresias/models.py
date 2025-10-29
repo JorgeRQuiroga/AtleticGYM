@@ -12,3 +12,7 @@ class Membresia(models.Model):
 
     def __str__(self):
         return f"Membresía de {self.cliente.nombre} {self.cliente.apellido} - {'Activa' if self.activa else 'Inactiva'}"
+
+    def borrar(self):
+        self.activa = False
+        self.save()

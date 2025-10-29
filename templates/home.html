@@ -1,12 +1,10 @@
-{% extends "base_home.html" %}
+{% extends "base.html" %}
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-<div class="mt-4 text-center mb-4">
-  <h1>AtletixGYM</h1>
-</div>
 
+<<<<<<< HEAD
 <div class="text-center">
   <div class="d-grid gap-3 col-6 mx-auto mt-4">
     <a href="{% url 'caja_abrir' %}" class="btn btn-dark btn-lg">💲 Cajas</a>
@@ -16,6 +14,20 @@
     <a href="{% url 'asistencias:asistencia_opciones' %}" class="btn btn-dark btn-lg">📋 Asistencias</a>
     <a href="{% url 'empleado_menu' %}" class="btn btn-dark btn-lg">🧑‍⚕️ Empleados </a>
   </div>
+=======
+
+<div class="container py-5">
+    <h1 class="text-center fw-bold mb-4">
+        Panel Principal
+    </h1>
+    <p class="lead text-center">
+        Bienvenido al sistema que impulsa tu gimnasio: gestión clara, control total y enfoque en el crecimiento.
+    </p>
+    <hr class="my-4">
+    <div class="d-grid gap-3 col-md-6 mx-auto">
+      <a href="{% url 'cobros_lista' %}" class="btn btn-primary btn-lg"> Cobros</a>
+    </div>
+>>>>>>> be571898bba7511f1b70bec3e22b2f9a4512729b
   {% else %}
     <p>Por favor ingresa o regístrate para continuar.</p>
   {% endif %}

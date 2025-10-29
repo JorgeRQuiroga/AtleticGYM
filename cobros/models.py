@@ -9,7 +9,13 @@ User = settings.AUTH_USER_MODEL
 
 class Cobro(models.Model):
     caja = models.ForeignKey(Caja, on_delete=models.PROTECT, related_name='cobros')
-    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='cobros')
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.PROTECT,
+        related_name='cobros',
+        null=True,      # permite NULL en la base de datos
+        blank=True      # permite que el form lo deje vacío
+    )    
     total = models.DecimalField(max_digits=10, decimal_places=2)
     descripcion = models.CharField(max_length=255, blank=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)

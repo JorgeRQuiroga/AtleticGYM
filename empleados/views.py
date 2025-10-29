@@ -7,8 +7,13 @@ from django.db.models import Q
 from .models import Empleado
 from .forms import EmpleadoForm
 from django.contrib.auth.models import User
+<<<<<<< HEAD
 from empleados.forms import EmpleadoForm
 
+=======
+from django.db import transaction
+from datetime import date
+>>>>>>> be571898bba7511f1b70bec3e22b2f9a4512729b
 
 @login_required
 def empleado_menu(request):
@@ -45,10 +50,46 @@ def empleado_lista(request):
 
 # # --- Agregar ---
 @login_required
+@transaction.atomic
 def empleado_agregar(request):
+    empleado_existente = None
+    
     if request.method == 'POST':
+        # Verificar si es una recontratación confirmada
+        recontratar = request.POST.get('recontratar')
+        dni = request.POST.get('dni')
+        
+        if recontratar == 'si':
+            # Reactivar empleado existente
+            try:
+                empleado = Empleado.objects.get(dni=dni, activo=False)
+                empleado.activo = True
+                empleado.fecha_baja = None
+                empleado.fecha_ingreso = date.today()
+                empleado.usuario.is_active = True
+                # empleado.usuario.save()
+                
+                # Actualizar datos del formulario
+                empleado.nombre = request.POST.get('nombre')
+                empleado.apellido = request.POST.get('apellido')
+                empleado.telefono = request.POST.get('telefono')
+                
+                # Actualizar usuario
+                empleado.usuario.first_name = empleado.nombre
+                empleado.usuario.last_name = empleado.apellido
+                empleado.usuario.save()
+                
+                empleado.save()
+                
+                messages.success(request, f'Empleado {empleado.nombre_completo()} recontratado exitosamente. Usuario: {dni}, Contraseña: {dni}')
+                return redirect('lista_empleados')
+            except Empleado.DoesNotExist:
+                messages.error(request, 'Error al recontratar el empleado.')
+                return redirect('empleados:agregar_empleado')
+        
         form = EmpleadoForm(request.POST)
         if form.is_valid():
+<<<<<<< HEAD
             dni_nuevo = request.POST.get('dni')
             empleado = Empleado.objects.get(dni=dni_nuevo)
             if empleado:
@@ -76,6 +117,46 @@ def empleado_agregar(request):
 
     return render(request, 'empleado_form.html', {'form': form})
 
+=======
+            dni = form.cleaned_data['dni']
+            
+            # Verificar si existe un empleado inactivo con ese DNI
+            try:
+                empleado_existente = Empleado.objects.get(dni=dni, activo=False)
+                # Si existe un empleado inactivo, mostrar confirmación
+                context = {
+                    'form': form,
+                    'accion': 'Agregar',
+                    'empleado_existente': empleado_existente,
+                    'mostrar_confirmacion': True
+                }
+                return render(request, 'empleado_form.html', context)
+            except Empleado.DoesNotExist:
+                pass
+            
+            # Si no existe empleado inactivo, crear nuevo empleado
+            empleado = form.save(commit=False)
+            
+            try:
+                usuario = User.objects.create_user(
+                    username=dni,
+                    password=dni,
+                    email=form.cleaned_data['email'],
+                    first_name=form.cleaned_data['nombre'],
+                    last_name=form.cleaned_data['apellido']
+                )
+                empleado.usuario = usuario
+                empleado.save()
+                
+                messages.success(request, f'Empleado {empleado.nombre_completo()} agregado exitosamente. Usuario: {dni}, Contraseña: {dni}')
+                return redirect('empleados:lista_empleados')
+            except Exception as e:
+                messages.error(request, f'Error al crear el empleado: {str(e)}')
+    else:
+        form = EmpleadoForm()
+    
+    return render(request, 'empleado_form.html', {'form': form, 'accion': 'Agregar'})
+>>>>>>> be571898bba7511f1b70bec3e22b2f9a4512729b
 
 # --- Editar ---
 @login_required

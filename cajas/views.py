@@ -7,8 +7,13 @@ from django.contrib import messages
 
 @login_required
 def abrir_caja(request):
+    # Si la caja ya está abierta, no mostramos el modal de apertura.
+    # En su lugar, redirigimos al usuario a donde iba o a la lista de cobros.
     if Caja.objects.filter(usuario=request.user, estado='abierta').exists():
-        return redirect('caja_estado')
+        next_url = request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
+        return redirect('cobros_lista') # Opción por defecto si no hay 'next'
 
     ultima_caja = Caja.objects.filter(usuario=request.user, estado='cerrada').order_by('-fecha_cierre').first()
     monto_inicial = ultima_caja.monto_cierre if ultima_caja else 0
@@ -23,14 +28,20 @@ def abrir_caja(request):
             caja.total_en_caja = caja.monto_apertura
 
             caja.save()
-            return redirect('caja_estado')
+            
+            # Redirigir a la página siguiente si existe, o a la lista de cobros por defecto
+            next_url = request.POST.get('next') # Lo tomamos del POST
+            if next_url:
+                return redirect(next_url)
+            return redirect('cobros_lista')
     else:
         form = AperturaCajaForm(initial={'monto_apertura': monto_inicial})
 
     return render(request, 'caja_abrir.html', {
         'form': form,
         'usuario': request.user,
-        'monto_sugerido': monto_inicial
+        'monto_sugerido': monto_inicial,
+        'next': request.GET.get('next', '') # Pasar el 'next' a la plantilla
     })
 
 @login_required
