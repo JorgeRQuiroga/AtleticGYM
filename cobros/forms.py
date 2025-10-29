@@ -24,3 +24,24 @@ class CobroForm(forms.ModelForm):
         widgets = {
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+
+class CobroClaseForm(forms.Form):
+    dni = forms.CharField(
+        label="DNI del Alumno",
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese DNI...'})
+    )
+    metodo_pago = forms.ModelChoiceField(
+        queryset=MetodoDePago.objects.all(),
+        label="Método de Pago",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        servicio = Servicio.objects.get(nombre="Por clase")
+        self.fields['servicio'] = forms.ModelChoiceField(
+            queryset=Servicio.objects.filter(id=servicio.id),
+            initial=servicio,
+            widget=forms.Select(attrs={'class': 'form-select', 'readonly': 'readonly'})
+        )

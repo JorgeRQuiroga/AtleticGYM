@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Cobro, DetalleCobro, MetodoDePago
-from .forms import CobroForm
+from .forms import CobroForm, CobroClaseForm
+from django.utils import timezone
 from .decorators import caja_abierta_required
 from servicios.models import Servicio
 from clientes.models import Cliente
@@ -23,8 +24,7 @@ def nuevo_cobro(request):
         form = CobroForm(request.POST)
         if form.is_valid():
             dni = form.cleaned_data['dni'].strip()
-            cliente = get_object_or_404(Cliente, dni=dni)
-
+            cliente = get_object_or_404(Cliente.objects.exclude(nombre="-----"), dni=dni)
             # Buscar membresía activa
             membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
 
@@ -64,6 +64,54 @@ def nuevo_cobro(request):
         form = CobroForm()
 
     return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
+
+@login_required
+@caja_abierta_required
+def cobro_un_dia(request):
+    caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    if not caja:
+        messages.error(request, "No hay una caja abierta para registrar el cobro.")
+        return redirect('cobros_lista')
+
+    if request.method == 'POST':
+        form = CobroClaseForm(request.POST)
+        if form.is_valid():
+            dni = form.cleaned_data['dni'].strip()
+            servicio = Servicio.objects.get(nombre="Por clase")
+            metodo_pago = form.cleaned_data['metodo_pago']
+
+            cliente = Cliente.objects.create(
+                dni=dni,
+                nombre="-----",
+                apellido="",
+                telefono="",
+                email=""
+            )
+            # Crear el cobro
+            cobro = Cobro.objects.create(
+                caja=caja,
+                cliente=cliente,
+                servicio=servicio,
+                total=servicio.precio,
+                descripcion="Cobro por clase suelta",
+                fecha_hora=timezone.now()
+            )
+
+            # Crear detalle
+            DetalleCobro.objects.create(
+                cobro=cobro,
+                servicio=servicio,
+                monto=servicio.precio,
+                metodoDePago=metodo_pago
+            )
+
+            messages.success(request, f"Cobro por clase registrado (${servicio.precio}).")
+            return redirect('cobros_lista')
+    else:
+        form = CobroClaseForm()
+
+    return render(request, 'cobro_un_dia.html', {'form': form, 'caja': caja})   
+
 
 @login_required
 @caja_abierta_required
