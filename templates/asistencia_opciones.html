@@ -1,74 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-5 text-center">
-  <h1 class="mb-4">Registrar Asistencia</h1>
+<div class="container py-5">
+  <div class="text-center">
+    <h1 class="mb-4">Gestión de Asistencias</h1>
+    <p class="lead text-muted">Selecciona una opción para continuar.</p>
+  </div>
 
   <!-- Botones -->
-  <div class="d-flex justify-content-center gap-4">
-    <!-- Botón Cliente -->
-    <button class="btn btn-success btn-lg"
-            data-bs-toggle="modal"
-            data-bs-target="#modalCliente">
-      💪 Alumno
-    </button>
-
-    <!-- Botón Empleado -->
-    <button class="btn btn-primary btn-lg"
-            data-bs-toggle="modal"
-            data-bs-target="#modalEmpleado">
-      👔 Empleado
-    </button>
-  </div>
-</div>
-
-<!-- Modal Cliente -->
-<div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title">Registrar Asistencia - Alumno</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form method="post" action="{% url 'asistencias:asistencia_opciones' %}">
-          {% csrf_token %}
-          <input type="hidden" name="tipo" value="alumno">
-          <div class="mb-3">
-            <label for="dniCliente" class="form-label">DNI del Alumno</label>
-            <input type="text" class="form-control" id="dniCliente" name="dni" placeholder="Ingrese DNI">
-          </div>
-          <div class="text-end">
-            <button type="submit" class="btn btn-success">Registrar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Empleado -->
-<div class="modal fade" id="modalEmpleado" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Registrar Asistencia - Empleado</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form method="post" action="{% url 'asistencias:asistencia_opciones' %}">
-          {% csrf_token %}
-          <input type="hidden" name="tipo" value="empleado">
-          <div class="mb-3">
-            <label for="dniEmpleado" class="form-label">DNI del Empleado</label>
-            <input type="text" class="form-control" id="dniEmpleado" name="dni" placeholder="Ingrese DNI">
-          </div>
-          <div class="text-end">
-            <button type="submit" class="btn btn-primary">Registrar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+  <div class="d-flex justify-content-center gap-4 mt-5">
+    <!-- Botón para abrir el modo TOTEM nueva pestaña -->
+    <a href="{% url 'asistencias:asistencia_registrar' %}" target="_blank" class="btn btn-success btn-lg"><i class="bi bi-person-check-fill me-2"></i> Abrir Modo TOTEM
+    
+    <!-- Botón para ver el historial de asistencias -->
+    <a href="{% url 'asistencias:asistencia_lista' %}" class="btn btn-primary btn-lg"><i class="bi bi-list-task me-2"></i> Ver Historial</a>
   </div>
 </div>
 {% endblock %}

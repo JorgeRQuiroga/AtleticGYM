@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
+{% block title %}Empleados{% endblock %}
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4 text-black mb-0">Empleados</h1>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
-    + Agregar nuevo empleado
-  </button>
-  <a href="{% url 'empleado_agregar' %}">+</a>
+  <h1>Empleados</h1>
+  <a href="{% url 'empleados:empleado_agregar' %}" class="btn btn-primary">+ Nuevo Empleado</a>
 </div>
 
-<form method="get" action="{% url 'empleado_lista' %}" class="mb-3">
+
+<form method="get" action="{% url 'empleados:empleado_lista' %}" class="mb-3">
   <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
 </form>
 
-<table class="table table-striped">
-  <thead>
+<table class="table table-hover table-bordered align-middle text-center" id="tablaEmpleados">
+  <thead class="table-dark">
     <tr>
+      <th>#</th>
       <th>Nombre</th>
       <th>DNI</th>
       <th>Teléfono</th>
@@ -25,6 +26,7 @@
   <tbody>
     {% for empleado in page_obj %}
       <tr>
+        <td>{{ forloop.counter }}</td>
         <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
         <td>{{ empleado.dni }}</td>
         <td>{{ empleado.telefono }}</td>
