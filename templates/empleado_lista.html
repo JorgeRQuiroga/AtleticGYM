@@ -25,24 +25,24 @@
   </thead>
   <tbody>
     {% for empleado in page_obj %}
-    {% if empleado.activo == True %}
       <tr>
         <td>{{ forloop.counter }}</td>
         <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
         <td>{{ empleado.dni }}</td>
         <td>{{ empleado.telefono }}</td>
         <td>{{ empleado.fecha_hora_alta|date:"d/m/Y H:i" }}</td>
+        <td>{{ empleado.activo }}</td>
         <td>
-          <a href="{% url 'empleados:empleado_editar' empleado.pk %}" class="btn btn-sm btn-secondary">Editar</a>
-          <a href="{% url 'empleados:empleado_eliminar' empleado.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+          <a href="{% url 'empleado_editar' empleado.pk %}" class="btn btn-sm btn-secondary">Editar</a>
+          <a href="{% url 'empleado_eliminar' empleado.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
         </td>
       </tr>
-    {% endif %}
     {% empty %}
       <tr><td colspan="5">No hay empleados registrados.</td></tr>
     {% endfor %}
   </tbody>
 </table>
+{% include 'empleado_agregar.html' %}
 
 {% if page_obj.has_other_pages %}
 <nav>
@@ -54,5 +54,6 @@
     {% endfor %}
   </ul>
 </nav>
+
 {% endif %}
 {% endblock %}

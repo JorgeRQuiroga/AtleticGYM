@@ -18,6 +18,7 @@ def empleado_menu(request):
 # --- Listar con búsqueda ---
 @login_required
 def empleado_lista(request):
+    form = EmpleadoForm()
     query = request.GET.get('q', '')
     empleados = Empleado.objects.all()
 
@@ -37,11 +38,12 @@ def empleado_lista(request):
 
     return render(request, 'empleado_lista.html', {
         'page_obj': page_obj,
-        'query': query
+        'query': query,
+        'form' : form
     })
 
 
-# --- Agregar ---
+# # --- Agregar ---
 @login_required
 @transaction.atomic
 def empleado_agregar(request):
@@ -142,5 +144,5 @@ def empleado_eliminar(request, pk):
     if request.method == 'POST':
         empleado.dar_baja()
         messages.success(request, "Empleado eliminado correctamente.")
-        return redirect('empleados:empleado_lista')
+        return redirect('empleado_lista')
     return render(request, 'empleado_eliminar.html', {'empleado': empleado})
