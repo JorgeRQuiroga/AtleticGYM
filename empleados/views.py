@@ -82,11 +82,12 @@ def empleado_agregar(request):
                 # Crear nuevo usuario con DNI como username
                 username = dni
                 user = User.objects.create_user(
-                    username=username,
-                    first_name=nombre,
-                    last_name=apellido
-                )
-                
+                username=username,
+                first_name=nombre,
+                last_name=apellido,
+                password=dni  # directamente acá
+)
+
                 # Crear nuevo empleado
                 empleado = Empleado.objects.create(
                     user=user,

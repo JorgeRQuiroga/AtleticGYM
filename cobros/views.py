@@ -11,6 +11,8 @@ from membresias.models import Membresia
 from django.http import JsonResponse
 from cajas.models import Caja
 from membresias.forms import MembresiaInscripcionForm
+from django.db.models import Q
+from django.core.paginator import Paginator
 
 @login_required
 @caja_abierta_required
@@ -116,10 +118,64 @@ def cobro_un_dia(request):
 @login_required
 @caja_abierta_required
 def lista_cobros(request):
-    form = MembresiaInscripcionForm()
-    caja = request.caja_abierta
-    cobros = Cobro.objects.filter(caja=caja).order_by('-fecha_hora')
-    return render(request, 'cobros_lista.html', {'cobros': cobros, 'caja': caja, 'form': form})
+    caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    form = MembresiaInscripcionForm(request.POST)
+    if not caja:
+        messages.error(request, "No hay una caja abierta para mostrar los cobros.")
+        return redirect('cobros_lista')  # o a donde quieras redirigir
+
+    cobros = caja.cobros.select_related("cliente", "servicio").all()
+
+    # 🔍 Filtros
+    query = request.GET.get('q', '').strip()
+    orden = request.GET.get('orden', '')
+
+    if query:
+        cobros = cobros.filter(
+            Q(cliente__nombre__icontains=query) |
+            Q(cliente__apellido__icontains=query) |
+            Q(cliente__dni__icontains=query) |
+            Q(cliente__apellido__icontains=query.split()[0], cliente__nombre__icontains=' '.join(query.split()[1:])) |
+            Q(cliente__nombre__icontains=query.split()[0], cliente__apellido__icontains=' '.join(query.split()[1:]))
+        )
+
+    # 🔄 Ordenamientos
+    if orden == 'fecha_desc':
+        cobros = cobros.order_by('-fecha_hora')
+    elif orden == 'fecha_asc':
+        cobros = cobros.order_by('fecha_hora')
+    elif orden == 'dni_desc':
+        cobros = cobros.order_by('-cliente__dni')
+    elif orden == 'dni_asc':
+        cobros = cobros.order_by('cliente__dni')
+    elif orden == 'nombre_asc':
+        cobros = cobros.order_by('cliente__nombre')
+    elif orden == 'nombre_desc':
+        cobros = cobros.order_by('-cliente__nombre')
+    elif orden == 'apellido_asc':
+        cobros = cobros.order_by('cliente__apellido')
+    elif orden == 'apellido_desc':
+        cobros = cobros.order_by('-cliente__apellido')
+    elif orden == 'apellido_nombre':
+        cobros = cobros.order_by('cliente__apellido', 'cliente__nombre')
+    elif orden == 'nombre_apellido':
+        cobros = cobros.order_by('cliente__nombre', 'cliente__apellido')
+    else:
+        cobros = cobros.order_by('-fecha_hora')  # default
+    #paginacion
+    paginator = Paginator(cobros, 10)  # 10 por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'cobros_lista.html', {
+        'cobros': cobros,
+        'caja': caja,
+        'query': query,
+        'orden': orden,
+        'tipo': 'cobros',
+        'page_obj': page_obj,
+        'form' : form
+    })
 
 @login_required
 @caja_abierta_required
@@ -181,3 +237,65 @@ def extraccion_cobros(request):
         form = ExtraccionForm()
 
     return render(request, 'cobros_extraccion.html', {'form': form, 'caja': caja})
+
+@login_required
+@caja_abierta_required
+def mostrar_extracciones(request):
+    caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    form = MembresiaInscripcionForm(request.POST)
+    if not caja:
+        messages.error(request, "No hay una caja abierta para mostrar las extracciones.")
+        return redirect('cobros_lista')
+
+    extracciones = caja.extracciones.select_related('usuario').all()
+
+    # Filtros
+    query = request.GET.get('q', '').strip()
+    orden = request.GET.get('orden', '')
+
+    if query:
+        extracciones = extracciones.filter(
+            Q(usuario__first_name__icontains=query) |
+            Q(usuario__last_name__icontains=query) |
+            Q(usuario__first_name__icontains=query.split()[0]) & Q(usuario__last_name__icontains=' '.join(query.split()[1:])) |
+            Q(usuario__last_name__icontains=query.split()[0]) & Q(usuario__first_name__icontains=' '.join(query.split()[1:])) |
+            Q(usuario__username__icontains=query)
+        )
+
+    # Ordenamientos
+    if orden == 'fecha_desc':
+        extracciones = extracciones.order_by('-fecha_hora')
+    elif orden == 'fecha_asc':
+        extracciones = extracciones.order_by('fecha_hora')
+    elif orden == 'dni_desc':
+        extracciones = extracciones.order_by('-empleado__dni')  # Asumiendo que el DNI está en username
+    elif orden == 'dni_asc':
+        extracciones = extracciones.order_by('empleado__dni')
+    elif orden == 'nombre_asc':
+        extracciones = extracciones.order_by('usuario__first_name')
+    elif orden == 'nombre_desc':
+        extracciones = extracciones.order_by('-usuario__first_name')
+    elif orden == 'apellido_asc':
+        extracciones = extracciones.order_by('usuario__last_name')
+    elif orden == 'apellido_desc':
+        extracciones = extracciones.order_by('-usuario__last_name')
+    elif orden == 'apellido_nombre':
+        extracciones = extracciones.order_by('usuario__last_name', 'usuario__first_name')
+    elif orden == 'nombre_apellido':
+        extracciones = extracciones.order_by('usuario__first_name', 'usuario__last_name')
+    else:
+        extracciones = extracciones.order_by('-fecha_hora')  # Default
+
+    #  Paginación
+    paginator = Paginator(extracciones, 10)  # 10 por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'cobros_extracciones_lista.html', {
+        'extracciones': extracciones,
+        'caja': caja,
+        'query': query,
+        'orden': orden,
+        'page_obj': page_obj,
+        'form': form,
+    })
