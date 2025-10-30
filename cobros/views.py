@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Cobro, DetalleCobro, MetodoDePago
-from .forms import CobroForm, CobroClaseForm
+from .forms import CobroForm, CobroClaseForm, ExtraccionForm
 from django.utils import timezone
 from .decorators import caja_abierta_required
 from servicios.models import Servicio
@@ -139,3 +139,45 @@ def buscar_dni(request):
             for c in clientes
         ]
     return JsonResponse(resultados, safe=False)
+
+@login_required
+@caja_abierta_required
+def extraccion_cobros(request):
+    caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    if not caja:
+        messages.error(request, "No hay una caja abierta para registrar la extracción.")
+        return redirect('cobros_lista')
+
+    if request.method == 'POST':
+        form = ExtraccionForm(request.POST)
+        if form.is_valid():
+            monto = form.cleaned_data['monto']
+
+            #Verificar saldo suficiente
+            saldo_actual = getattr(caja, 'saldo_actual', getattr(caja, 'total_en_caja', 0))
+            if monto > saldo_actual:
+                messages.error(request, f"No hay fondos suficientes en la caja. Saldo disponible: ${saldo_actual}")
+                return render(request, 'cobros_extraccion.html', {'form': form, 'caja': caja})
+
+            #Registrar extracción
+            extraccion = form.save(commit=False)
+            extraccion.caja = caja
+            extraccion.usuario = request.user
+            extraccion.save()
+
+            #Actualizar saldo
+            if hasattr(caja, 'saldo_actual'):
+                caja.saldo_actual -= extraccion.monto
+            elif hasattr(caja, 'total_en_caja'):
+                caja.total_en_caja -= extraccion.monto
+            caja.save()
+
+            messages.success(
+                request,
+                f"Extracción de ${extraccion.monto} registrada. Nuevo saldo: ${getattr(caja, 'saldo_actual', caja.total_en_caja)}"
+            )
+            return redirect('cobros_lista')
+    else:
+        form = ExtraccionForm()
+
+    return render(request, 'cobros_extraccion.html', {'form': form, 'caja': caja})

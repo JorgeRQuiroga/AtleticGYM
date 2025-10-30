@@ -22,11 +22,12 @@
 
 <!-- Botones de acción centrados -->
 <div class="d-flex justify-content-center gap-3 mb-4">
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDecision"><i class="bi bi-person-plus me-1"></i>
+  <button type="button" class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#modalDecision"><i class="bi bi-cash me-1"></i>
     Nuevo Cobro
   </button>
-  <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalInscripcion"><i class="bi bi-person-plus me-1"></i> Nueva Inscripción</a>
-  <a class="btn btn-danger" href="{% url 'caja_cerrar' %}"><i class="bi bi-door-closed me-1"></i> Cerrar Caja</a>
+  <a class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalInscripcion"><i class="bi bi-person-plus me-1"></i> Nueva Inscripción</a>
+  <a class="btn btn-warning text-white fw-bold"  href="{% url 'cobros_extraccion' %}"><i class="bi bi-cash-coin"></i> Extraccion</a>
+  <a class="btn btn-danger fw-bold" href="{% url 'caja_cerrar' %}"><i class="bi bi-door-closed me-1"></i> Cerrar Caja</a>
 </div>
 
 <hr class="border-secondary">

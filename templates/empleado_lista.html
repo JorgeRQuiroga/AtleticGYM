@@ -12,10 +12,9 @@
   <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
 </form>
 
-<table class="table table-hover table-bordered align-middle text-center" id="tablaEmpleados">
+<table class="table table-hover table-bordered align-middle text-center table-dark" id="tablaEmpleados">
   <thead class="table-dark">
     <tr>
-      <th>#</th>
       <th>Nombre</th>
       <th>DNI</th>
       <th>Teléfono</th>
@@ -26,7 +25,6 @@
   <tbody>
     {% for empleado in page_obj %}
       <tr>
-        <td>{{ forloop.counter }}</td>
         <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
         <td>{{ empleado.dni }}</td>
         <td>{{ empleado.telefono }}</td>
@@ -35,10 +33,10 @@
           <a href="{% url 'empleado_editar' empleado.pk %}" class="btn btn-sm btn-secondary">Editar</a>
           <a href="{% url 'empleado_eliminar' empleado.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
         </td>
-      </tr>
     {% empty %}
-      <tr><td colspan="5">No hay empleados registrados.</td></tr>
+      <td colspan="5">No hay empleados registrados.</td>
     {% endfor %}
+    </tr>
   </tbody>
 </table>
 

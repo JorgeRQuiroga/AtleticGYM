@@ -7,4 +7,5 @@ urlpatterns = [
     path('detalle/<int:pk>/', views.detalle_cobro, name='cobros_detalle'),
     path('buscar-dni/', views.buscar_dni, name='buscar_dni'),
     path('un-dia/', views.cobro_un_dia, name='cobros_un_dia'),
+    path('extraccion/', views.extraccion_cobros, name='cobros_extraccion'),
 ]

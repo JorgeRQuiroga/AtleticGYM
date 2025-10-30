@@ -43,3 +43,13 @@ class DetalleCobro(models.Model):
     cobro = models.ForeignKey(Cobro, on_delete=models.PROTECT, related_name='detalles_cobro')
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     metodoDePago = models.ForeignKey(MetodoDePago, on_delete=models.PROTECT, related_name='detalles_cobro')
+
+class Extraccion(models.Model):
+    caja = models.ForeignKey(Caja, on_delete=models.PROTECT, related_name="extracciones")
+    usuario = models.ForeignKey(User, on_delete=models.PROTECT)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    motivo = models.CharField(max_length=255, blank=True)
+    fecha_hora = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Extracción {self.monto} por {self.usuario} en {self.fecha_hora}"
