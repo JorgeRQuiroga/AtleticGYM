@@ -15,6 +15,7 @@
   <form method="post" novalidate>
     {% csrf_token %}
     {{ form.as_p }}
+    {{ form.non_field_errors }}
     <button type="submit" class="btn btn-success">Guardar</button>
     <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-link">Cancelar</a>
   </form>

@@ -12,7 +12,7 @@ from .forms import MembresiaInscripcionForm
 from .models import Membresia
 from cobros.models import Cobro, DetalleCobro, MetodoDePago
 from cajas.models import Caja
-
+from django.core.paginator import Paginator
 
 @login_required
 @caja_abierta_required
@@ -68,7 +68,7 @@ def inscribir_cliente(request):
         form = MembresiaInscripcionForm()
 
     membresias = Membresia.objects.select_related('cliente', 'servicio').all()
-    return render(request, 'membresia_form.html', {
+    return render(request, 'membresias_lista.html', {
         'form': form,
         'membresias': membresias,
         'caja': caja
@@ -92,13 +92,12 @@ def lista_membresias(request):
                 Q(cliente__apellido__icontains=term)
             )
 
-
     # --- Ordenamiento ---
     orden = request.GET.get('orden')
     if orden == 'fecha_asc':
-        membresias = membresias.order_by('id')  # más antiguo primero
+        membresias = membresias.order_by('id')
     elif orden == 'fecha_desc':
-        membresias = membresias.order_by('-id')  # más nuevo primero
+        membresias = membresias.order_by('-id')
     elif orden == 'nombre_asc':
         membresias = membresias.order_by('cliente__apellido', 'cliente__nombre')
     elif orden == 'nombre_desc':
@@ -107,14 +106,27 @@ def lista_membresias(request):
         membresias = membresias.order_by('cliente__dni')
     elif orden == 'dni_desc':
         membresias = membresias.order_by('-cliente__dni')
+    elif orden == 'solo_activo':
+        membresias = membresias.filter(activa=True)
+    elif orden == 'solo_inactivo':
+        membresias = membresias.filter(activa=False)
+    else:
+        # Por defecto: primero activas, luego inactivas
+        membresias = membresias.order_by('-activa', 'cliente__apellido')
+
+    # --- Paginación ---
+    paginator = Paginator(membresias, 10)  # 10 por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'membresias_lista.html', {
-        'membresias': membresias,
+        'page_obj': page_obj,   # Usar solo esto en el template
         'query': query,
         'orden': orden,
-        'form' : form
+        'form': form,
     })
-
+    
+    
 @login_required
 def borrar_membresia(request, membresia_id):
     try:
@@ -138,3 +150,34 @@ def menu(request):
     else:
         form = MembresiaInscripcionForm()
     return render(request, 'membresias_menu.html', {'form': form})
+
+@login_required
+def membresias_detalle(request, pk):
+    form = MembresiaInscripcionForm()
+    membresia = get_object_or_404(
+        Membresia.objects.select_related('cliente', 'servicio'),
+        pk=pk
+    )
+    return render(request, 'membresias_detalle.html', {
+        'membresia': membresia,
+        'form':form,
+    })
+    
+@login_required
+def membresias_editar(request, pk):
+    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
+
+    if request.method == 'POST':
+        form = MembresiaInscripcionForm(request.POST, membresia_instance=membresia)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Membresía actualizada correctamente.")
+            return redirect('membresias:membresia_detalle', pk=membresia.pk)
+    else:
+        # GET: precargar con la instancia
+        form = MembresiaInscripcionForm(membresia_instance=membresia)
+
+    return render(request, 'membresias/editar.html', {
+        'form': form,
+        'membresia': membresia,
+    })

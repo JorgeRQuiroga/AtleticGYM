@@ -46,16 +46,31 @@ class MembresiaInscripcionForm(forms.ModelForm):
 
     # Campo de Servicio
     servicio = forms.ModelChoiceField(
-        queryset=Servicio.objects.filter(activo=True),
+        queryset=Servicio.objects.filter(activo=True).exclude(nombre__icontains='Por clase'),
         required=True,
         label="Servicio",
         widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    observaciones = forms.CharField(
+        required=False,
+        label = "Observaciones",
+        widget = forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Observaciones adicionales'})
     )
 
     class Meta:
         model = Membresia
         fields = ['servicio']
+    def clean_dni(self):
+        dni = self.cleaned_data.get('dni')
+        try:
+            dni_int = int(dni)
+        except (TypeError, ValueError):
+            raise forms.ValidationError("El DNI debe ser un número válido.")
 
+        if dni_int <= 8000000:
+            raise forms.ValidationError("El DNI debe ser mayor a 8.000.000.")
+        return dni_int
+    
     def save(self, commit=True):
         # Crear cliente
         cliente = Cliente.objects.create(
@@ -85,3 +100,4 @@ class MembresiaInscripcionForm(forms.ModelForm):
             activa=True
         )
         return membresia
+    

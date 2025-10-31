@@ -47,6 +47,10 @@ def nuevo_cobro(request):
             servicio = form.cleaned_data.get('servicio') or membresia.servicio
             cobro.servicio = servicio
             cobro.total = servicio.precio
+            # guarda un detalle por defecto si no hay descripcion
+            if cobro.descripcion.strip() == "":
+                cobro.detalle = f"Cobro por membresía: {servicio.nombre}"
+            
             cobro.save()
             if servicio != membresia.servicio:
                 membresia.servicio = servicio
@@ -58,8 +62,8 @@ def nuevo_cobro(request):
                 monto=cobro.total,
                 metodoDePago=metodo_pago
             )
-            caja.total_en_caja += cobro.total
-            caja.save()
+            # Actualizar caja
+            caja.registrar_ingreso(servicio.precio)
             messages.success(request, f"Cobro registrado para {cliente}.")
             return redirect('cobros_lista')
     else:
@@ -95,7 +99,7 @@ def cobro_un_dia(request):
                 cliente=cliente,
                 servicio=servicio,
                 total=servicio.precio,
-                descripcion="Cobro por clase suelta",
+                descripcion="Cobro por una clase",
                 fecha_hora=timezone.now()
             )
 
@@ -106,6 +110,8 @@ def cobro_un_dia(request):
                 monto=servicio.precio,
                 metodoDePago=metodo_pago
             )
+            # Actualizar caja
+            caja.registrar_ingreso(servicio.precio)
 
             messages.success(request, f"Cobro por clase registrado (${servicio.precio}).")
             return redirect('cobros_lista')
@@ -126,7 +132,7 @@ def lista_cobros(request):
 
     cobros = caja.cobros.select_related("cliente", "servicio").all()
 
-    # 🔍 Filtros
+    # Filtros
     query = request.GET.get('q', '').strip()
     orden = request.GET.get('orden', '')
 
@@ -139,7 +145,7 @@ def lista_cobros(request):
             Q(cliente__nombre__icontains=query.split()[0], cliente__apellido__icontains=' '.join(query.split()[1:]))
         )
 
-    # 🔄 Ordenamientos
+    #  Ordenamientos
     if orden == 'fecha_desc':
         cobros = cobros.order_by('-fecha_hora')
     elif orden == 'fecha_asc':
