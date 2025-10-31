@@ -5,11 +5,11 @@ from .models import Servicio
 class ServicioForm(forms.ModelForm):
     class Meta:
         model = Servicio
-        fields = ['nombre', 'cantidad_clases', 'precio']
-        labels = {'nombre':   'Nombre del Servicio', 'cantidad_clases': 'Cantidad de Clases', 'precio':   'Precio'}
+        fields = ['nombre', 'dias_semana', 'precio']
+        labels = {'nombre':   'Nombre del Servicio','dias_semana': 'Días por Semana', 'precio':   'Precio' }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Yoga para principiantes'}),
-            'cantidad_clases': forms.NumberInput(attrs={'class': 'form-control','placeholder': 'Ej: 10'}),
+            'dias_semana': forms.NumberInput(attrs={'class': 'form-control','placeholder': 'Ej: 3'}),
             'precio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 1500.00', 'inputmode': 'decimal'}),
         }
     def clean_precio(self):

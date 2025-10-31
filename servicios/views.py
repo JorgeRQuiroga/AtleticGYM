@@ -17,13 +17,22 @@ def servicio_agregar(request):
     if request.method == 'POST':
         form = ServicioForm(request.POST)
         if form.is_valid():
-            form.save()
+            # Acceder al valor desde cleaned_data
+            dias_semana = form.cleaned_data['dias_semana']
+            cantidad_clases = dias_semana * 4  # Asumiendo 4 semanas por mes
+
+            # Crear instancia pero sin guardar todavía
+            servicio = form.save(commit=False)
+            servicio.cantidad_clases = cantidad_clases
+            servicio.save()
+
             messages.success(request, "Servicio agregado correctamente.")
             return redirect('servicios:servicio_listar')
         messages.error(request, "Error al guardar. Verificá los datos.")
     else:
         form = ServicioForm()
     return render(request, 'servicio_form.html', {'form': form})
+
 
 @login_required
 def servicio_editar(request, pk):

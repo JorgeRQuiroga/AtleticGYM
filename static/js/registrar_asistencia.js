@@ -3,21 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!form) return;
 
   const dniInput = document.querySelector('#id_dni') || document.querySelector('input[name="dni"]');
-  const card = document.querySelector('.card');
   const submitBtn = form.querySelector('button[type="submit"]');
+  const resultado = document.getElementById('resultado');
 
   let submitting = false;
 
-  async function mostrarSwal(tipo, titulo, mensaje, timeout = 3000) {
-    const opts = {
+  async function mostrarSwal(tipo, titulo, mensaje, timeout = 2500) {
+    await Swal.fire({
       title: titulo,
       html: `<p style="margin:0.25rem 0">${mensaje}</p>`,
       icon: tipo,
       showConfirmButton: false,
       timer: timeout,
       backdrop: 'rgba(0,0,0,0.6)'
-    };
-    await Swal.fire(opts);
+    });
   }
 
   function setDisabled(state) {
@@ -46,18 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setDisabled(true);
 
-    // Mostrar loader visual en el botón
     const originalBtnHtml = submitBtn ? submitBtn.innerHTML : null;
-    if (submitBtn) submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registrando...`;
+    if (submitBtn) {
+      submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Registrando...`;
+    }
 
     try {
       const action = form.action || window.location.href;
-      const formData = new FormData();
-      // si el campo tiene name distinto, intentamos ambos
-      if (dniInput && dniInput.name) formData.append(dniInput.name, dni);
-      else formData.append('dni', dni);
-      const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
-      if (csrfToken) formData.append('csrfmiddlewaretoken', csrfToken.value);
+      const formData = new FormData(form);
 
       const resp = await fetch(action, {
         method: 'POST',
@@ -66,58 +61,31 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const text = await resp.text();
-
-      // Parsear respuesta HTML y buscar señales de resultado
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, 'text/html');
 
-      // 1) Buscar mensajes tipo alert-success / alert-warning / alert-error
+      // Buscar alertas en la respuesta
       const alertEl = doc.querySelector('.alert');
-      const clienteCard = doc.querySelector('.text-center.mb-3') || doc.querySelector('.cliente-info') || null;
-
       if (alertEl) {
         const classes = (alertEl.className || '').toLowerCase();
         const messageText = alertEl.textContent.trim();
 
         if (classes.includes('alert-success')) {
-          // actualizar la card con el HTML retornado para mostrar info del cliente/usuario
-          if (card) {
-            // sustituir el contenido interno de .card por el nuevo que haya devuelto el servidor
-            const nuevoHtml = doc.querySelector('.card') ? doc.querySelector('.card').innerHTML : card.innerHTML;
-            card.innerHTML = nuevoHtml;
-          }
-          await mostrarSwal('success', 'Asistencia registrada', messageText, 2200);
-          // mantener foco en input para nuevas registraciones (si existe)
-          aplicarFocus();
+          await mostrarSwal('success', 'Asistencia registrada', messageText);
         } else if (classes.includes('alert-warning')) {
-          await mostrarSwal('warning', 'Atención', messageText, 2600);
-          if (card) {
-            const nuevoHtml = doc.querySelector('.card') ? doc.querySelector('.card').innerHTML : card.innerHTML;
-            card.innerHTML = nuevoHtml;
-          }
-          aplicarFocus();
-        } else if (classes.includes('alert-danger') || classes.includes('alert-error') || classes.includes('alert-secondary')) {
-          await mostrarSwal('error', 'Error', messageText, 3000);
-          aplicarFocus();
+          await mostrarSwal('warning', 'Atención', messageText);
+        } else if (classes.includes('alert-danger') || classes.includes('alert-error')) {
+          await mostrarSwal('error', 'Error', messageText);
         } else {
-          // mensaje genérico
-          await mostrarSwal('info', 'Resultado', messageText, 2200);
-          aplicarFocus();
+          await mostrarSwal('info', 'Resultado', messageText);
         }
-      } else if (clienteCard) {
-        // si no hay .alert pero sí info de cliente, reemplazamos y mostramos éxito
-        if (card) {
-          const nuevoHtml = doc.querySelector('.card') ? doc.querySelector('.card').innerHTML : card.innerHTML;
-          card.innerHTML = nuevoHtml;
-        }
-        await mostrarSwal('success', 'Asistencia registrada', 'Registro completado.', 2000);
-        aplicarFocus();
       } else {
-        // fallback: no se encontró estructura esperada, mostramos contenido crudo como info
-        await mostrarSwal('info', 'Respuesta', 'Operación completada. Revisa la pantalla.', 2000);
-        if (card && doc.querySelector('.card')) card.innerHTML = doc.querySelector('.card').innerHTML;
-        aplicarFocus();
+        await mostrarSwal('success', 'Asistencia registrada', 'Registro completado.');
       }
+
+
+      form.reset();
+      aplicarFocus();
 
     } catch (err) {
       console.error('Error registrar asistencia:', err);
