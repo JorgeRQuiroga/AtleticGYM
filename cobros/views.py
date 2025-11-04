@@ -29,8 +29,13 @@ def nuevo_cobro(request):
             cliente = get_object_or_404(Cliente.objects.exclude(nombre="-----"), dni=dni)
             # Buscar membresía activa
             membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
-
-            if not membresia:
+            servicio = form.cleaned_data.get('servicio') or membresia.servicio
+            if membresia:
+                membresia = Membresia.objects.get(cliente=cliente)
+                membresia.clases_restantes = servicio.cantidad_clases
+                membresia.fecha_fin = timezone.now().date() + timezone.timedelta(days=30)
+                membresia.save()
+            else:
                 messages.error(request, "El cliente no tiene ninguna membresía registrada.")
                 return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
 

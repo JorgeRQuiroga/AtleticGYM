@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import MembresiaInscripcionForm
+from membresias.forms import MembresiaInscripcionForm
 from .models import Membresia
 from cobros.models import Cobro, DetalleCobro, MetodoDePago
 from cajas.models import Caja
@@ -21,6 +21,7 @@ from django.template.loader import render_to_string
 @caja_abierta_required
 def inscribir_cliente(request):
     caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    
     if not caja:
         messages.error(request, "No hay una caja abierta para registrar el cobro.")
         return redirect('membresias:membresias_lista')
@@ -156,26 +157,34 @@ def menu(request):
 
 @login_required
 def membresias_detalle(request, pk):
-    form = MembresiaInscripcionForm()
-    membresia = get_object_or_404(
-        Membresia.objects.select_related('cliente', 'servicio'),
-        pk=pk
-    )
+    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
+
+    # si querés mostrar el form precargado en el modal:
+    form = MembresiaInscripcionForm(membresia_instance=membresia)
+
     return render(request, 'membresias_detalle.html', {
         'membresia': membresia,
-        'form':form,
+        'form': form,
     })
     
 @login_required
 def membresias_editar(request, pk):
-    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
+    membresia = get_object_or_404(
+        Membresia.objects.select_related('cliente', 'servicio'), pk=pk
+    )
 
     if request.method == 'POST':
         form = MembresiaInscripcionForm(request.POST, instance=membresia)
         if form.is_valid():
-            form.save()
+            membresia = form.save()  # devuelve la instancia actualizada
+
+            # 🔧 recalcular clases_restantes en base al servicio
+            if membresia.servicio.cantidad_clases > 0:
+                membresia.clases_restantes = membresia.servicio.cantidad_clases
+                membresia.save()
+
             messages.success(request, "Membresía actualizada correctamente.")
-            return redirect('membresias:membresia_detalle', pk=membresia.pk)
+            return redirect('membresias:membresias_detalle', pk=membresia.pk)
     else:
         form = MembresiaInscripcionForm(instance=membresia)
 
