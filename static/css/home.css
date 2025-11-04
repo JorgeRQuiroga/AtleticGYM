@@ -1,0 +1,28 @@
+.bg-home {
+    /* Antes: gradiente verde (#1abc9c → #16a085).
+       Ahora: gradiente gris oscuro a gris medio */
+    background: linear-gradient(135deg, #111111, #444444);
+    color: #ffffff;
+    border-radius: 1rem;
+}
+
+.text-home {
+    font-weight: 700;
+    /* Opcional: color blanco puro para resaltar */
+    color: #ffffff;
+}
+
+.btn-success {
+    /* Antes: verde (#27ae60).
+       Ahora: gris medio → consistente con la paleta */
+    background-color: #555555;
+    border-color: #555555;
+    color: #ffffff; /* texto en blanco */
+}
+
+.btn-success:hover {
+    /* Hover más oscuro, para dar feedback claro */
+    background-color: #333333;
+    border-color: #333333;
+    color: #ffffff;
+}

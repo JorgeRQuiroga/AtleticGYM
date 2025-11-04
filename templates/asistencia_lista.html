@@ -5,7 +5,59 @@
 {% block content %}
 <h1>Historial de Asistencias</h1>
 
-<p class="text-muted">Aquí se muestran los últimos 100 registros de asistencia.</p>
+ <!-- Filtros -->
+        <div class="filters-section mb-4 p-3 border border-secondary rounded">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6 col-lg-6">
+                    <label for="filter-cliente" class="form-label">Cliente</label>
+                    <input type="text" id="filter-cliente" class="form-control" placeholder="Buscar por cliente o DNI">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filter-estado" class="form-label">Estado</label>
+                    <select id="filter-estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                         <option value="activa">Activa</option>
+                         <option value="inactiva">Inactiva</option>
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="filter-servicio" class="form-label">Servicio</label>
+                    <select id="filter-servicio" class="form-select">
+                        <option value="">Todos los servicios</option>
+                        <!-- Django template: {% for servicio in servicios %} -->
+                        <option value="{{ servicio.id }}">{{ servicio.nombre }}</option>
+                        <!-- {% endfor %} -->
+                    </select>
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="filter-fecha-desde" class="form-label">Fecha Desde</label>
+                    <input type="date" id="filter-fecha-desde" class="form-control">
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="filter-fecha-hasta" class="form-label">Fecha Hasta</label>
+                    <input type="date" id="filter-fecha-hasta" class="form-control">
+                </div>
+                <div class="col-md-4 col-lg-6 d-flex gap-2">
+                    <button id="btn-aplicar-filtros" class="btn btn-primary w-100">Aplicar Filtros</button>
+                    <button id="btn-limpiar-filtros" class="btn btn-secondary w-100">Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles de tabla -->
+        <div class="table-controls d-flex justify-content-between align-items-center mb-3">
+            <div class="records-info">
+                <span id="records-count">Mostrando 0 de 0 registros</span>
+            </div>
+            <div class="records-per-page">
+                <label for="select-per-page" class="form-label me-2">Registros por página:</label>
+                <select id="select-per-page" class="form-select d-inline-block w-auto">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
 
 <table class="table table-hover table-bordered align-middle text-center mt-4">
     <thead class="table-dark">

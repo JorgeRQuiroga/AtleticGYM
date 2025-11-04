@@ -96,7 +96,8 @@ body {
     margin-bottom: 20px;
 }
 
-.text-primary{
+
+.text-primary {
     color: #c0392b !important; /* Bordó más claro y visible */
 }
 
@@ -120,6 +121,7 @@ body {
 .text-bordo {
     color: #c0392b  !important; /* Bordó clásico */
 }
+
 
 h1 {
   color: #c0392b !important;

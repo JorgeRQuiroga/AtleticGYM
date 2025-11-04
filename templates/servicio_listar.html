@@ -2,11 +2,10 @@
 {% load static %}
 
 {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
   <h1>Servicios</h1>
-
-  <a href="{% url 'servicios:servicio_agregar' %}" class="btn btn-primary mb-3">
-    + Nuevo Servicio
-  </a>
+  <a href="{% url 'servicios:servicio_agregar' %}" class="btn btn-success">+ Nuevo Servicio</a>
+</div>
 
 <table class="table table-hover table-bordered align-middle text-center" id="tablaServicios">
     <thead class="table-dark">

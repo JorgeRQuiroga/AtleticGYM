@@ -10,7 +10,6 @@ def caja_abierta_required(view_func):
             return redirect('login')
         abierto = Caja.objects.filter(usuario=request.user, estado='abierta').first()
         if not abierto:
-            messages.warning(request, "No hay una caja abierta. Debes abrirla antes de registrar cobros.")
             # Construir la URL de redirección con el parámetro 'next'
             base_url = redirect('cajas:caja_abrir').url
             return redirect(f'{base_url}?next={request.path}')
