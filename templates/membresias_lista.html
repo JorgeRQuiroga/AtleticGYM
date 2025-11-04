@@ -149,11 +149,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content bg-dark text-light">
       <div class="modal-header border-bordo">
-      {% if editar %}
-        <h5 class="modal-title text-primary">Editar Cliente</h5>
-      {% else %}
         <h5 class="modal-title text-primary">Inscribir Cliente</h5>
-      {% endif %}
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <form method="post" action="{% url 'membresias:membresias_inscribir' %}">

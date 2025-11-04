@@ -195,7 +195,7 @@ def buscar_dni(request):
     q = request.GET.get('q', '')
     resultados = []
     if q:
-        clientes = Cliente.objects.filter(dni__icontains=q)[:10]
+        clientes = Cliente.objects.filter(dni__icontains=q).exclude(nombre__iexact="-----")[:10]
         resultados = [
             {"id": c.id, "dni": c.dni, "nombre": f"{c.apellido}, {c.nombre}"}
             for c in clientes

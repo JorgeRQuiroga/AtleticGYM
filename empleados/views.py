@@ -104,7 +104,7 @@ def empleado_agregar(request):
         except Exception as e:
             messages.error(request, f'Error al registrar el empleado: {str(e)}')
     
-    return render(request, 'empleado_agregar.html')
+    return render(request, 'empleado_lista.html')
 
 # --- Editar ---
 @login_required

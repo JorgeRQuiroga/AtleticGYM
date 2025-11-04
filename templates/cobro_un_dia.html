@@ -17,8 +17,11 @@
     <div class="mb-3">
       {{ form.metodo_pago.label_tag }} {{ form.metodo_pago }}
     </div>
-    <button type="submit" class="btn btn-success ">Confirmar Cobro</button>
-    <a href="{% url 'cobros_lista' %}" class="btn btn-secondary">Cancelar</a>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">Confirmar Cobro</button>
+      <a href="{% url 'cobros_lista' %}" class="btn btn-danger">Cancelar</a>
+    </div>
+
   </form>
 </div>
 {% endblock %}

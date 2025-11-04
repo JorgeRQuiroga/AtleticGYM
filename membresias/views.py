@@ -13,6 +13,9 @@ from .models import Membresia
 from cobros.models import Cobro, DetalleCobro, MetodoDePago
 from cajas.models import Caja
 from django.core.paginator import Paginator
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
+
 
 @login_required
 @caja_abierta_required
@@ -168,16 +171,38 @@ def membresias_editar(request, pk):
     membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
 
     if request.method == 'POST':
-        form = MembresiaInscripcionForm(request.POST, membresia_instance=membresia)
+        form = MembresiaInscripcionForm(request.POST, instance=membresia)
         if form.is_valid():
             form.save()
             messages.success(request, "Membresía actualizada correctamente.")
             return redirect('membresias:membresia_detalle', pk=membresia.pk)
     else:
-        # GET: precargar con la instancia
-        form = MembresiaInscripcionForm(membresia_instance=membresia)
+        form = MembresiaInscripcionForm(instance=membresia)
 
-    return render(request, 'membresias/editar.html', {
+    return render(request, 'membresias_detalle.html', {
         'form': form,
         'membresia': membresia,
     })
+
+@login_required
+def membresia_editar_partial(request, pk):
+    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
+
+    if request.method == 'POST':
+        form = MembresiaInscripcionForm(request.POST, instance=membresia)
+        if form.is_valid():
+            form.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'ok': True, 'message': 'Membresía actualizada.'})
+            messages.success(request, "Membresía actualizada correctamente.")
+            return redirect('membresias:membresia_detalle', pk=membresia.pk)
+        else:
+            # si es AJAX devolver el HTML con errores para reinyectar
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                html = render_to_string('membresias/partials/_form.html', {'form': form, 'membresia': membresia}, request=request)
+                return JsonResponse({'ok': False, 'html': html})
+    else:
+        form = MembresiaInscripcionForm(instance=membresia)
+
+    html = render_to_string('partials/_form.html', {'form': form, 'membresia': membresia}, request=request)
+    return HttpResponse(html)
