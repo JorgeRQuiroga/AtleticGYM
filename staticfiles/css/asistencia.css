@@ -1,0 +1,64 @@
+body {
+    /* Fondo actual: imagen */
+    background-image: url("../img/login_fondo.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    /* Mantiene altura mínima de toda la pantalla */
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+body::before {
+    /* Capa semitransparente oscura para mejorar contraste */
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+
+    /* Cambio: usar negro con opacidad, consistente con la paleta */
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.card {
+    position: relative;
+    z-index: 2;
+
+    /* Cambio: fondo gris oscuro en vez de azul/gris azulado */
+    background-color: rgba(51, 51, 51, 0.9); /* gris #333 */
+
+    border-radius: 0.75rem;
+
+    /* Cambio: sombra más neutra (negro con baja opacidad) */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+
+    /* Opcional: texto blanco para contraste */
+    color: #ffffff;
+}
+
+.btn-back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 3;
+
+    /* Cambio: botón con fondo gris claro y texto negro */
+    background-color: #f5f5f5;
+    color: #000000;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+
+    /* Sombra ligera para resaltar sobre el fondo */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn-back:hover {
+    /* Invertir colores al pasar el mouse (efecto claro/oscuro) */
+    background-color: #333333;
+    color: #ffffff;
+}

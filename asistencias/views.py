@@ -5,19 +5,14 @@ from django.views import View
 from django.utils import timezone
 from .models import Asistencia
 from membresias.models import Membresia
+from datetime import timedelta
 
 @login_required
 def asistencia_opciones(request):
-    """
-    Vista que simplemente renderiza la página del menú de opciones de asistencia.
-    """
+    # Vista que simplemente renderiza la página del menú de opciones de asistencia.
     return render(request, 'asistencia_opciones.html')
 
 class RegistrarAsistenciaView(View):
-    """
-    Gestiona la pantalla de "modo kiosco" para que los clientes registren su asistencia.
-    No requiere que el usuario esté logueado.
-    """
     template_name = 'asistencia_registrar.html'
 
     def get(self, request, *args, **kwargs):
@@ -30,21 +25,46 @@ class RegistrarAsistenciaView(View):
             return render(request, self.template_name)
 
         try:
-            membresia = Membresia.objects.select_related('cliente', 'servicio').get(cliente__dni=dni, activa=True)
+            membresia = Membresia.objects.select_related('cliente', 'servicio').get(
+                cliente__dni=dni, activa=True
+            )
         except Membresia.DoesNotExist:
-            messages.error(request, f'No se encontró una membresía activa para el DNI {dni}. Por favor, acérquese a recepción.')
+            messages.error(request, f'No se encontró una membresía activa para el DNI {dni}.')
             return render(request, self.template_name)
 
-        if membresia.fecha_fin < timezone.now().date():
-            messages.warning(request, f'Hola {membresia.cliente.nombre}, tu membresía ha vencido. Por favor, acércate a recepción.')
+        hoy = timezone.now().date()
+
+        # 1. Verificar fecha de vencimiento
+        if membresia.fecha_fin < hoy:
+            messages.warning(request, f'Hola {membresia.cliente.nombre}, tu membresía ha vencido.')
             return render(request, self.template_name, {'membresia': membresia})
 
+        # 2. Verificar clases restantes
         if membresia.servicio.cantidad_clases > 0 and membresia.clases_restantes <= 0:
-            messages.warning(request, f'Hola {membresia.cliente.nombre}, no te quedan clases disponibles. Por favor, acércate a recepción.')
+            messages.warning(request, f'Hola {membresia.cliente.nombre}, no te quedan clases disponibles.')
             return render(request, self.template_name, {'membresia': membresia})
 
+        # 3. Verificar límite semanal
+        # asumimos que tu modelo Servicio tiene un campo `veces_por_semana`
+        if hasattr(membresia.servicio, 'veces_por_semana') and membresia.servicio.veces_por_semana:
+            inicio_semana = hoy - timedelta(days=hoy.weekday())  # lunes
+            fin_semana = inicio_semana + timedelta(days=6)       # domingo
+
+            usadas_esta_semana = membresia.asistencias.filter(
+                fecha__range=(inicio_semana, fin_semana)
+            ).count()
+
+            if usadas_esta_semana >= membresia.servicio.veces_por_semana:
+                messages.warning(
+                    request,
+                    f'Hola {membresia.cliente.nombre}, ya alcanzaste tu límite semanal '
+                    f'de {membresia.servicio.veces_por_semana} asistencias.'
+                )
+                return render(request, self.template_name, {'membresia': membresia})
+
+        # 4. Registrar asistencia
         Asistencia.objects.create(membresia=membresia)
-        
+
         if membresia.servicio.cantidad_clases > 0:
             membresia.clases_restantes -= 1
             membresia.save()

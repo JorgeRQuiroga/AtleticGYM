@@ -7,13 +7,13 @@
   <div class="d-flex flex-column align-items-center gap-3">
 
     <!-- Botón para ir a la página de alta de empleado -->
-  <button class="btn btn-primary btn-lg w-50" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
-    ➕ Agregar nuevo empleado
+  <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
+    <i class="bi bi-person-plus"></i> Nuevo Empleado
   </button>
-
     <!-- Botón para listar empleados -->
-    <a href="{% url 'empleado_lista' %}" class="btn btn-primary btn-lg w-50">
-      👥 Mostrar todos los empleados
+    <a href="{% url 'empleado_lista' %}" class="btn btn-primary btn-lg">
+       <i class="bi bi-people"></i>
+    Mostrar todos los empleados
     </a>
 
     <!-- Botón para volver al home -->
@@ -22,41 +22,59 @@
     </a>
   </div>
 </div>
+
+<!-- Modal -->
 <div class="modal fade" id="modalEmpleado" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-bordo">
+      <div class="modal-header border-secondary">
         <h5 class="modal-title text-primary">Registrar Empleado</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <form method="post">
+
+      <form method="post" action="{% url 'empleado_agregar' %}">
         {% csrf_token %}
         <div class="modal-body">
+          {{ form.non_field_errors }}
           <div class="row g-3">
             <div class="col-md-6">
-              {{ form.nombre.label_tag }} {{ form.nombre }}
+              <label for="{{ form.dni.id_for_label }}" class="form-label">DNI</label>
+              {{ form.dni }}
+              {{ form.dni.errors }}
             </div>
             <div class="col-md-6">
-              {{ form.apellido.label_tag }} {{ form.apellido }}
+              <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
+              {{ form.nombre }}
+              {{ form.nombre.errors }}
             </div>
             <div class="col-md-6">
-              {{ form.dni.label_tag }} {{ form.dni }}
+              <label for="{{ form.apellido.id_for_label }}" class="form-label">Apellido</label>
+              {{ form.apellido }}
+              {{ form.apellido.errors }}
             </div>
             <div class="col-md-6">
-              {{ form.telefono.label_tag }} {{ form.telefono }}
+              <label for="{{ form.telefono.id_for_label }}" class="form-label">Teléfono</label>
+              {{ form.telefono }}
+              {{ form.telefono.errors }}
             </div>
             <div class="col-12">
-              {{ form.domicilio.label_tag }} {{ form.domicilio }}
+              <label for="{{ form.domicilio.id_for_label }}" class="form-label">Domicilio</label>
+              {{ form.domicilio }}
+              {{ form.domicilio.errors }}
             </div>
           </div>
         </div>
+
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle"></i> Guardar
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
         </div>
       </form>
     </div>
   </div>
 </div>
-
 {% endblock %}

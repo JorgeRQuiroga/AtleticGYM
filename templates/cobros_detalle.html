@@ -6,5 +6,7 @@
 <p><strong>Importe:</strong> ${{ cobro.total }}</p>
 <p><strong>Fecha:</strong> {{ cobro.fecha_hora }}</p>
 <p><strong>Descripción:</strong> {{ cobro.descripcion }}</p>
+<p><strong>Membresía:</strong> {{ cobro.cliente.membresia|default:cobro.cliente.dni }}</p>
 <a class="btn btn-secondary" href="{% url 'cobros_lista' %}">Volver</a>
+
 {% endblock %}

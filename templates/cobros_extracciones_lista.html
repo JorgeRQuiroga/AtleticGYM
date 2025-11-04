@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Extracciones de Caja{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="text-warning">Extracciones</h1>
+  <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detallesCaja" aria-expanded="false" aria-controls="detallesCaja">
+    <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
+  </button>
+</div>
+
+<!-- Detalles de la caja colapsables -->
+<div class="collapse" id="detallesCaja">
+  <div class="card card-body bg-dark border-secondary mb-4">
+    <div class="row">
+      <div class="col-md-3"><strong>Usuario:</strong> {{ request.user.username }}</div>
+      <div class="col-md-3"><strong>Apertura:</strong> {{ caja.fecha_apertura }}</div>
+      <div class="col-md-3"><strong>Monto Inicial:</strong> ${{ caja.monto_apertura }}</div>
+      <div class="col-md-3"><strong>Total Actual:</strong> <span class="badge bg-success fs-6">${{ caja.total_en_caja }}</span></div>
+    </div>
+  </div>
+</div>
+  <!-- Botones de acción centrados -->
+{% include "partials/cobros_acciones.html" with active="extracciones" %}
+  <!-- Filtros -->
+  <div class="card bg-dark text-light shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
+        </div>
+        <div class="col-md-4">
+          <select name="orden" class="form-select">
+            <option value="">-- Ordenar por --</option>
+            <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha: Reciente → Antiguo</option>
+            <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha: Antiguo → Reciente</option>
+            <option value="dni_desc" {% if orden == 'dni_desc' %}selected{% endif %}>DNI: Mayor → Menor</option>
+            <option value="dni_asc" {% if orden == 'dni_asc' %}selected{% endif %}>DNI: Menor → Mayor</option>
+            <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre: A → Z</option>
+            <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre: Z → A</option>
+            <option value="apellido_asc" {% if orden == 'apellido_asc' %}selected{% endif %}>Apellido: A → Z</option>
+            <option value="apellido_desc" {% if orden == 'apellido_desc' %}selected{% endif %}>Apellido: Z → A</option>
+            <option value="apellido_nombre" {% if orden == 'apellido_nombre' %}selected{% endif %}>Apellido + Nombre</option>
+            <option value="nombre_apellido" {% if orden == 'nombre_apellido' %}selected{% endif %}>Nombre + Apellido</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-filter"></i> Aplicar
+          </button>
+          <a href="{% url 'cobros_mostrar_extracciones' %}" class="btn btn-secondary">
+            <i class="bi bi-x-circle"></i> Limpiar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered table-dark align-middle text-center">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>DNI</th>
+          <th>Monto</th>
+          <th>Motivo</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+        <tbody>
+        {% for e in page_obj %}
+            <tr>
+            <td>{{ e.usuario.last_name }}, {{ e.usuario.first_name }}</td>
+            <td>{{ e.usuario.empleado.dni }}</td>
+            <td>${{ e.monto }}</td>
+            <td>{{ e.motivo }}</td>
+            <td>{{ e.fecha_hora|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <a href="" class="btn btn-info btn-sm">
+                    <i class="bi bi-eye"></i> Ver
+                    </a>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="text-center">No hay extracciones registradas.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center custom-pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&orden={{ orden }}">Anterior</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+        <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&orden={{ orden }}">Siguiente</a>
+        </li>
+        {% endif %}
+    </ul>
+    </nav>
+  </div>
+</div>
+<!-- Modal de decisión -->
+<div class="modal fade" id="modalDecision" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Tipo de Cobro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>¿Qué tipo de cobro desea registrar?</p>
+        <a href="{% url 'cobros_un_dia' %}" class="btn btn-outline-info me-2" id="btnClase">Por día de clase</a>
+        <a href="{% url 'cobros_nuevo' %}" class="btn btn-outline-success" id="btnCliente">Cliente con membresía</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Inscripción -->
+<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title text-primary">Inscribir Cliente</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
+            <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
+            <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
+            <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
+            <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
+            <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
+            <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
+            <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

@@ -2,8 +2,6 @@
 {% load static %}
 
 {% block content %}
-<div class="card shadow-lg p-4 rounded-4 bg-dark text-white" style="width: 100%; max-width: 520px;">
-    
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -12,23 +10,7 @@
             </div>
         {% endfor %}
     {% endif %}
-
-    {% if membresia %}
-        <!-- Vista de bienvenida después de un registro exitoso -->
-        <div class="text-center">
-            <h2 class="fw-bold text-success">¡Bienvenido/a!</h2>
-            <h3 class="display-6 fw-semibold">{{ membresia.cliente.nombre }} {{ membresia.cliente.apellido }}</h3>
-            <hr class="border-secondary">
-            <div class="text-start">
-                <p class="fs-5 mb-2"><i class="bi bi-person-badge-fill me-2"></i><strong>DNI:</strong> {{ membresia.cliente.dni }}</p>
-                <p class="fs-5 mb-2"><i class="bi bi-bookmark-star-fill me-2"></i><strong>Servicio:</strong> {{ membresia.servicio.nombre }}</p>
-                <p class="fs-5 mb-2"><i class="bi bi-calendar-check-fill me-2"></i><strong>Vencimiento:</strong> {{ membresia.fecha_fin|date:"d/m/Y" }}</p>
-                {% if membresia.servicio.cantidad_clases > 0 %}
-                <p class="fs-5 mb-2"><i class="bi bi-barbell me-2"></i><strong>Clases restantes:</strong> {{ membresia.clases_restantes }}</p>
-                {% endif %}
-            </div>
-        </div>
-    {% else %}
+<div class="card shadow-lg p-4 rounded-4 bg-dark text-white" style="width: 100%; max-width: 520px;">
         <!-- Vista inicial para ingresar DNI -->
         <div class="text-center mb-4">
             <h2 class="fw-bold fs-1"><i class="bi bi-barbell me-2"></i> ATLETIX GYM</h2>
@@ -36,18 +18,22 @@
             <p class="text-light">Ingrese su DNI para continuar</p>
         </div>
 
-        <form method="post" action="{% url 'asistencias:asistencia_registrar' %}">
+        <form id="asistencia-form" method="post" action="{% url 'asistencias:asistencia_registrar' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="dni" class="form-label fw-semibold fs-5">Documento de Identidad</label>
-                <input type="text" class="form-control form-control-lg bg-secondary-subtle border-0 text-white" id="dni" name="dni" required autofocus placeholder="Solo números, sin puntos">
+                <input type="text" class="form-control form-control-lg bg-secondary-subtle border-0 text-white"
+                    id="dni" name="dni" required autofocus placeholder="Solo números, sin puntos">
             </div>
             <div class="d-grid">
-                <button type="submit" class="btn btn-bordo btn-lg fw-bold"><i class="bi bi-check-circle-fill me-2"></i> Registrar</button>
+                <button type="submit" class="btn btn-bordo btn-lg fw-bold">
+                    <i class="bi bi-check-circle-fill me-2"></i> Registrar
+                </button>
             </div>
         </form>
-    {% endif %}
 </div>
+<div id="resultado"></div>
+
 
 <script src="{% static 'js/registrar_asistencia.js' %}"></script>
 {% endblock %}

@@ -9,9 +9,10 @@ class Membresia(models.Model):
     fecha_fin = models.DateField()
     clases_restantes = models.IntegerField(default=0)
     activa = models.BooleanField(default=True)
+    observaciones = models.TextField(blank=True, default='Ninguna')
 
     def __str__(self):
-        return f"Membresía de {self.cliente.nombre} {self.cliente.apellido} - {'Activa' if self.activa else 'Inactiva'}"
+        return f"Membresía de {self.cliente.nombre} {self.cliente.apellido}"
 
     def borrar(self):
         self.activa = False

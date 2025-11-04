@@ -1,0 +1,34 @@
+<div class="d-flex justify-content-center gap-3 mb-4 fw-bold">
+  <!-- Acciones principales -->
+  <button type="button" class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#modalDecision">
+    <i class="bi bi-cash me-1"></i> Nuevo Cobro
+  </button>
+  <a class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
+    <i class="bi bi-person-plus me-1"></i> Nueva Inscripción
+  </a>
+  <a class="btn btn-warning text-black fw-bold" href="{% url 'cobros_extraccion' %}">
+    <i class="bi bi-cash-coin"></i> Extracción
+  </a>
+  <a class="btn btn-danger fw-bold" href="{% url 'caja_cerrar' %}">
+    <i class="bi bi-door-closed me-1"></i> Cerrar Caja
+  </a>
+</div>
+
+<!-- Botones de navegación -->
+<div class="d-flex justify-content-center gap-2 mb-3 ">
+  {% if active == "cobros" %}
+    <button class="btn btn-secondary" disabled>
+      <i class="bi bi-cash-coin"></i> Ver Cobros
+    </button>
+    <a href="{% url 'cobros_mostrar_extracciones' %}" class="btn btn-warning text-dark fw-bold">
+      <i class="bi bi-wallet2"></i> Ver Extracciones
+    </a>
+  {% elif active == "extracciones" %}
+    <a href="{% url 'cobros_lista' %}" class="btn btn-success fw-bold">
+      <i class="bi bi-cash-coin"></i> Ver Cobros
+    </a>
+    <button class="btn btn-secondary" disabled>
+      <i class="bi bi-wallet2 "></i> Ver Extracciones
+    </button>
+  {% endif %}
+</div>

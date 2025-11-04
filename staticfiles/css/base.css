@@ -1,0 +1,129 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+
+    /* Antes: gradiente azul oscuro.
+       Ahora: gradiente gris → consistente con la paleta */
+    background: linear-gradient(to right, #111111, #333333);
+
+    /* Texto por defecto en gris claro/blanco */
+    color: #f5f5f5;
+}
+
+.sidebar {
+    width: 250px;
+
+    /* Antes: gris azulado oscuro (#212529).
+       Ahora: negro casi puro */
+    background-color: #000000;
+    color: #ffffff;
+
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1rem;
+
+    /* Sombra lateral para separar visualmente */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.6);
+
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.sidebar h4 {
+    /* Antes: color turquesa (#1abc9c).
+       Ahora: gris intermedio → consistente con monocromía */
+    color: #cccccc;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.sidebar .hr-custom {
+    /* Línea separadora → gris tenue */
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.sidebar a {
+    color: #f5f5f5;
+    text-decoration: none;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar a i {
+    margin-right: 10px;
+    font-size: 1.1em;
+}
+
+.sidebar a:hover {
+    /* Antes: fondo verde (#1abc9c).
+       Ahora: gris más claro para resaltar */
+    background-color: #444444;
+    color: #ffffff;
+}
+
+.sidebar a.active {
+    /* Antes: verde oscuro (#16a085).
+       Ahora: gris medio para marcar selección */
+    background-color: #666666;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+
+    /* Texto claro sobre fondo oscuro */
+    color: #f5f5f5;
+}
+
+.navbar-custom {
+    /* Antes: azul oscuro (#2c3e50).
+       Ahora: gris oscuro */
+    background-color: #1a1a1a;
+
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+}
+
+.text-primary {
+    color: #c0392b !important; /* Bordó más claro y visible */
+}
+
+.border-bordo {
+    border-color: #c0392b !important;
+}
+
+
+.content-card {
+    background-color: #1c1c1c;   /* gris oscuro distinto del fondo */
+    border-radius: 10px;         /* bordes redondeados */
+    padding: 2rem;               /* espacio interno */
+    box-shadow: 0 0 20px rgba(0,0,0,0.4); /* sombra para separar del fondo */
+}
+
+body {
+    padding-bottom: 60px; /* reserva espacio igual a la altura del footer */
+}
+
+/* color bordó para el link */
+.text-bordo {
+    color: #c0392b  !important; /* Bordó clásico */
+}
+
+
+h1{
+  color: #c0392b !important;
+  font-weight: bold;
+  margin-bottom: 0;
+}

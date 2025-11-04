@@ -1,0 +1,92 @@
+<!-- templates/membresia_detalle.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="card bg-dark text-light shadow-sm">
+    <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Detalle de membresía</h5>
+      <a href="{% url 'membresias:membresias_lista' %}" class="btn btn-secondary btn-sm">Volver</a>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Estado:</strong>
+            {% if membresia.activa %}
+              <span class="badge bg-success">Activa</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactiva</span>
+            {% endif %}
+          </p>
+          <p class="mb-1"><strong>Cliente:</strong> {{ membresia.cliente.apellido }}, {{ membresia.cliente.nombre }}</p>
+          <p class="mb-1"><strong>DNI:</strong> {{ membresia.cliente.dni }}</p>
+          <p class="mb-1"><strong>Email:</strong> {{ membresia.cliente.email|default:"—" }}</p>
+          <p class="mb-1"><strong>Teléfono:</strong> {{ membresia.cliente.telefono|default:"—" }}</p>
+          <p class="mb-1"><strong>Domicilio:</strong> {{ membresia.cliente.domicilio|default:"—" }}</p>
+        </div>
+
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Servicio:</strong> {{ membresia.servicio.nombre }}</p>
+          <p class="mb-1"><strong>Fecha de inicio:</strong> {{ membresia.fecha_inicio }}</p>
+          <p class="mb-1"><strong>Fecha de fin:</strong> {{ membresia.fecha_fin }}</p>
+          <p class="mb-1"><strong>Clases restantes:</strong> {{ membresia.clases_restantes }}</p>
+          <p class="mb-1"><strong>Observaciones:</strong> {{ membresia.observaciones|default:"Ninguna" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer border-secondary d-flex justify-content-end gap-2">
+    <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
+        Editar
+    </button>
+
+      {% if membresia.activa %}
+        <form method="post" action="{% url 'membresias:membresia_borrar' membresia.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-slash-circle me-1"></i> Desactivar
+          </button>
+        </form>
+      {% else %}
+        <span class="text-muted">Esta membresía está inactiva.</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% include 'partials/_form.html' %}
+
+
+<!-- Modal Inscripción -->
+<!-- <div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title text-primary">Editar membresia</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'membresias:membresias_editar' membresia.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+             <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
+            <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
+            <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
+            <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
+            <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
+            <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
+            <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
+            <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
+            <div class="col-12">{{ form.observaciones.label_tag }} {{ form.observaciones }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> -->
+{% endblock %}

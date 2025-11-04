@@ -7,6 +7,9 @@ from django.db.models import Q
 from .models import Empleado
 from .forms import EmpleadoForm
 from django.contrib.auth.models import User
+from empleados.forms import EmpleadoForm
+
+
 from django.db import transaction
 from datetime import date
 
@@ -20,7 +23,7 @@ def empleado_menu(request):
 def empleado_lista(request):
     form = EmpleadoForm()
     query = request.GET.get('q', '')
-    empleados = Empleado.objects.all()
+    empleados = Empleado.objects.filter(activo=True)
 
     if query:
         empleados = empleados.filter(
@@ -45,83 +48,63 @@ def empleado_lista(request):
 
 # # --- Agregar ---
 @login_required
-@transaction.atomic
 def empleado_agregar(request):
-    empleado_existente = None
-    
+    """Vista para registrar un nuevo empleado o reactivar uno existente"""
     if request.method == 'POST':
-        # Verificar si es una recontratación confirmada
-        recontratar = request.POST.get('recontratar')
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
         dni = request.POST.get('dni')
+        telefono = request.POST.get('telefono', '')
+        domicilio = request.POST.get('domicilio', '')
         
-        if recontratar == 'si':
-            # Reactivar empleado existente
-            try:
-                empleado = Empleado.objects.get(dni=dni, activo=False)
-                empleado.activo = True
-                empleado.fecha_baja = None
-                empleado.fecha_ingreso = date.today()
-                empleado.usuario.is_active = True
-                # empleado.usuario.save()
+        try:
+            with transaction.atomic():
+                # Verificar si el empleado ya existe
+                empleado_existente = Empleado.objects.filter(dni=dni).first()
                 
-                # Actualizar datos del formulario
-                empleado.nombre = request.POST.get('nombre')
-                empleado.apellido = request.POST.get('apellido')
-                empleado.telefono = request.POST.get('telefono')
+                if empleado_existente:
+                    if not empleado_existente.activo:
+                        # Reactivar empleado
+                        empleado_existente.activo = True
+                        empleado_existente.fecha_baja = None
+                        empleado_existente.nombre = nombre
+                        empleado_existente.apellido = apellido
+                        empleado_existente.telefono = telefono
+                        empleado_existente.domicilio = domicilio
+                        empleado_existente.save()
+                        
+                        messages.success(request, f'Empleado {nombre} {apellido} reactivado exitosamente.')
+                    else:
+                        messages.warning(request, f'El empleado con DNI {dni} ya existe y está activo.')
+                    
+                    return redirect('empleado_lista')
                 
-                # Actualizar usuario
-                empleado.usuario.first_name = empleado.nombre
-                empleado.usuario.last_name = empleado.apellido
-                empleado.usuario.save()
-                
-                empleado.save()
-                
-                messages.success(request, f'Empleado {empleado.nombre_completo()} recontratado exitosamente. Usuario: {dni}, Contraseña: {dni}')
-                return redirect('lista_empleados')
-            except Empleado.DoesNotExist:
-                messages.error(request, 'Error al recontratar el empleado.')
-                return redirect('empleados:agregar_empleado')
-        
-        form = EmpleadoForm(request.POST)
-        if form.is_valid():
-            dni = form.cleaned_data['dni']
-            
-            # Verificar si existe un empleado inactivo con ese DNI
-            try:
-                empleado_existente = Empleado.objects.get(dni=dni, activo=False)
-                # Si existe un empleado inactivo, mostrar confirmación
-                context = {
-                    'form': form,
-                    'accion': 'Agregar',
-                    'empleado_existente': empleado_existente,
-                    'mostrar_confirmacion': True
-                }
-                return render(request, 'empleado_form.html', context)
-            except Empleado.DoesNotExist:
-                pass
-            
-            # Si no existe empleado inactivo, crear nuevo empleado
-            empleado = form.save(commit=False)
-            
-            try:
-                usuario = User.objects.create_user(
-                    username=dni,
-                    password=dni,
-                    email=form.cleaned_data['email'],
-                    first_name=form.cleaned_data['nombre'],
-                    last_name=form.cleaned_data['apellido']
+                # Crear nuevo usuario con DNI como username
+                username = dni
+                user = User.objects.create_user(
+                username=username,
+                first_name=nombre,
+                last_name=apellido,
+                password=dni  # directamente acá
+)
+
+                # Crear nuevo empleado
+                empleado = Empleado.objects.create(
+                    user=user,
+                    nombre=nombre,
+                    apellido=apellido,
+                    dni=dni,
+                    telefono=telefono,
+                    domicilio=domicilio
                 )
-                empleado.usuario = usuario
-                empleado.save()
                 
-                messages.success(request, f'Empleado {empleado.nombre_completo()} agregado exitosamente. Usuario: {dni}, Contraseña: {dni}')
-                return redirect('empleados:lista_empleados')
-            except Exception as e:
-                messages.error(request, f'Error al crear el empleado: {str(e)}')
-    else:
-        form = EmpleadoForm()
+                messages.success(request, f'Empleado {nombre} {apellido} registrado exitosamente.')
+                return redirect('empleado_lista')
+                
+        except Exception as e:
+            messages.error(request, f'Error al registrar el empleado: {str(e)}')
     
-    return render(request, 'empleado_form.html', {'form': form, 'accion': 'Agregar'})
+    return render(request, 'empleado_lista.html')
 
 # --- Editar ---
 @login_required

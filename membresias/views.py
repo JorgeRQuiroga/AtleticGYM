@@ -5,17 +5,64 @@ from .forms import MembresiaInscripcionForm
 from .models import Membresia
 from cobros.decorators import caja_abierta_required
 from django.db.models import Q
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from membresias.forms import MembresiaInscripcionForm
+from .models import Membresia
+from cobros.models import Cobro, DetalleCobro, MetodoDePago
+from cajas.models import Caja
+from django.core.paginator import Paginator
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import render_to_string
+
 
 @login_required
 @caja_abierta_required
 def inscribir_cliente(request):
+    caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
+    
+    if not caja:
+        messages.error(request, "No hay una caja abierta para registrar el cobro.")
+        return redirect('membresias:membresias_lista')
+
     if request.method == 'POST':
         form = MembresiaInscripcionForm(request.POST)
         if form.is_valid():
             membresia = form.save()
+
+            # Crear el cobro automáticamente
+            servicio = membresia.servicio
+            cobro = Cobro.objects.create(
+                caja=caja,
+                cliente=membresia.cliente,
+                servicio=servicio,
+                total=servicio.precio,
+                descripcion=f"Inscripción a {servicio.nombre}"
+            )
+
+            # Obtener método de pago desde el formulario (ej: un select en el form)
+            metodo_pago_id = request.POST.get('metodo_pago')
+            if metodo_pago_id:
+                metodo_pago = get_object_or_404(MetodoDePago, id=metodo_pago_id)
+            else:
+                metodo_pago = MetodoDePago.objects.get_or_create(metodoDePago="Efectivo")[0]
+
+            # Crear detalle del cobro
+            DetalleCobro.objects.create(
+                cobro=cobro,
+                servicio=servicio,
+                monto=cobro.total,
+                metodoDePago=metodo_pago
+            )
+
+            # Actualizar saldo de la caja
+            caja.total_en_caja += cobro.total
+            caja.save()
+
             messages.success(
                 request,
-                f"Membresía creada para {membresia.cliente.apellido}, {membresia.cliente.nombre}. "
+                f"Membresía creada y cobro registrado para {membresia.cliente.apellido}, {membresia.cliente.nombre}. "
                 f"Vence el {membresia.fecha_fin} con {membresia.clases_restantes} clases asignadas."
             )
             return redirect('membresias:membresias_lista')
@@ -23,8 +70,14 @@ def inscribir_cliente(request):
             messages.error(request, "Error en el formulario. Verifica los datos.")
     else:
         form = MembresiaInscripcionForm()
+
     membresias = Membresia.objects.select_related('cliente', 'servicio').all()
-    return render(request, 'membresia_form.html', {'form': form, 'membresias': membresias})
+    return render(request, 'membresias_lista.html', {
+        'form': form,
+        'membresias': membresias,
+        'caja': caja
+    })
+
 
 @login_required
 def lista_membresias(request):
@@ -43,13 +96,12 @@ def lista_membresias(request):
                 Q(cliente__apellido__icontains=term)
             )
 
-
     # --- Ordenamiento ---
     orden = request.GET.get('orden')
     if orden == 'fecha_asc':
-        membresias = membresias.order_by('id')  # más antiguo primero
+        membresias = membresias.order_by('id')
     elif orden == 'fecha_desc':
-        membresias = membresias.order_by('-id')  # más nuevo primero
+        membresias = membresias.order_by('-id')
     elif orden == 'nombre_asc':
         membresias = membresias.order_by('cliente__apellido', 'cliente__nombre')
     elif orden == 'nombre_desc':
@@ -58,14 +110,27 @@ def lista_membresias(request):
         membresias = membresias.order_by('cliente__dni')
     elif orden == 'dni_desc':
         membresias = membresias.order_by('-cliente__dni')
+    elif orden == 'solo_activo':
+        membresias = membresias.filter(activa=True)
+    elif orden == 'solo_inactivo':
+        membresias = membresias.filter(activa=False)
+    else:
+        # Por defecto: primero activas, luego inactivas
+        membresias = membresias.order_by('-activa', 'cliente__apellido')
+
+    # --- Paginación ---
+    paginator = Paginator(membresias, 10)  # 10 por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'membresias_lista.html', {
-        'membresias': membresias,
+        'page_obj': page_obj,   # Usar solo esto en el template
         'query': query,
         'orden': orden,
-        'form' : form
+        'form': form,
     })
-
+    
+    
 @login_required
 def borrar_membresia(request, membresia_id):
     try:
@@ -89,3 +154,64 @@ def menu(request):
     else:
         form = MembresiaInscripcionForm()
     return render(request, 'membresias_menu.html', {'form': form})
+
+@login_required
+def membresias_detalle(request, pk):
+    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
+
+    # si querés mostrar el form precargado en el modal:
+    form = MembresiaInscripcionForm(membresia_instance=membresia)
+
+    return render(request, 'membresias_detalle.html', {
+        'membresia': membresia,
+        'form': form,
+    })
+    
+@login_required
+def membresias_editar(request, pk):
+    membresia = get_object_or_404(
+        Membresia.objects.select_related('cliente', 'servicio'), pk=pk
+    )
+
+    if request.method == 'POST':
+        form = MembresiaInscripcionForm(request.POST, instance=membresia)
+        if form.is_valid():
+            membresia = form.save()  # devuelve la instancia actualizada
+
+            # 🔧 recalcular clases_restantes en base al servicio
+            if membresia.servicio.cantidad_clases > 0:
+                membresia.clases_restantes = membresia.servicio.cantidad_clases
+                membresia.save()
+
+            messages.success(request, "Membresía actualizada correctamente.")
+            return redirect('membresias:membresias_detalle', pk=membresia.pk)
+    else:
+        form = MembresiaInscripcionForm(instance=membresia)
+
+    return render(request, 'membresias_detalle.html', {
+        'form': form,
+        'membresia': membresia,
+    })
+
+@login_required
+def membresia_editar_partial(request, pk):
+    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
+
+    if request.method == 'POST':
+        form = MembresiaInscripcionForm(request.POST, instance=membresia)
+        if form.is_valid():
+            form.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'ok': True, 'message': 'Membresía actualizada.'})
+            messages.success(request, "Membresía actualizada correctamente.")
+            return redirect('membresias:membresia_detalle', pk=membresia.pk)
+        else:
+            # si es AJAX devolver el HTML con errores para reinyectar
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                html = render_to_string('membresias/partials/_form.html', {'form': form, 'membresia': membresia}, request=request)
+                return JsonResponse({'ok': False, 'html': html})
+    else:
+        form = MembresiaInscripcionForm(instance=membresia)
+
+    html = render_to_string('partials/_form.html', {'form': form, 'membresia': membresia}, request=request)
+    return HttpResponse(html)

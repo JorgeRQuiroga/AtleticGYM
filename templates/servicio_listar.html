@@ -8,10 +8,9 @@
     + Nuevo Servicio
   </a>
 
-<table class="table table-hover table-bordered align-middle text-center" id="tablaServicios">
+<table class="table table-hover table-bordered align-middle text-center table-dark" id="tablaServicios">
     <thead class="table-dark">
       <tr>
-        <th>#</th>
         <th>Nombre</th>
         <th>Cantidad</th>
         <th>Precio</th>
@@ -22,7 +21,6 @@
     <tbody>
       {% for servicio in page_obj %}
         <tr>
-          <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
           <td>{{ servicio.nombre }}</td>
           <td>{{ servicio.cantidad_clases }}</td>
           <td>{{ servicio.precio }}</td>
@@ -45,24 +43,34 @@
             <!-- Modal -->
             <div class="modal fade" id="confirmarEliminar{{ servicio.pk }}" tabindex="-1" aria-labelledby="modalLabel{{ servicio.pk }}" aria-hidden="true">
               <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="modalLabel{{ servicio.pk }}">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <div class="modal-content bg-dark text-light">
+                  <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-danger fw-bold" id="modalLabel{{ servicio.pk }}">
+                      <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                   </div>
                   <div class="modal-body">
-                    ¿Seguro que deseas borrar “<strong>{{ servicio.nombre }}</strong>”?
+                    <p class="mb-0">
+                      ¿Seguro que deseas borrar el servicio 
+                      <strong class="text-warning">“{{ servicio.nombre }}”</strong>?
+                    </p>
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer border-secondary">
                     <form method="post" action="{% url 'servicios:servicio_eliminar' servicio.pk %}">
                       {% csrf_token %}
-                      <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                      <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="bi bi-trash-fill me-1"></i> Sí, eliminar
+                      </button>
                     </form>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">
+                      <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+
           </td>
         </tr>
       {% empty %}

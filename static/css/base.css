@@ -96,11 +96,7 @@ body {
     margin-bottom: 20px;
 }
 
-<<<<<<< HEAD
-.text-primary{
-=======
 .text-primary {
->>>>>>> main
     color: #c0392b !important; /* Bordó más claro y visible */
 }
 
@@ -124,12 +120,29 @@ body {
 .text-bordo {
     color: #c0392b  !important; /* Bordó clásico */
 }
-<<<<<<< HEAD
 
-h1 {
+
+h1{
   color: #c0392b !important;
   font-weight: bold;
   margin-bottom: 0;
 }
-=======
->>>>>>> main
+
+.custom-pagination .page-link {
+  background-color: #000;      /* Fondo negro */
+  color: #ff0000;              /* Letras rojas */
+  font-weight: bold;           /* Negrita */
+  border: 1px solid #444;      /* Borde gris oscuro */
+}
+
+.custom-pagination .page-link:hover {
+  background-color: #111;      /* Fondo un poco más claro al pasar el mouse */
+  color: #ff4444;              /* Rojo más brillante */
+}
+
+.custom-pagination .page-item.disabled .page-link {
+  background-color: #000;      /* Fondo negro */
+  color: #666;                 /* Gris para deshabilitado */
+  font-weight: normal;
+  border: 1px solid #333;
+}
