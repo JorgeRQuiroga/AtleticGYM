@@ -146,3 +146,12 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
 AUTH_USER_MODEL = 'auth.User'
+
+# La sesión expira a los 5 minutos (300 segundos)
+SESSION_COOKIE_AGE = 300  
+
+# Cada request válido renueva la cookie y reinicia el contador
+SESSION_SAVE_EVERY_REQUEST = True  
+
+# Opcional: que la cookie se borre al cerrar el navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
