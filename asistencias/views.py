@@ -5,6 +5,9 @@ from django.views import View
 from django.utils import timezone
 from .models import Asistencia
 from membresias.models import Membresia
+#graficos---
+from django.db.models import Count
+from django.db.models.functions import ExtractMonth, ExtractWeekDay, ExtractHour
 
 @login_required
 def asistencia_opciones(request):
@@ -56,5 +59,57 @@ def lista_asistencias(request):
     asistencias = Asistencia.objects.select_related('membresia__cliente', 'membresia__servicio').order_by('-fecha_hora')[:100]
     return render(request, 'asistencia_lista.html', {'asistencias': asistencias})
 
+
 def grafico_asistencias(request):
-    return render(request, 'grafico_asistencias.html')
+    # Fecha actual para filtrar el año
+    hoy = timezone.now()
+    año_actual = hoy.year
+
+    # --- Gráfico 1: Asistencias por mes ---
+    asistencias_mes = (
+        Asistencia.objects.filter(fecha_hora__year=año_actual)
+        .annotate(mes=ExtractMonth('fecha_hora'))
+        .values('mes')
+        .annotate(total=Count('id'))
+        .order_by('mes')
+    )
+
+    meses = [r['mes'] for r in asistencias_mes]
+    totales_mes = [r['total'] for r in asistencias_mes]
+
+    # --- Gráfico 2: Asistencias por día de la semana ---
+    # Django: domingo=1 ... sábado=7
+    asistencias_dia = (
+        Asistencia.objects
+        .annotate(dia=ExtractWeekDay('fecha_hora'))
+        .values('dia')
+        .annotate(total=Count('id'))
+        .order_by('dia')
+    )
+
+    dias_semana_labels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    totales_dia = [0] * 7
+    for r in asistencias_dia:
+        totales_dia[r['dia'] - 1] = r['total']
+
+    # --- Gráfico 3: Asistencias por hora ---
+    asistencias_hora = (
+        Asistencia.objects
+        .annotate(hora=ExtractHour('fecha_hora'))
+        .values('hora')
+        .annotate(total=Count('id'))
+        .order_by('hora')
+    )
+
+    horas = [r['hora'] for r in asistencias_hora]
+    totales_hora = [r['total'] for r in asistencias_hora]
+
+    contexto = {
+        'meses': meses,
+        'totales_mes': totales_mes,
+        'dias_semana_labels': dias_semana_labels,
+        'totales_dia': totales_dia,
+        'horas': horas,
+        'totales_hora': totales_hora,
+    }
+    return render(request, 'grafico_asistencias.html', contexto)

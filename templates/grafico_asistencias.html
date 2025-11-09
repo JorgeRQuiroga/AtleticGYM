@@ -34,7 +34,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Total Asistencias del Mes</span>
-                    <span class="metric-value" id="metric-total-mes">0</span>
+                    
                     <span class="metric-subtitle"><!-- Django: {{ mes_actual }} --></span>
                     <span class="metric-value" id="metric-total-mes">{{ total_asistencias_mes }}</span>
                     <span class="metric-subtitle">{{ mes_actual_str }}</span>
@@ -50,7 +50,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Asistencias Hoy</span>
-                    <span class="metric-value" id="metric-hoy">0</span>
+                    
                     <span class="metric-subtitle" id="metric-hoy-fecha"><!-- Fecha actual --></span>
                     <span class="metric-value" id="metric-hoy">{{ asistencias_hoy }}</span>
                     <span class="metric-subtitle" id="metric-hoy-fecha">{{ fecha_hoy_str }}</span>
@@ -65,8 +65,8 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Tasa de Asistencia</span>
-                    <span class="metric-value" id="metric-tasa">0%</span>
-                    <span class="metric-subtitle" id="metric-tasa-detalle">0 de 0 clientes activos</span>
+                    
+                    
                     <span class="metric-value" id="metric-tasa">{{ tasa_asistencia|floatformat:1 }}%</span>
                     <span class="metric-subtitle" id="metric-tasa-detalle">{{ clientes_asistieron_count }} de {{ clientes_activos_count }} clientes</span>
                 </div>
@@ -83,7 +83,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Promedio Diario</span>
-                    <span class="metric-value" id="metric-promedio">0</span>
+                    
                     <span class="metric-value" id="metric-promedio">{{ promedio_diario|floatformat:1 }}</span>
                     <span class="metric-subtitle">Asistencias por día</span>
                 </div>
@@ -99,7 +99,7 @@
                 <div class="metric-content">
                     <span class="metric-label">Horario Pico</span>
                     <span class="metric-value" id="metric-horario-pico">--:--</span>
-                    <span class="metric-subtitle" id="metric-horario-pico-cantidad">0 asistencias</span>
+                    
                     {% if horario_pico_data %}
                         <span class="metric-value" id="metric-horario-pico">{{ horario_pico_data.hora|date:"H:00" }}</span>
                         <span class="metric-subtitle" id="metric-horario-pico-cantidad">{{ horario_pico_data.cantidad }} asistencias</span>
@@ -144,41 +144,104 @@
             </div>
         </div>
 
-        <!-- Gráficos principales -->
-        <div class="charts-grid">
-            <!-- Gráfico de asistencias por día de semana -->
-            <div class="chart-card chart-card-large">
-                <div class="chart-header">
-                    <h2>Asistencias por Día de Semana</h2>
-                    <span class="chart-subtitle">Promedio del mes</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="chart-dias-semana"></canvas>
-                </div>
-            </div>
+        
+    </div>
 
-            <!-- Gráfico de asistencias por franja horaria -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h2>Asistencias por Franja Horaria</h2>
-                    <span class="chart-subtitle">Distribución del mes</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="chart-franjas"></canvas>
-                </div>
-            </div>
+    <!-- Gráficos principales -->
+    <div class="charts-grid row">
 
-            <!-- Gráfico de evolución diaria -->
-            <div class="chart-card chart-card-full">
-                <div class="chart-header">
-                    <h2>Evolución Diaria del Mes</h2>
-                    <span class="chart-subtitle">Asistencias por día</span>
-                </div>
-                <div class="chart-container">
-                    <canvas id="chart-evolucion"></canvas>
-                </div>
+        
+            
+        <div class="chart-card chart-card-full">
+            <div class="chart-header">
+                <h2>Asistencias por Día de Semana</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoDia"></canvas>
+            </div>
+         </div>
+
+            
+        <div class="chart-card chart-card-full">
+            <div class="chart-header">
+                <h2>Distribución por Hora del Día</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoHora"></canvas>  
             </div>
         </div>
+
+        <div class="chart-card chart-card-full">
+            <div class="chart-header">
+                <h2>Evolución Mensual</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficoMes"></canvas>
+            </div>
+        </div>    
+        
     </div>
+
+    <script>
+    const meses = {{ meses|safe }};
+    const totalesMes = {{ totales_mes|safe }};
+    const diasSemana = {{ dias_semana_labels|safe }};
+    const totalesDia = {{ totales_dia|safe }};
+    const horas = {{ horas|safe }};
+    const totalesHora = {{ totales_hora|safe }};
+
+    const nombresMeses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+    // --- Gráfico mensual (barras) ---
+    new Chart(document.getElementById('graficoMes'), {
+        type: 'bar',
+        data: {
+            labels: meses.map(m => nombresMeses[m-1]),
+            datasets: [{
+                label: 'Asistencias',
+                data: totalesMes,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // --- Gráfico diario ---
+    new Chart(document.getElementById('graficoDia'), {
+        type: 'bar',
+        data: {
+            labels: diasSemana,
+            datasets: [{
+                label: 'Asistencias',
+                data: totalesDia,
+                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                borderColor: 'rgb(255, 159, 64)',
+                borderWidth: 1
+            }]
+        }
+    });
+
+    // --- Gráfico por hora ---
+    new Chart(document.getElementById('graficoHora'), {
+        type: 'bar',
+        data: {
+            labels: horas.map(h => `${h}:00`),
+            datasets: [{
+                label: 'Asistencias',
+                data: totalesHora,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 1
+            }]
+        }
+    });
+</script>
+
 
 {% endblock %}
