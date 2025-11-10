@@ -19,10 +19,14 @@ class RegistrarAsistenciaView(View):
         return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
-        dni = request.POST.get('dni', '').strip()
-        if not dni.isdigit():
+        dni_str = request.POST.get('dni', '').strip()
+        dni_str = dni_str.replace('.', '').replace('-', '')  # normalizar
+
+        if not dni_str.isdigit():
             messages.error(request, 'Por favor, ingrese un DNI válido (solo números).')
             return render(request, self.template_name)
+
+        dni = int(dni_str)
 
         try:
             membresia = Membresia.objects.select_related('cliente', 'servicio').get(

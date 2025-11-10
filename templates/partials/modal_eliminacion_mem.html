@@ -1,0 +1,29 @@
+    <div class="modal fade" id="confirmarEliminar{{ m.id }}" tabindex="-1" aria-labelledby="modalLabel{{ m.id }}" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title text-danger fw-bold" id="modalLabel{{ m.id }}">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">
+              ¿Seguro que deseas eliminar la membresía de 
+              <strong class="text-warning">{{ m.cliente.apellido }}, {{ m.cliente.nombre }}</strong>?
+            </p>
+          </div>
+          <div class="modal-footer border-secondary">
+            <form method="post" action="{% url 'membresias:membresia_borrar' m.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger fw-bold">
+                <i class="bi bi-trash-fill me-1"></i> Sí, eliminar
+              </button>
+            </form>
+            <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle me-1"></i> Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>

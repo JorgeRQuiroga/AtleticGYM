@@ -1,91 +1,57 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Menú de Membresías{% endblock %}
+
 {% block content %}
-<div class="container py-5 text-center">
-  <h1 class="mb-4">Menú de Membresías</h1>
+<div class="container py-5">
 
-  <div class="d-flex flex-column align-items-center gap-3">
-
-    <!-- Botón para abrir modal de inscripción -->
-    <button class="btn btn-success btn-lg w-50"
-            data-bs-toggle="modal"
-            data-bs-target="#modalInscripcion">
-      + Inscribir nuevo alumno
-    </button>
-
-    <!-- Botón para listar clientes -->
-    <a href="{% url 'membresias:membresias_lista' %}" class="btn btn-primary btn-lg w-50">
-      👥 Mostrar todos los clientes
-    </a>
-
-
+  <!-- Hero -->
+  <div class="text-center mb-4">
+    <h1 class="fw-bold text-danger mb-1">
+      <i class="bi bi-people-fill me-2"></i> Menú de Membresías
+    </h1>
+    <p class="text-light mb-0">Gestiona inscripciones y accede al listado de clientes desde aquí</p>
   </div>
-</div>
 
-<!-- Modal de inscripción (reutiliza el que ya tenés hecho) -->
-<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-md">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title">Inscribir Cliente</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
-          {% csrf_token %}
-          <div class="row g-2">
-            <div class="col-md-6">
-              <label class="form-label">{{ form.nombre.label }}</label>
-              {{ form.nombre }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.apellido.label }}</label>
-              {{ form.apellido }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.dni.label }}</label>
-              {{ form.dni }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.telefono.label }}</label>
-              {{ form.telefono }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.emergencia.label }}</label>
-              {{ form.emergencia }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.domicilio.label }}</label>
-              {{ form.domicilio }}
-            </div>
-            <div class="col-md-12">
-              <label class="form-label">{{ form.email.label }}</label>
-              {{ form.email }}
-            </div>
-            <div class="col-md-12">
-              <label class="form-label">{{ form.servicio.label }}</label>
-              {{ form.servicio }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.cantidad_clases.label }}</label>
-              {{ form.cantidad_clases }}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">{{ form.fecha_fin.label }}</label>
-              {{ form.fecha_fin }}
-            </div>
-            <div class="col-md-12 form-check mt-2">
-              {{ form.activa }} <label class="form-check-label">{{ form.activa.label }}</label>
-            </div>
+  <!-- Panel de acciones -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card bg-dark text-light border-secondary shadow-sm p-4">
+        <div class="row g-3 align-items-center">
+
+          <!-- Inscribir -->
+          <div class="col-md-6 d-flex flex-column align-items-center">
+            <button
+              class="btn btn-outline-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+              data-bs-toggle="modal"
+              data-bs-target="#modalInscripcion"
+              aria-label="Inscribir nuevo alumno">
+              <i class="bi bi-person-plus-fill fs-5"></i>
+              <span class="fs-6">Inscribir nuevo alumno</span>
+            </button>
+            <small class="text-muted mt-2">Alta rápida y formulario de inscripción</small>
           </div>
-          <div class="mt-3 text-end">
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+          <!-- Mostrar lista -->
+          <div class="col-md-6 d-flex flex-column align-items-center">
+            <a href="{% url 'membresias:membresias_lista' %}"
+              class="btn btn-outline-light btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+              aria-label="Mostrar todos los clientes">
+              <i class="bi bi-people fs-5"></i>
+              <span class="fs-6">Mostrar todos los clientes</span>
+            </a>
+            <small class="text-muted mt-2">Ver, filtrar y administrar membresías</small>
           </div>
-        </form>
+
+
+        </div>
       </div>
     </div>
   </div>
+
 </div>
+
+<!-- Modal de inscripción -->
+{% include 'partials/modal_agregar_mem.html' %}
 {% endblock %}

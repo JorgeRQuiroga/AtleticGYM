@@ -15,13 +15,15 @@ from cajas.models import Caja
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
+from login.decorators import group_required
+from django.db import transaction
+from django.utils import timezone
 
 
 @login_required
 @caja_abierta_required
 def inscribir_cliente(request):
     caja = Caja.objects.filter(estado='abierta', usuario=request.user).first()
-    
     if not caja:
         messages.error(request, "No hay una caja abierta para registrar el cobro.")
         return redirect('membresias:membresias_lista')
@@ -29,43 +31,92 @@ def inscribir_cliente(request):
     if request.method == 'POST':
         form = MembresiaInscripcionForm(request.POST)
         if form.is_valid():
-            membresia = form.save()
+            # Creamos una instancia temporal para leer los campos sin guardar
+            temp_memb = form.save(commit=False)
 
-            # Crear el cobro automáticamente
-            servicio = membresia.servicio
-            cobro = Cobro.objects.create(
-                caja=caja,
-                cliente=membresia.cliente,
-                servicio=servicio,
-                total=servicio.precio,
-                descripcion=f"Inscripción a {servicio.nombre}"
-            )
+            # Obtener cliente y DNI de forma robusta
+            cliente = getattr(temp_memb, 'cliente', None) or form.cleaned_data.get('cliente')
+            dni = None
+            if cliente:
+                dni = getattr(cliente, 'dni', None)
+            if not dni:
+                dni = form.cleaned_data.get('dni') or request.POST.get('dni')
 
-            # Obtener método de pago desde el formulario (ej: un select en el form)
-            metodo_pago_id = request.POST.get('metodo_pago')
-            if metodo_pago_id:
-                metodo_pago = get_object_or_404(MetodoDePago, id=metodo_pago_id)
+            # Comprobar si ya existe una membresía activa para ese DNI
+            if dni:
+                tiene_activa = Membresia.objects.filter(cliente__dni=dni, activa=True).exists()
+                if tiene_activa:
+                    messages.error(request, "Ya existe una membresía activa para ese DNI.")
+                    return redirect('membresias:membresias_lista')
+
+                # Buscar si existe alguna membresía inactiva para reactivar (la más reciente)
+                membresia_inactiva = Membresia.objects.filter(cliente__dni=dni, activa=False).order_by('-fecha_fin', '-id').first()
             else:
-                metodo_pago = MetodoDePago.objects.get_or_create(metodoDePago="Efectivo")[0]
+                membresia_inactiva = None
 
-            # Crear detalle del cobro
-            DetalleCobro.objects.create(
-                cobro=cobro,
-                servicio=servicio,
-                monto=cobro.total,
-                metodoDePago=metodo_pago
-            )
+            # Guardar o reactivar dentro de una transacción
+            with transaction.atomic():
+                if membresia_inactiva:
+                    # Reactivar: actualizar campos relevantes con los del formulario temporal
+                    membresia = membresia_inactiva
+                    # Actualizar servicio y fechas/clases según lo enviado en el form
+                    membresia.servicio = temp_memb.servicio
+                    membresia.fecha_inicio = temp_memb.fecha_inicio or timezone.now()
+                    membresia.fecha_fin = temp_memb.fecha_fin
+                    # Si el formulario calcula clases_restantes, usarlo; si no, recalcular según servicio
+                    if hasattr(temp_memb, 'clases_restantes') and temp_memb.clases_restantes is not None:
+                        membresia.clases_restantes = temp_memb.clases_restantes
+                    else:
+                        # ejemplo: si servicio tiene cantidad_clases
+                        if getattr(membresia.servicio, 'cantidad_clases', None):
+                            membresia.clases_restantes = membresia.servicio.cantidad_clases
+                    membresia.activa = True
+                    # actualizar otros campos que el formulario pudiera haber enviado
+                    # (por ejemplo: precio, observaciones, etc.)
+                    for field in ['precio', 'observaciones']:
+                        if hasattr(temp_memb, field):
+                            setattr(membresia, field, getattr(temp_memb, field))
+                    membresia.save()
+                else:
+                    # No hay inactiva: crear nueva membresía como antes
+                    membresia = form.save()
 
-            # Actualizar saldo de la caja
-            caja.total_en_caja += cobro.total
-            caja.save()
+                # Crear el cobro automáticamente (se cobra tanto en nueva inscripción como en reactivación)
+                servicio = membresia.servicio
+                cobro = Cobro.objects.create(
+                    caja=caja,
+                    cliente=membresia.cliente,
+                    servicio=servicio,
+                    total=servicio.precio,
+                    descripcion=f"Inscripción a {servicio.nombre}"
+                )
+
+                # Obtener método de pago desde el formulario (ej: un select en el form)
+                metodo_pago_id = request.POST.get('metodo_pago')
+                if metodo_pago_id:
+                    metodo_pago = get_object_or_404(MetodoDePago, id=metodo_pago_id)
+                else:
+                    metodo_pago = MetodoDePago.objects.get_or_create(metodoDePago="Efectivo")[0]
+
+                # Crear detalle del cobro
+                DetalleCobro.objects.create(
+                    cobro=cobro,
+                    servicio=servicio,
+                    monto=cobro.total,
+                    metodoDePago=metodo_pago
+                )
+
+                # Actualizar saldo de la caja
+                caja.total_en_caja += cobro.total
+                caja.save()
 
             messages.success(
                 request,
-                f"Membresía creada y cobro registrado para {membresia.cliente.apellido}, {membresia.cliente.nombre}. "
-                f"Vence el {membresia.fecha_fin} con {membresia.clases_restantes} clases asignadas."
+                f"Membresía {'reactivada' if membresia_inactiva else 'creada'} y cobro registrado para "
+                f"{membresia.cliente.apellido}, {membresia.cliente.nombre}. Vence el {membresia.fecha_fin} "
+                f"con {membresia.clases_restantes} clases asignadas."
             )
-            return redirect('membresias:membresias_lista')
+            return redirect('membresias_lista')
         else:
             messages.error(request, "Error en el formulario. Verifica los datos.")
     else:

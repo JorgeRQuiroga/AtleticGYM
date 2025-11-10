@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'membresias',
     'asistencias',
     'empleados',
+    'widget_tweaks',
+    'graficos'
 ]
 
 
@@ -72,6 +74,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'login.context_processors.grupos_usuario'
             ],
         },
     },

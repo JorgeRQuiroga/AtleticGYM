@@ -1,160 +1,167 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Extracciones de Caja{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="text-warning">Extracciones</h1>
-  <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detallesCaja" aria-expanded="false" aria-controls="detallesCaja">
-    <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
-  </button>
-</div>
+<div class="container py-4">
 
-<!-- Detalles de la caja colapsables -->
-<div class="collapse" id="detallesCaja">
-  <div class="card card-body bg-dark border-secondary mb-4">
-    <div class="row">
-      <div class="col-md-3"><strong>Usuario:</strong> {{ request.user.username }}</div>
-      <div class="col-md-3"><strong>Apertura:</strong> {{ caja.fecha_apertura }}</div>
-      <div class="col-md-3"><strong>Monto Inicial:</strong> ${{ caja.monto_apertura }}</div>
-      <div class="col-md-3"><strong>Total Actual:</strong> <span class="badge bg-success fs-6">${{ caja.total_en_caja }}</span></div>
-    </div>
-  </div>
-</div>
-  <!-- Botones de acción centrados -->
-{% include "partials/cobros_acciones.html" with active="extracciones" %}
-  <!-- Filtros -->
-  <div class="card bg-dark text-light shadow-sm mb-4">
-    <div class="card-body">
-      <form method="get" class="row g-3 align-items-end">
-        <div class="col-md-4">
-          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
-        </div>
-        <div class="col-md-4">
-          <select name="orden" class="form-select">
-            <option value="">-- Ordenar por --</option>
-            <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha: Reciente → Antiguo</option>
-            <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha: Antiguo → Reciente</option>
-            <option value="dni_desc" {% if orden == 'dni_desc' %}selected{% endif %}>DNI: Mayor → Menor</option>
-            <option value="dni_asc" {% if orden == 'dni_asc' %}selected{% endif %}>DNI: Menor → Mayor</option>
-            <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre: A → Z</option>
-            <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre: Z → A</option>
-            <option value="apellido_asc" {% if orden == 'apellido_asc' %}selected{% endif %}>Apellido: A → Z</option>
-            <option value="apellido_desc" {% if orden == 'apellido_desc' %}selected{% endif %}>Apellido: Z → A</option>
-            <option value="apellido_nombre" {% if orden == 'apellido_nombre' %}selected{% endif %}>Apellido + Nombre</option>
-            <option value="nombre_apellido" {% if orden == 'nombre_apellido' %}selected{% endif %}>Nombre + Apellido</option>
-          </select>
-        </div>
-        <div class="col-md-4 d-flex gap-2">
-          <button type="submit" class="btn btn-primary">
-            <i class="bi bi-filter"></i> Aplicar
-          </button>
-          <a href="{% url 'cobros_mostrar_extracciones' %}" class="btn btn-secondary">
-            <i class="bi bi-x-circle"></i> Limpiar
-          </a>
-        </div>
-      </form>
-    </div>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="fw-bold text-danger mb-0">
+      <i class="bi bi-box-arrow-down me-2"></i> Extracciones
+    </h1>
+    <button class="btn btn-outline-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#detallesCaja" aria-expanded="false" aria-controls="detallesCaja">
+      <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
+    </button>
   </div>
 
-  <!-- Tabla -->
-  <div class="table-responsive">
-    <table class="table table-hover table-bordered table-dark align-middle text-center">
-      <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>DNI</th>
-          <th>Monto</th>
-          <th>Motivo</th>
-          <th>Fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-        <tbody>
-        {% for e in page_obj %}
-            <tr>
-            <td>{{ e.usuario.last_name }}, {{ e.usuario.first_name }}</td>
-            <td>{{ e.usuario.empleado.dni }}</td>
-            <td>${{ e.monto }}</td>
-            <td>{{ e.motivo }}</td>
-            <td>{{ e.fecha_hora|date:"d/m/Y H:i" }}</td>
-                <td>
-                    <a href="" class="btn btn-info btn-sm">
-                    <i class="bi bi-eye"></i> Ver
-                    </a>
-            </tr>
-        {% empty %}
-            <tr><td colspan="5" class="text-center">No hay extracciones registradas.</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center custom-pagination">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&orden={{ orden }}">Anterior</a>
-        </li>
-        {% endif %}
-
-        <li class="page-item disabled">
-        <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        </li>
-
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&orden={{ orden }}">Siguiente</a>
-        </li>
-        {% endif %}
-    </ul>
-    </nav>
-  </div>
-</div>
-<!-- Modal de decisión -->
-<div class="modal fade" id="modalDecision" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header">
-        <h5 class="modal-title">Tipo de Cobro</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center">
-        <p>¿Qué tipo de cobro desea registrar?</p>
-        <a href="{% url 'cobros_un_dia' %}" class="btn btn-outline-info me-2" id="btnClase">Por día de clase</a>
-        <a href="{% url 'cobros_nuevo' %}" class="btn btn-outline-success" id="btnCliente">Cliente con membresía</a>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Modal Inscripción -->
-<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-bordo">
-        <h5 class="modal-title text-primary">Inscribir Cliente</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
-        {% csrf_token %}
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
-            <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
-            <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
-            <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
-            <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
-            <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
-            <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
-            <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
+  <!-- Detalles de la caja colapsables -->
+  <div class="collapse" id="detallesCaja">
+    <div class="card bg-dark text-light border-secondary mb-4">
+      <div class="card-body">
+        <div class="row gy-2">
+          <div class="col-md-3"><span class="text-danger fw-semibold">Usuario:</span> {{ request.user.username }}</div>
+          <div class="col-md-3"><span class="text-danger fw-semibold">Apertura:</span> {{ caja.fecha_apertura|date:"d/m/Y H:i" }}</div>
+          <div class="col-md-3"><span class="text-danger fw-semibold">Monto inicial:</span> ${{ caja.monto_apertura }}</div>
+          <div class="col-md-3">
+            <span class="text-danger fw-semibold">Total actual:</span>
+            <span class="badge bg-success ms-2 fs-6">${{ caja.total_en_caja }}</span>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
+
+  <!-- Botones de acción -->
+  {% include "partials/cobros_acciones.html" with active="extracciones" %}
+  <hr class="border-secondary">
+
+  <!-- Sección de la lista de extracciones -->
+  <div class="container-fluid py-2">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="text-danger mb-0">
+        <i class="bi bi-list-check me-2"></i> Historial de Extracciones
+      </h4>
+      <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#listaCollapse" aria-expanded="true" aria-controls="listaCollapse">
+        <i class="bi bi-eye me-1"></i> Ocultar / Mostrar
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <form method="get" class="row g-3 align-items-end mb-4">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por usuario, apellido o DNI">
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <select name="orden" class="form-select">
+          <option value="">-- Ordenar por --</option>
+          <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha ↓</option>
+          <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha ↑</option>
+          <option value="monto_desc" {% if orden == 'monto_desc' %}selected{% endif %}>Monto ↓</option>
+          <option value="monto_asc" {% if orden == 'monto_asc' %}selected{% endif %}>Monto ↑</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-filter me-1"></i> Aplicar
+        </button>
+        <a href="{% url 'cobros_mostrar_extracciones' %}" class="btn btn-outline-light">
+          <i class="bi bi-x-circle me-1"></i> Limpiar
+        </a>
+      </div>
+    </form>
+
+    <!-- Tabla dinámica -->
+    <div class="collapse show" id="listaCollapse">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle text-center table-dark shadow-sm mb-0">
+          <thead>
+            <tr>
+              <th class="text-start">Usuario</th>
+              <th>DNI</th>
+              <th>Monto</th>
+              <th class="text-start">Motivo</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-light">
+            {% for e in page_obj %}
+              <tr>
+                <td class="text-start">{{ e.usuario.last_name }} {{ e.usuario.first_name }}</td>
+                <td>
+                  {% if e.usuario.empleado %}
+                    {{ e.usuario.empleado.dni }}
+                  {% else %}
+                    <span class="text-muted">-----</span>
+                  {% endif %}
+                </td>
+                <td><span class="badge bg-danger">${{ e.monto }}</span></td>
+                <td class="text-start">{{ e.motivo|default:"-" }}</td>
+                <td>{{ e.fecha_hora|date:"d/m/Y H:i" }}</td>
+                <td>
+                  <a href="{% url 'extraccion_detalle' e.pk %}" class="btn btn-outline-info btn-sm">
+                    <i class="bi bi-eye"></i> Ver
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted">No hay extracciones registradas en esta caja.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <nav aria-label="Paginación de extracciones" class="mt-3">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">Anterior</a>
+            </li>
+          {% endif %}
+
+          <li class="page-item disabled">
+            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          </li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">Siguiente</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Modal Inscripción -->
+  {% include 'partials/modal_agregar_mem.html' %}
+
+  <!-- Modal de decisión -->
+  <div class="modal fade" id="modalDecision" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title text-danger"><i class="bi bi-question-circle me-2"></i> Tipo de Cobro</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="text-light mb-3">¿Qué tipo de cobro desea registrar?</p>
+          <a href="{% url 'cobros_un_dia' %}" class="btn btn-outline-info me-2">Por día de clase</a>
+          <a href="{% url 'cobros_nuevo' %}" class="btn btn-outline-success">Cliente con membresía</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-
 {% endblock %}

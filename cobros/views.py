@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Cobro, DetalleCobro, MetodoDePago
+from .models import Cobro, DetalleCobro, MetodoDePago, Extraccion
 from .forms import CobroForm, CobroClaseForm, ExtraccionForm
 from django.utils import timezone
 from .decorators import caja_abierta_required
@@ -22,44 +22,59 @@ def nuevo_cobro(request):
         messages.error(request, "No hay una caja abierta para registrar el cobro.")
         return redirect('cobros_lista')
 
+    # Queryset base: todos los servicios excepto el que se llame "Por Clase" (case-insensitive)
+    servicios_base = Servicio.objects.exclude(nombre__iexact='Por Clase')
+
     if request.method == 'POST':
+        # obtener dni crudo para poder conocer la membresía antes de validar el form
+        raw_dni = request.POST.get('dni', '').strip()
+        cliente = Cliente.objects.filter(dni=raw_dni).exclude(nombre="-----").first()
+        membresia = None
+        if cliente:
+            membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
+
+        # si querés permitir usar la membresía aunque su servicio sea "Por Clase",
+        # incluí ese servicio en el queryset
+        servicios_qs = servicios_base
+        if membresia and membresia.servicio:
+            if membresia.servicio.nombre.lower() == 'por clase':
+                servicios_qs = Servicio.objects.filter(pk=membresia.servicio.pk) | servicios_base
+                servicios_qs = servicios_qs.distinct()
+
         form = CobroForm(request.POST)
+        # asignar el queryset al campo antes de validar
+        form.fields['servicio'].queryset = servicios_qs
+
         if form.is_valid():
             dni = form.cleaned_data['dni'].strip()
             cliente = get_object_or_404(Cliente.objects.exclude(nombre="-----"), dni=dni)
-            # Buscar membresía activa
             membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
-            servicio = form.cleaned_data.get('servicio') or membresia.servicio
-            if membresia:
-                membresia = Membresia.objects.get(cliente=cliente)
-                membresia.clases_restantes = servicio.cantidad_clases
-                membresia.fecha_fin = timezone.now().date() + timezone.timedelta(days=30)
-                membresia.save()
-            else:
+            if not membresia:
                 messages.error(request, "El cliente no tiene ninguna membresía registrada.")
                 return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
 
-            # Si la membresía existe pero está inactiva, reactivarla
+            servicio = form.cleaned_data.get('servicio') or membresia.servicio
+
+            # actualizar membresía
+            membresia.clases_restantes = servicio.cantidad_clases
+            membresia.fecha_fin = timezone.now().date() + timezone.timedelta(days=30)
             if not membresia.activa:
                 membresia.activa = True
-                membresia.save()
+            membresia.save()
 
             cobro = form.save(commit=False)
             cobro.caja = caja
             cobro.cliente = cliente
-
-            # Si el usuario no cambió el servicio, usar el de la membresía
-            servicio = form.cleaned_data.get('servicio') or membresia.servicio
             cobro.servicio = servicio
             cobro.total = servicio.precio
-            # guarda un detalle por defecto si no hay descripcion
             if cobro.descripcion.strip() == "":
                 cobro.detalle = f"Cobro por membresía: {servicio.nombre}"
-            
             cobro.save()
+
             if servicio != membresia.servicio:
                 membresia.servicio = servicio
                 membresia.save()
+
             metodo_pago = form.cleaned_data['metodo_pago']
             DetalleCobro.objects.create(
                 cobro=cobro,
@@ -67,14 +82,17 @@ def nuevo_cobro(request):
                 monto=cobro.total,
                 metodoDePago=metodo_pago
             )
-            # Actualizar caja
+
             caja.registrar_ingreso(servicio.precio)
             messages.success(request, f"Cobro registrado para {cliente}.")
             return redirect('cobros_lista')
     else:
         form = CobroForm()
+        # asignar queryset para GET (lista de servicios sin "Por Clase")
+        form.fields['servicio'].queryset = servicios_base
 
     return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
+
 
 @login_required
 @caja_abierta_required
@@ -310,3 +328,17 @@ def mostrar_extracciones(request):
         'page_obj': page_obj,
         'form': form,
     })
+    
+@login_required
+@caja_abierta_required
+def extraccion_detalle(request, pk):
+    extraccion = get_object_or_404(Extraccion, pk=pk)
+
+    # Opcional: restringir acceso a la misma caja/usuario (descomentar si aplica)
+    # if extraccion.caja.usuario != request.user and not request.user.is_staff:
+    #     raise Http404
+
+    context = {
+        'extraccion': extraccion,
+    }
+    return render(request, 'extraccion_detalle.html', context)

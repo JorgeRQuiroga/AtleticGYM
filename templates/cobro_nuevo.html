@@ -1,81 +1,96 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Nuevo Cobro{% endblock %}
-{% block content %}
-<h2>Nuevo Cobro</h2>
-<p><strong>Usuario:</strong> {{ request.user.username }}</p>
-<p><strong>Caja abierta desde:</strong> {{ caja.fecha_apertura }}</p>
 
-<form method="post" id="formCobro">
-  {% csrf_token %}
-  {{ form.non_field_errors }}
-  <div class="mb-3">
-    <div class="mb-3">
-      <label for="id_dni" class="form-label">DNI del Cliente</label>
-      <input type="text" id="id_dni" name="dni" class="form-control" placeholder="Ingrese DNI...">
-      <ul id="resultadosDNI" class="list-group position-absolute w-50"></ul>
+{% block content %}
+<div class="container py-4">
+
+  <!-- Encabezado -->
+  <div class="text-center mb-4">
+    <h1 class="fw-bold text-danger">
+      <i class="bi bi-plus-circle me-2"></i> Nuevo Cobro
+    </h1>
+    <p class="text-light mb-1">Registrar cobro rápido desde la caja activa</p>
+    <div class="small text-muted">
+      <span class="me-3"><strong class="text-light">Usuario:</strong> {{ request.user.username }}</span>
+      <span><strong class="text-light">Caja abierta desde:</strong> {{ caja.fecha_apertura }}</span>
     </div>
   </div>
-        <!-- Método de pago -->
-        <div class="mb-3">
-          {{ form.metodo_pago.label_tag }} {{ form.metodo_pago }}
-        </div>
-        <div class="mb-3">
-          {{ form.servicio.label_tag }} {{ form.servicio }}           <p>^^^ MODIFICAR SOLO SI EL CLIENTE LO SOLICITA ^^^</p>
 
-        </div>
-        <!-- Descripción -->
-        <div class="mb-3">
-          {{ form.descripcion.label_tag }} {{ form.descripcion }}
+  <!-- Formulario -->
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <form method="post" id="formCobro" class="card bg-dark text-light shadow-sm border-0 p-4">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="row g-3">
+
+          <!-- DNI con autocompletado -->
+          <div class="col-12 position-relative">
+            <label for="id_dni" class="form-label text-danger">DNI del Cliente</label>
+            <div class="input-group">
+              <input type="text" id="id_dni" name="dni" class="form-control bg-opacity-10" placeholder="Ingrese DNI..." autocomplete="off">
+              <button type="button" class="btn btn-outline-light" id="btnBuscarCliente" title="Buscar cliente">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+            <div class="form-text text-muted small">Escriba al menos 2 dígitos para buscar clientes existentes.</div>
+
+            <ul id="resultadosDNI"
+                class="list-group position-absolute w-100 mt-1"
+                style="z-index:1050; max-height:220px; overflow:auto; display:none;">
+            </ul>
+          </div>
+
+          <!-- Método de pago -->
+          <div class="col-md-6">
+            <label class="form-label text-danger">{{ form.metodo_pago.label }}</label>
+            {{ form.metodo_pago }}
+            {% if form.metodo_pago.errors %}
+              <div class="form-text text-danger small">{{ form.metodo_pago.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Servicio -->
+          <div class="col-md-6">
+            <label class="form-label text-danger">{{ form.servicio.label }}</label>
+            {{ form.servicio }}
+            <div class="form-text text-muted small">Modificar solo si el cliente lo solicita.</div>
+            {% if form.servicio.errors %}
+              <div class="form-text text-danger small">{{ form.servicio.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Descripción -->
+          <div class="col-12">
+            <label class="form-label text-danger">{{ form.descripcion.label }}</label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+              <div class="form-text text-danger small">{{ form.descripcion.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
         </div>
 
         <!-- Botones -->
-        <button type="button" class="btn btn-success" id="btnPagar">Registrar Cobro</button>
-        <a href="{% url 'cobros_lista' %}" class="btn btn-danger">Cancelar</a>
+        <div class="mt-4 d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-success" id="btnPagar">
+            <i class="bi bi-check-circle me-1"></i> Registrar Cobro
+          </button>
+          <a href="{% url 'cobros_lista' %}" class="btn btn-outline-light">
+            <i class="bi bi-x-circle me-1"></i> Cancelar
+          </a>
+        </div>
+
       </form>
     </div>
   </div>
 </div>
 
-<!-- Modal Efectivo -->
-<div class="modal fade" id="modalEfectivo" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-bordo">
-        <h5 class="modal-title">Confirmar Pago en Efectivo</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        ¿Se recibió el pago en efectivo?
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success" form="formCobro">Sí, confirmar</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No se realizó</button>
-      </div>
-    </div>
-  </div>
-</div>
+{% include 'partials/modal_confimacion_pago.html' %}
 
-<!-- Modal Transferencia -->
-<div class="modal fade" id="modalTransferencia" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-bordo">
-        <h5 class="modal-title">Pago por Transferencia</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center">
-        <p>Escanee el QR o use el alias:</p>
-        <img src="{'#'}" alt="QR Transferencia" class="img-fluid mb-3">
-        <p><strong>Alias:</strong> gimnasio.atleticx</p>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success" form="formCobro">Confirmar Pago</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- Scripts (sin modificar funcionalidad) -->
 <script>
 document.getElementById("btnPagar").addEventListener("click", function() {
   const metodo = document.getElementById("id_metodo_pago").value;
@@ -91,6 +106,7 @@ document.getElementById("btnPagar").addEventListener("click", function() {
 </script>
  
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const input = document.getElementById("id_dni");
@@ -113,13 +129,16 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             resultados.appendChild(li);
           });
+          resultados.style.display = data.length ? 'block' : 'none';
         });
     } else {
       resultados.innerHTML = "";
+      resultados.style.display = 'none';
     }
   });
 });
 </script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const input = document.getElementById("id_dni");
@@ -142,9 +161,11 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             resultados.appendChild(li);
           });
+          resultados.style.display = data.length ? 'block' : 'none';
         });
     } else {
       resultados.innerHTML = "";
+      resultados.style.display = 'none';
     }
   });
 });
