@@ -91,7 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'atletixgym_db',
         'USER': 'root',
-        'PASSWORD': '45054588',
+        'PASSWORD': 'imperial225',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
