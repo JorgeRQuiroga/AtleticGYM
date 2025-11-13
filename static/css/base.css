@@ -189,4 +189,6 @@ h1{
     color: #bdbdbd;
   }
   /* Aumentar z-index para dropdowns/autocomplete si los hubiera */
-.table-responsive { z-index: 0; }
+.table-responsive { z-index: 0; 
+  margin-bottom: 4rem !important;
+}

@@ -2,38 +2,44 @@
 {% load static %}
 
 {% block content %}
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-<div class="card shadow-lg p-4 rounded-4 bg-dark text-white" style="width: 100%; max-width: 520px;">
-        <!-- Vista inicial para ingresar DNI -->
-        <div class="text-center mb-4">
-            <h2 class="fw-bold fs-1"><i class="bi bi-barbell me-2"></i> ATLETIX GYM</h2>
-            <h4 class="fw-semibold text-light mt-3">Registrar Asistencia</h4>
-            <p class="text-light">Ingrese su DNI para continuar</p>
+<div class="container py-5">
+  <div class="mx-auto" style="max-width: 520px;">
+  <!-- Card principal -->
+  <div class="card shadow-lg border-0 rounded-4 bg-dark text-light" style="max-width: 520px; width: 100%;">
+    <div class="card-body p-4">
+
+      <!-- Encabezado -->
+      <div class="text-center mb-4">
+        <h2 class="fw-bold fs-1 text-danger mb-1">
+          <i class="bi bi-barbell me-2"></i> ATLETIX GYM
+        </h2>
+        <h4 class="fw-semibold mt-2">Registrar Asistencia</h4>
+        <p class="text-secondary mb-0">Ingrese su DNI para continuar</p>
+      </div>
+
+      <!-- Formulario -->
+      <form method="post" action="{% url 'asistencias:asistencia_registrar' %}" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="dni" class="form-label fw-semibold">Documento de Identidad</label>
+          <input type="text"
+                 class="form-control form-control-lg bg-dark text-light border-secondary"
+                 id="dni"
+                 name="dni"
+                 required
+                 autofocus
+                 placeholder="Solo números, sin puntos ni guiones">
         </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-danger btn-lg fw-bold">
+            <i class="bi bi-check-circle-fill me-2"></i> Registrar
+          </button>
+        </div>
+      </form>
 
-        <form id="asistencia-form" method="post" action="{% url 'asistencias:asistencia_registrar' %}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="dni" class="form-label fw-semibold fs-5">Documento de Identidad</label>
-                <input type="number" class="form-control form-control-lg bg-secondary-subtle border-0 text-white"
-                    id="dni" name="dni" required autofocus placeholder="Solo números, sin puntos">
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-bordo btn-lg fw-bold">
-                    <i class="bi bi-check-circle-fill me-2"></i> Registrar
-                </button>
-            </div>
-        </form>
+    </div>
+  </div>
+  </div>
 </div>
-<div id="resultado"></div>
 
-
-<script src="{% static 'js/registrar_asistencia.js' %}"></script>
 {% endblock %}

@@ -19,8 +19,10 @@ def servicio_agregar(request):
         if form.is_valid():
             # Acceder al valor desde cleaned_data
             dias_semana = form.cleaned_data['dias_semana']
-            cantidad_clases = dias_semana * 4  # Asumiendo 4 semanas por mes
-
+            if dias_semana != 1:
+                cantidad_clases = dias_semana * 4  # Asumiendo 4 semanas por mes
+            else:
+                cantidad_clases = 1
             # Crear instancia pero sin guardar todavía
             servicio = form.save(commit=False)
             servicio.cantidad_clases = cantidad_clases

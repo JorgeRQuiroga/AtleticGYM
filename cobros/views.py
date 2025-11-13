@@ -292,28 +292,14 @@ def mostrar_extracciones(request):
         )
 
     # Ordenamientos
-    if orden == 'fecha_desc':
-        extracciones = extracciones.order_by('-fecha_hora')
-    elif orden == 'fecha_asc':
-        extracciones = extracciones.order_by('fecha_hora')
-    elif orden == 'dni_desc':
-        extracciones = extracciones.order_by('-empleado__dni')  # Asumiendo que el DNI está en username
-    elif orden == 'dni_asc':
-        extracciones = extracciones.order_by('empleado__dni')
-    elif orden == 'nombre_asc':
-        extracciones = extracciones.order_by('usuario__first_name')
-    elif orden == 'nombre_desc':
-        extracciones = extracciones.order_by('-usuario__first_name')
-    elif orden == 'apellido_asc':
-        extracciones = extracciones.order_by('usuario__last_name')
-    elif orden == 'apellido_desc':
-        extracciones = extracciones.order_by('-usuario__last_name')
-    elif orden == 'apellido_nombre':
-        extracciones = extracciones.order_by('usuario__last_name', 'usuario__first_name')
-    elif orden == 'nombre_apellido':
-        extracciones = extracciones.order_by('usuario__first_name', 'usuario__last_name')
-    else:
-        extracciones = extracciones.order_by('-fecha_hora')  # Default
+    if orden == "fecha_desc":
+        extracciones = extracciones.order_by("-fecha_hora")
+    elif orden == "fecha_asc":
+        extracciones = extracciones.order_by("fecha_hora")
+    elif orden == "monto_desc":
+        extracciones = extracciones.order_by("-monto")
+    elif orden == "monto_asc":
+        extracciones = extracciones.order_by("monto") # Default
 
     #  Paginación
     paginator = Paginator(extracciones, 10)  # 10 por página

@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from membresias.forms import MembresiaInscripcionForm
+from membresias.forms import MembresiaInscripcionForm, MembresiaEdicionForm
 from .models import Membresia
 from cobros.models import Cobro, DetalleCobro, MetodoDePago
 from cajas.models import Caja
@@ -116,7 +116,7 @@ def inscribir_cliente(request):
                 f"{membresia.cliente.apellido}, {membresia.cliente.nombre}. Vence el {membresia.fecha_fin} "
                 f"con {membresia.clases_restantes} clases asignadas."
             )
-            return redirect('membresias_lista')
+            return redirect('lista_membresias')
         else:
             messages.error(request, "Error en el formulario. Verifica los datos.")
     else:
@@ -211,7 +211,7 @@ def membresias_detalle(request, pk):
     membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
 
     # si querés mostrar el form precargado en el modal:
-    form = MembresiaInscripcionForm(membresia_instance=membresia)
+    form = MembresiaInscripcionForm(instance=membresia)
 
     return render(request, 'membresias_detalle.html', {
         'membresia': membresia,
@@ -220,16 +220,14 @@ def membresias_detalle(request, pk):
     
 @login_required
 def membresias_editar(request, pk):
-    membresia = get_object_or_404(
-        Membresia.objects.select_related('cliente', 'servicio'), pk=pk
-    )
+    membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
 
     if request.method == 'POST':
-        form = MembresiaInscripcionForm(request.POST, instance=membresia)
+        form = MembresiaEdicionForm(request.POST, instance=membresia)
         if form.is_valid():
-            membresia = form.save()  # devuelve la instancia actualizada
+            membresia = form.save()
 
-            # 🔧 recalcular clases_restantes en base al servicio
+            # recalcular clases_restantes en base al servicio
             if membresia.servicio.cantidad_clases > 0:
                 membresia.clases_restantes = membresia.servicio.cantidad_clases
                 membresia.save()
@@ -237,32 +235,40 @@ def membresias_editar(request, pk):
             messages.success(request, "Membresía actualizada correctamente.")
             return redirect('membresias:membresias_detalle', pk=membresia.pk)
     else:
-        form = MembresiaInscripcionForm(instance=membresia)
+        form = MembresiaEdicionForm(instance=membresia)
 
     return render(request, 'membresias_detalle.html', {
         'form': form,
         'membresia': membresia,
     })
 
+
 @login_required
 def membresia_editar_partial(request, pk):
     membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
 
     if request.method == 'POST':
-        form = MembresiaInscripcionForm(request.POST, instance=membresia)
+        form = MembresiaEdicionForm(request.POST, instance=membresia)
         if form.is_valid():
             form.save()
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'ok': True, 'message': 'Membresía actualizada.'})
             messages.success(request, "Membresía actualizada correctamente.")
-            return redirect('membresias:membresia_detalle', pk=membresia.pk)
+            return redirect('membresias:membresias_detalle', pk=membresia.pk)
         else:
-            # si es AJAX devolver el HTML con errores para reinyectar
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                html = render_to_string('membresias/partials/_form.html', {'form': form, 'membresia': membresia}, request=request)
+                html = render_to_string(
+                    'partials/_form_membresia.html',
+                    {'form': form, 'membresia': membresia},
+                    request=request
+                )
                 return JsonResponse({'ok': False, 'html': html})
     else:
-        form = MembresiaInscripcionForm(instance=membresia)
+        form = MembresiaEdicionForm(instance=membresia)
 
-    html = render_to_string('partials/_form.html', {'form': form, 'membresia': membresia}, request=request)
+    html = render_to_string(
+        'partials/_form_membresia.html',
+        {'form': form, 'membresia': membresia},
+        request=request
+    )
     return HttpResponse(html)

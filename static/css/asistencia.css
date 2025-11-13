@@ -1,6 +1,6 @@
 body {
     /* Fondo actual: imagen */
-    background-image: url("../img/login_fondo.jpeg");
+    background-image: url("../img/login_fondo.jpeg") !important;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

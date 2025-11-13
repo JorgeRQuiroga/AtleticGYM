@@ -140,29 +140,22 @@
       <!-- Paginación -->
       <nav aria-label="Paginación de cobros">
         <ul class="pagination justify-content-center">
-          {% if page_obj.has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
-                Anterior
-              </a>
-            </li>
-          {% endif %}
-
-          <li class="page-item disabled">
-            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-          </li>
-
-          {% if page_obj.has_next %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
-                Siguiente
-              </a>
-            </li>
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
-  </div>
+        {% if page_obj.has_other_pages %}
+                <nav aria-label="Paginación de empleados">
+                  <ul class="pagination justify-content-center">
+                    {% for num in page_obj.paginator.page_range %}
+                      <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
+                          {{ num }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </nav>
+                {% endif %}        </ul>
+              </nav>
+            </div>
+          </div>
 
   <!-- Modal Inscripción -->
   {% include 'partials/modal_agregar_mem.html' %}
