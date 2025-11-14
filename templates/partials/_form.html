@@ -1,0 +1,87 @@
+<div class="modal fade" id="editarMembresiaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title text-primary">Editar membresía</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Contenedor dinámico donde se inyectará el formulario -->
+      <div id="modalBody">
+        <!-- El formulario se cargará aquí vía AJAX desde membresia_editar_partial -->
+         <form id="membresia-editar-form" method="post" action="{% url 'membresias:membresia_editar_partial' membresia.pk %}">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
+              <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
+              <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
+              <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
+              <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
+              <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
+              <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
+              <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
+              <div class="col-12">{{ form.observaciones.label_tag }} {{ form.observaciones }}</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('editarMembresiaModal');
+  const modalBody = document.getElementById('modalBody');
+
+  // Delegación: botones editar con data-pk
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-editar-membresia');
+    if (!btn) return;
+    const pk = btn.dataset.pk;
+    if (!pk) return;
+
+    // cargar form vía AJAX
+    const url = `/membresias/${pk}/editar-partial/`;
+    const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const html = await resp.text();
+    modalBody.innerHTML = html;
+
+    // mostrar modal (Bootstrap 5)
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    // enganchar submit del form ahora que existe en DOM
+    const form = modalBody.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const formData = new FormData(form);
+        const resp = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          body: formData,
+          credentials: 'same-origin'
+        });
+        const data = await resp.json();
+        if (data.ok) {
+          bsModal.hide();
+          location.reload(); // refrescar lista o fila
+        } else {
+          modalBody.innerHTML = data.html; // reinyectar errores
+        }
+      }, { once: true });
+    }
+  });
+});
+</script>
+
+

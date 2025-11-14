@@ -2,18 +2,65 @@
 
 {% block content %}
 <div class="container py-5">
-  <div class="text-center">
-    <h1 class="mb-4">Gestión de Asistencias</h1>
-    <p class="lead text-muted">Selecciona una opción para continuar.</p>
-  </div>
+  <div class="d-flex justify-content-center">
+    <div class="card bg-dark text-light border-secondary shadow-sm w-100" style="max-width:920px;">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3 gap-3">
+          <div class="rounded bg-secondary d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+            <i class="bi bi-clock-history fs-4 text-white"></i>
+          </div>
+          <div>
+            <h2 class="h4 mb-0">Gestión de Asistencias</h2>
+            <p class="mb-0 text-muted small">Selecciona una opción para continuar.</p>
+          </div>
+          <div class="ms-auto d-none d-md-block text-end">
+            <small class="text-muted">Rápido · Seguro</small>
+          </div>
+        </div>
 
-  <!-- Botones -->
-  <div class="d-flex justify-content-center gap-4 mt-5">
-    <!-- Botón para abrir el modo TOTEM nueva pestaña -->
-    <a href="{% url 'asistencias:asistencia_registrar' %}" target="_blank" class="btn btn-success btn-lg"><i class="bi bi-person-check-fill me-2"></i> Abrir Modo TOTEM
-    
-    <!-- Botón para ver el historial de asistencias -->
-    <a href="{% url 'asistencias:asistencia_lista' %}" class="btn btn-primary btn-lg"><i class="bi bi-list-task me-2"></i> Ver Historial</a>
+        <div class="row g-3 mt-4">
+          <div class="col-12 col-md-6">
+            <a href="{% url 'asistencias:asistencia_registrar' %}" target="_blank"
+               class="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+               role="button" aria-label="Abrir Modo TOTEM" title="Abrir Modo TOTEM en nueva pestaña">
+              <i class="bi bi-person-check-fill fs-5"></i>
+              <span class="fw-semibold">Abrir Modo TOTEM</span>
+            </a>
+            <div class="mt-2 text-start">
+              <small class="text-muted">Modo optimizado para kiosco; se abre en una nueva pestaña.</small>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <a href="{% url 'asistencias:asistencia_lista' %}"
+               class="btn btn-outline-light btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+               role="button" aria-label="Ver Historial de Asistencias" title="Ver historial de asistencias">
+              <i class="bi bi-list-task fs-5"></i>
+              <span class="fw-semibold">Ver Historial</span>
+            </a>
+            <div class="mt-2 text-start">
+              <small class="text-muted">Consulta y filtra registros de asistencia.</small>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4 border-secondary">
+
+      </div>
+    </div>
   </div>
 </div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+      tooltipTriggerList.forEach(function (el) {
+        new bootstrap.Tooltip(el);
+      });
+    });
+  </script>
 {% endblock %}

@@ -2,54 +2,94 @@
 {% block title %}Empleados{% endblock %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1>Empleados</h1>
-  <a href="{% url 'empleado_agregar' %}" class="btn btn-primary">+ Nuevo Empleado</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="fw-bold text-primary">
+    <i class="bi bi-people"></i> Empleados
+  </h1>
+  <button type="button" class="btn btn-outline-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
+    <i class="bi bi-person-plus"></i> Nuevo Empleado
+  </button>
 </div>
 
-
-<form method="get" action="{% url 'empleado_lista' %}" class="mb-3">
-  <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
+<!-- Buscador + Ordenamiento -->
+<form method="get" action="{% url 'empleado_lista' %}" class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="input-group">
+      <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
+      <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
+    </div>
+  </div>
+  <div class="col-md-4">
+    <select name="orden" class="form-select">
+      <option value="">Ordenar por...</option>
+      <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre ↑</option>
+      <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre ↓</option>
+      <option value="apellido_asc" {% if orden == 'apellido_asc' %}selected{% endif %}>Apellido ↑</option>
+      <option value="apellido_desc" {% if orden == 'apellido_desc' %}selected{% endif %}>Apellido ↓</option>
+      <option value="dni_asc" {% if orden == 'dni_asc' %}selected{% endif %}>DNI ↑</option>
+      <option value="dni_desc" {% if orden == 'dni_desc' %}selected{% endif %}>DNI ↓</option>
+      <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha Alta ↑</option>
+      <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha Alta ↓</option>
+    </select>
+  </div>
+  <div class="col-md-2 d-grid">
+    <button class="btn btn-outline-primary" type="submit">Aplicar</button>
+  </div>
 </form>
 
-<table class="table table-hover table-bordered align-middle text-center table-dark" id="tablaEmpleados">
-  <thead class="table-dark">
-    <tr>
-      <th>Nombre</th>
-      <th>DNI</th>
-      <th>Teléfono</th>
-      <th>Fecha/Hora Alta</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for empleado in page_obj %}
+<!-- Tabla de empleados -->
+<div class="table-responsive">
+  <table class="table table-hover table-bordered align-middle text-center table-dark shadow-sm" id="tablaEmpleados">
+    <thead>
       <tr>
-        <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
-        <td>{{ empleado.dni }}</td>
-        <td>{{ empleado.telefono }}</td>
-        <td>{{ empleado.fecha_hora_alta|date:"d/m/Y H:i" }}</td>
-        <td>
-          <a href="{% url 'empleado_editar' empleado.pk %}" class="btn btn-sm btn-secondary">Editar</a>
-          <a href="{% url 'empleado_eliminar' empleado.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
-        </td>
-    {% empty %}
-      <td colspan="5">No hay empleados registrados.</td>
-    {% endfor %}
-    </tr>
-  </tbody>
-</table>
+        <th>Nombre</th>
+        <th>DNI</th>
+        <th>Teléfono</th>
+        <th>Fecha/Hora Alta</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for empleado in page_obj %}
+        <tr>
+          <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
+          <td>{{ empleado.dni }}</td>
+          <td>{{ empleado.telefono }}</td>
+          <td>{{ empleado.fecha_hora_alta|date:"d/m/Y H:i" }}</td>
+          <td>
+            <a href="{% url 'empleado_editar' empleado.pk %}" class="btn btn-sm btn-outline-warning me-1">
+              <i class="bi bi-pencil-square"></i> Editar
+            </a>
+            <a href="{% url 'empleado_eliminar' empleado.pk %}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i> Eliminar
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="text-muted">No hay empleados registrados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
+<!-- Paginación -->
 {% if page_obj.has_other_pages %}
-<nav>
-  <ul class="pagination">
+<nav aria-label="Paginación de empleados">
+  <ul class="pagination justify-content-center">
     {% for num in page_obj.paginator.page_range %}
       <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a>
+        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
+          {{ num }}
+        </a>
       </li>
     {% endfor %}
   </ul>
 </nav>
-
 {% endif %}
+
+<!-- Modal para agregar empleado -->
+{% include 'partials/modal_agregar_empleado.html' %}
+
 {% endblock %}

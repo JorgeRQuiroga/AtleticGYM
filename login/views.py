@@ -9,3 +9,6 @@ class CustomLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = LoginForm
 
+
+def error_403(request, exception=None):
+    return render(request, '403.html', status=403)

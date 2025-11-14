@@ -19,12 +19,79 @@
 {% include 'partials/navbar.html' %}
 {% include 'partials/sidebar.html' %}
 
-<div class="container my-5 pt-4">
-  {% if messages %}
+{% if messages %}
+  <!-- Modal que muestra los mensajes de Django -->
+  <div class="modal fade" id="messagesModal" tabindex="-1" aria-labelledby="messagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light border-secondary">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="messagesModalLabel">
+            {% for message in messages %}
+              {% if forloop.first %}
+                {% if 'error' in message.tags %}
+                  <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Alerta
+                {% elif 'success' in message.tags %}
+                  <i class="bi bi-check-circle-fill text-success me-2"></i>Éxito
+                {% elif 'warning' in message.tags %}
+                  <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>Atención
+                {% else %}
+                  <i class="bi bi-info-circle-fill text-info me-2"></i>Información
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <ul class="list-unstyled mb-0" aria-live="polite">
+            {% for message in messages %}
+              <li class="mb-2 d-flex gap-2 align-items-start">
+                {% if 'error' in message.tags %}
+                  <i class="bi bi-exclamation-triangle-fill text-danger fs-5 mt-1"></i>
+                {% elif 'success' in message.tags %}
+                  <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                {% elif 'warning' in message.tags %}
+                  <i class="bi bi-exclamation-circle-fill text-warning fs-5 mt-1"></i>
+                {% else %}
+                  <i class="bi bi-info-circle-fill text-info fs-5 mt-1"></i>
+                {% endif %}
+                <div class="flex-grow-1">{{ message }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fallback para usuarios sin JS: usamos forloop.first para obtener la clase -->
+  <noscript>
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% if forloop.first %}
+        <div class="alert alert-{{ message.tags }} mb-3">
+          {% for m in messages %}{{ m }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+        </div>
+      {% endif %}
     {% endfor %}
-  {% endif %}
+  </noscript>
+
+  <!-- Mostrar modal automáticamente si hay mensajes -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var modalEl = document.getElementById('messagesModal');
+      if (modalEl) {
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      }
+    });
+  </script>
+{% endif %}
+
 
   <div class="container my-5 pt-4">
     <div class="content-card p-4 shadow rounded bg-dark text-light">
@@ -34,10 +101,13 @@
 </div>
 
 
+
 {% include 'partials/footer.html' %}
 
     <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </body>
 </html>
 
