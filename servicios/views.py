@@ -4,14 +4,48 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from .models import Servicio
 from .forms import ServicioForm
+from django.db.models import Q
 
 @login_required
 def servicio_listar(request):
-    servicios = Servicio.objects.filter(activo=True)
-    paginator = Paginator(servicios, 6)
-    page_obj  = paginator.get_page(request.GET.get('page'))
-    return render(request, 'servicio_listar.html', {'page_obj': page_obj})
+    # Obtener parámetros de búsqueda y orden
+    query = request.GET.get('q', '').strip()
+    orden = request.GET.get('orden', '')
 
+    # Base queryset
+    servicios = Servicio.objects.all()
+
+    # Filtrar por nombre (buscador único)
+    if query:
+        servicios = servicios.filter(
+            Q(nombre__icontains=query) |
+            Q(cantidad_clases__icontains=query) |
+            Q(precio__icontains=query)
+        )
+
+    # Ordenamientos
+    if orden == 'nombre_asc':
+        servicios = servicios.order_by('nombre')
+    elif orden == 'nombre_desc':
+        servicios = servicios.order_by('-nombre')
+    elif orden == 'cantidad_asc':
+        servicios = servicios.order_by('cantidad_clases')
+    elif orden == 'cantidad_desc':
+        servicios = servicios.order_by('-cantidad_clases')
+    elif orden == 'precio_asc':
+        servicios = servicios.order_by('precio')
+    elif orden == 'precio_desc':
+        servicios = servicios.order_by('-precio')
+
+    # Paginación
+    paginator = Paginator(servicios, 6)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'servicio_listar.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'orden': orden,
+    })
 @login_required
 def servicio_agregar(request):
     if request.method == 'POST':

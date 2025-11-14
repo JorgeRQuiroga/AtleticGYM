@@ -15,12 +15,12 @@
 <form method="get" action="{% url 'empleado_lista' %}" class="row g-3 mb-4">
   <div class="col-md-6">
     <div class="input-group">
-      <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
-      <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
+      <span class="input-group-text bg-transparent text-light"><i class="bi bi-search"></i></span>
+      <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent" placeholder="Buscar por nombre, apellido o DNI">
     </div>
   </div>
   <div class="col-md-4">
-    <select name="orden" class="form-select">
+    <select name="orden" class="form-select bg-transparent form-control text-light">
       <option value="">Ordenar por...</option>
       <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre ↑</option>
       <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre ↓</option>

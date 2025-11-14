@@ -75,18 +75,22 @@
     </div>
   </div>
 
-  <!-- Script para mostrar automáticamente el modal -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var modalEl = document.getElementById('messagesModal');
-      if (modalEl) {
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-      }
-    });
-  </script>
+ <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var modalEl = document.getElementById('messagesModal');
+    if (modalEl) {
+      var modal = new bootstrap.Modal(modalEl);
+      modal.show();
 
-</body>
+      // Cerrar automáticamente a los 3 segundos (3000 ms)
+      setTimeout(function () {
+        modal.hide();
+      }, 2000);
+    }
+  });
+</script>
+{% endif %}
+
 
 
   <!-- Fallback para usuarios sin JS: usamos forloop.first para obtener la clase -->
@@ -100,17 +104,6 @@
     {% endfor %}
   </noscript>
 
-  <!-- Mostrar modal automáticamente si hay mensajes -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var modalEl = document.getElementById('messagesModal');
-      if (modalEl) {
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-      }
-    });
-  </script>
-{% endif %}
   
 
   <div class="container py-5">

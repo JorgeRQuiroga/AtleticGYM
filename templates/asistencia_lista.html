@@ -1,48 +1,131 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Historial de Asistencias{% endblock %}
 
 {% block content %}
-<h1>Historial de Asistencias</h1>
+<div class="container-fluid py-4">
 
-<p class="text-muted">Aquí se muestran los últimos 100 registros de asistencia.</p>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-danger mb-0">
+      <i class="bi bi-clock-history me-2"></i> Historial de Asistencias
+    </h1>
+  </div>
 
-<table class="table table-hover table-bordered align-middle text-center table-dark bg-dark text-light">
-    <thead class="table-dark">
-        <tr>
-            <th>#</th>
-            <th>Cliente</th>
-            <th>Servicio</th>
-            <th>Clases Restantes</th>
-            <th>Estado Membresía</th>
-            <th>Fecha y Hora</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for asistencia in asistencias %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ asistencia.membresia.cliente.apellido }}, {{ asistencia.membresia.cliente.nombre }}</td>
-            <td>{{ asistencia.membresia.servicio.nombre }}</td>
-            <td>
-                {% if asistencia.membresia.servicio.cantidad_clases > 0 %}
+  <!-- Card contenedor de filtros -->
+  <div class="card bg-dark text-light border-secondary mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <!-- Buscador -->
+        <div class="col-md-4">
+          <input type="text" name="busqueda" value="{{ busqueda|default_if_none:'' }}"
+                 class="form-control text-white bg-transparent border-secondary"
+                 placeholder="Buscar por nombre o apellido">
+        </div>
+
+        <!-- Ordenamiento -->
+        <div class="col-md-4">
+          <select name="orden" class="form-select text-white bg-transparent border-secondary">
+            <option value="">-- Ordenar --</option>
+            <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre ↑</option>
+            <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre ↓</option>
+            <option value="clases_asc" {% if orden == 'clases_asc' %}selected{% endif %}>Clases ↑</option>
+            <option value="clases_desc" {% if orden == 'clases_desc' %}selected{% endif %}>Clases ↓</option>
+            <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha ↑</option>
+            <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha ↓</option>
+          </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-md-4 d-flex gap-2">
+          <button type="submit" class="btn btn-danger flex-fill">
+            <i class="bi bi-filter me-1"></i> Aplicar
+          </button>
+          <a href="{% url 'asistencias:asistencia_lista' %}" class="btn btn-outline-light flex-fill">
+            <i class="bi bi-x-circle me-1"></i> Limpiar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla de asistencias -->
+  <div class="card bg-dark text-light border-secondary shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle text-center table-dark mb-0">
+          <thead>
+            <tr class="text-danger">
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th>Clases Restantes</th>
+              <th>Estado Membresía</th>
+              <th>Fecha y Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for asistencia in asistencias %}
+              <tr>
+                <td class="text-start">{{ asistencia.membresia.cliente.apellido }}, {{ asistencia.membresia.cliente.nombre }}</td>
+                <td class="text-start">{{ asistencia.membresia.servicio.nombre }}</td>
+                <td>
+                  {% if asistencia.membresia.servicio.cantidad_clases > 0 %}
                     {{ asistencia.membresia.clases_restantes }}
-                {% else %}
+                  {% else %}
                     Ilimitadas
-                {% endif %}
-            </td>
-            <td>
-                {% if asistencia.membresia.activa %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if asistencia.membresia.activa %}
                     <span class="badge bg-success">Activa</span>
-                {% else %}
+                  {% else %}
                     <span class="badge bg-secondary">Inactiva</span>
-                {% endif %}
-            </td>
-            <td>{{ asistencia.fecha_hora|date:"d/m/Y H:i" }} hs</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5">No hay asistencias registradas.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+                  {% endif %}
+                </td>
+                <td>{{ asistencia.fecha_hora|date:"d/m/Y H:i" }} hs</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">No hay asistencias registradas.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      {% if asistencias.has_other_pages %}
+        <nav aria-label="Paginación de asistencias" class="mt-3">
+          <ul class="pagination justify-content-center">
+            {% if asistencias.has_previous %}
+              <li class="page-item">
+                <a class="page-link bg-dark text-light border-secondary" href="?page={{ asistencias.previous_page_number }}{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">«</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link bg-dark text-muted border-secondary">«</span></li>
+            {% endif %}
+
+            {% for num in asistencias.paginator.page_range %}
+              <li class="page-item {% if num == asistencias.number %}active{% endif %}">
+                <a class="page-link {% if num == asistencias.number %}bg-danger text-white{% else %}bg-dark text-light border-secondary{% endif %}" 
+                   href="?page={{ num }}{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
+                  {{ num }}
+                </a>
+              </li>
+            {% endfor %}
+
+            {% if asistencias.has_next %}
+              <li class="page-item">
+                <a class="page-link bg-dark text-light border-secondary" href="?page={{ asistencias.next_page_number }}{% if busqueda %}&busqueda={{ busqueda }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">»</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link bg-dark text-muted border-secondary">»</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

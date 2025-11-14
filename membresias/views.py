@@ -1,15 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import MembresiaInscripcionForm
+from .forms import MembresiaInscripcionForm, MembresiaEdicionForm
 from .models import Membresia
 from cobros.decorators import caja_abierta_required
 from django.db.models import Q
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from membresias.forms import MembresiaInscripcionForm, MembresiaEdicionForm
-from .models import Membresia
+from django.shortcuts import get_object_or_404
 from cobros.models import Cobro, DetalleCobro, MetodoDePago
 from cajas.models import Caja
 from django.core.paginator import Paginator
@@ -31,57 +27,64 @@ def inscribir_cliente(request):
     if request.method == 'POST':
         form = MembresiaInscripcionForm(request.POST)
         if form.is_valid():
-            # Creamos una instancia temporal para leer los campos sin guardar
-            temp_memb = form.save(commit=False)
-
-            # Obtener cliente y DNI de forma robusta
-            cliente = getattr(temp_memb, 'cliente', None) or form.cleaned_data.get('cliente')
-            dni = None
-            if cliente:
-                dni = getattr(cliente, 'dni', None)
+            # Obtener DNI directamente del formulario limpio
+            dni = form.cleaned_data.get('dni')
+            
             if not dni:
-                dni = form.cleaned_data.get('dni') or request.POST.get('dni')
+                messages.error(request, "El DNI es obligatorio.")
+                return redirect('membresias:membresias_lista')
 
             # Comprobar si ya existe una membresía activa para ese DNI
-            if dni:
-                tiene_activa = Membresia.objects.filter(cliente__dni=dni, activa=True).exists()
-                if tiene_activa:
-                    messages.error(request, "Ya existe una membresía activa para ese DNI.")
-                    return redirect('membresias:membresias_lista')
+            tiene_activa = Membresia.objects.filter(cliente__dni=dni, activa=True).exists()
+            if tiene_activa:
+                messages.error(request, f"Ya existe una membresía activa para el DNI {dni}.")
+                # Renderizar nuevamente el formulario con el error
+                membresias = Membresia.objects.select_related('cliente', 'servicio').all()
+                return render(request, 'membresias_lista.html', {
+                    'form': form,
+                    'membresias': membresias,
+                    'caja': caja
+                })
 
-                # Buscar si existe alguna membresía inactiva para reactivar (la más reciente)
-                membresia_inactiva = Membresia.objects.filter(cliente__dni=dni, activa=False).order_by('-fecha_fin', '-id').first()
-            else:
-                membresia_inactiva = None
+            # Buscar si existe alguna membresía inactiva para reactivar (la más reciente)
+            membresia_inactiva = Membresia.objects.filter(
+                cliente__dni=dni, 
+                activa=False
+            ).order_by('-fecha_fin', '-id').first()
 
             # Guardar o reactivar dentro de una transacción
             with transaction.atomic():
                 if membresia_inactiva:
-                    # Reactivar: actualizar campos relevantes con los del formulario temporal
+                    # Reactivar membresía existente
                     membresia = membresia_inactiva
-                    # Actualizar servicio y fechas/clases según lo enviado en el form
-                    membresia.servicio = temp_memb.servicio
-                    membresia.fecha_inicio = temp_memb.fecha_inicio or timezone.now()
-                    membresia.fecha_fin = temp_memb.fecha_fin
-                    # Si el formulario calcula clases_restantes, usarlo; si no, recalcular según servicio
-                    if hasattr(temp_memb, 'clases_restantes') and temp_memb.clases_restantes is not None:
-                        membresia.clases_restantes = temp_memb.clases_restantes
-                    else:
-                        # ejemplo: si servicio tiene cantidad_clases
-                        if getattr(membresia.servicio, 'cantidad_clases', None):
-                            membresia.clases_restantes = membresia.servicio.cantidad_clases
+                    
+                    # Actualizar datos del cliente
+                    cliente = membresia.cliente
+                    cliente.nombre = form.cleaned_data['nombre']
+                    cliente.apellido = form.cleaned_data['apellido']
+                    cliente.telefono = form.cleaned_data['telefono']
+                    cliente.emergencia = form.cleaned_data.get('emergencia', '')
+                    cliente.domicilio = form.cleaned_data.get('domicilio', '')
+                    cliente.email = form.cleaned_data.get('email', '')
+                    cliente.save()
+                    
+                    # Actualizar datos de la membresía
+                    servicio = form.cleaned_data['servicio']
+                    membresia.servicio = servicio
+                    membresia.fecha_inicio = timezone.now().date()
+                    membresia.fecha_fin = timezone.now().date() + timezone.timedelta(days=30)
+                    membresia.clases_restantes = getattr(servicio, 'cantidad_clases', 0)
                     membresia.activa = True
-                    # actualizar otros campos que el formulario pudiera haber enviado
-                    # (por ejemplo: precio, observaciones, etc.)
-                    for field in ['precio', 'observaciones']:
-                        if hasattr(temp_memb, field):
-                            setattr(membresia, field, getattr(temp_memb, field))
+                    membresia.observaciones = form.cleaned_data.get('observaciones', 'Ninguna')
                     membresia.save()
+                    
+                    mensaje_tipo = 'reactivada'
                 else:
-                    # No hay inactiva: crear nueva membresía como antes
+                    # Crear nueva membresía
                     membresia = form.save()
+                    mensaje_tipo = 'creada'
 
-                # Crear el cobro automáticamente (se cobra tanto en nueva inscripción como en reactivación)
+                # Crear el cobro automáticamente
                 servicio = membresia.servicio
                 cobro = Cobro.objects.create(
                     caja=caja,
@@ -91,7 +94,7 @@ def inscribir_cliente(request):
                     descripcion=f"Inscripción a {servicio.nombre}"
                 )
 
-                # Obtener método de pago desde el formulario (ej: un select en el form)
+                # Obtener método de pago desde el formulario
                 metodo_pago_id = request.POST.get('metodo_pago')
                 if metodo_pago_id:
                     metodo_pago = get_object_or_404(MetodoDePago, id=metodo_pago_id)
@@ -112,11 +115,11 @@ def inscribir_cliente(request):
 
             messages.success(
                 request,
-                f"Membresía {'reactivada' if membresia_inactiva else 'creada'} y cobro registrado para "
+                f"Membresía {mensaje_tipo} y cobro registrado para "
                 f"{membresia.cliente.apellido}, {membresia.cliente.nombre}. Vence el {membresia.fecha_fin} "
                 f"con {membresia.clases_restantes} clases asignadas."
             )
-            return redirect('lista_membresias')
+            return redirect('membresias:membresias_lista')
         else:
             messages.error(request, "Error en el formulario. Verifica los datos.")
     else:
@@ -175,7 +178,7 @@ def lista_membresias(request):
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'membresias_lista.html', {
-        'page_obj': page_obj,   # Usar solo esto en el template
+        'page_obj': page_obj,
         'query': query,
         'orden': orden,
         'form': form,
@@ -192,6 +195,7 @@ def borrar_membresia(request, membresia_id):
         messages.error(request, "La membresía no existe.")
     return redirect('membresias:membresias_lista')
 
+
 @login_required
 def menu(request):
     if request.method == 'POST':
@@ -206,17 +210,19 @@ def menu(request):
         form = MembresiaInscripcionForm()
     return render(request, 'membresias_menu.html', {'form': form})
 
+
 @login_required
 def membresias_detalle(request, pk):
     membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
 
-    # si querés mostrar el form precargado en el modal:
-    form = MembresiaInscripcionForm(instance=membresia)
+    # Crear formulario de edición precargado con los datos
+    form = MembresiaEdicionForm(instance=membresia)
 
     return render(request, 'membresias_detalle.html', {
         'membresia': membresia,
         'form': form,
     })
+
     
 @login_required
 def membresias_editar(request, pk):
@@ -224,16 +230,37 @@ def membresias_editar(request, pk):
 
     if request.method == 'POST':
         form = MembresiaEdicionForm(request.POST, instance=membresia)
+        
+        # Si es AJAX, responder con JSON
+        es_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        
         if form.is_valid():
-            membresia = form.save()
-
-            # recalcular clases_restantes en base al servicio
+            # Guardar cambios en el cliente y la membresía
+            form.save()
+            
+            # Recalcular clases_restantes si cambió el servicio
             if membresia.servicio.cantidad_clases > 0:
                 membresia.clases_restantes = membresia.servicio.cantidad_clases
                 membresia.save()
 
-            messages.success(request, "Membresía actualizada correctamente.")
-            return redirect('membresias:membresias_detalle', pk=membresia.pk)
+            if es_ajax:
+                return JsonResponse({
+                    'ok': True, 
+                    'message': 'Membresía actualizada correctamente.'
+                })
+            else:
+                messages.success(request, "Membresía actualizada correctamente.")
+                return redirect('membresias:membresias_detalle', pk=membresia.pk)
+        else:
+            # Si hay errores en el formulario
+            if es_ajax:
+                return JsonResponse({
+                    'ok': False,
+                    'errors': form.errors
+                })
+            else:
+                messages.error(request, "Error al actualizar. Verifica los datos.")
+                
     else:
         form = MembresiaEdicionForm(instance=membresia)
 
@@ -245,6 +272,7 @@ def membresias_editar(request, pk):
 
 @login_required
 def membresia_editar_partial(request, pk):
+    """Vista para cargar el formulario de edición vía AJAX (ya no es necesaria)"""
     membresia = get_object_or_404(Membresia.objects.select_related('cliente', 'servicio'), pk=pk)
 
     if request.method == 'POST':
@@ -258,7 +286,7 @@ def membresia_editar_partial(request, pk):
         else:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 html = render_to_string(
-                    'partials/_form_membresia.html',
+                    'partials/_form.html',
                     {'form': form, 'membresia': membresia},
                     request=request
                 )
@@ -267,7 +295,7 @@ def membresia_editar_partial(request, pk):
         form = MembresiaEdicionForm(instance=membresia)
 
     html = render_to_string(
-        'partials/_form_membresia.html',
+        'partials/_form.html',
         {'form': form, 'membresia': membresia},
         request=request
     )

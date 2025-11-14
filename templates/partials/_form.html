@@ -1,3 +1,4 @@
+
 <div class="modal fade" id="editarMembresiaModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content bg-dark text-light">
@@ -8,20 +9,61 @@
 
       <!-- Contenedor dinámico donde se inyectará el formulario -->
       <div id="modalBody">
-        <!-- El formulario se cargará aquí vía AJAX desde membresia_editar_partial -->
-         <form id="membresia-editar-form" method="post" action="{% url 'membresias:membresia_editar_partial' membresia.pk %}">
+        <form id="membresia-editar-form" method="post" action="{% url 'membresias:membresias_editar' membresia.pk %}">
           {% csrf_token %}
           <div class="modal-body">
             <div class="row g-3">
-              <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
-              <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
-              <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
-              <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
-              <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
-              <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
-              <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
-              <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
-              <div class="col-12">{{ form.observaciones.label_tag }} {{ form.observaciones }}</div>
+              <div class="col-md-6">
+                {{ form.nombre.label_tag }}
+                {{ form.nombre }}
+                {% if form.nombre.errors %}
+                  <div class="text-danger small">{{ form.nombre.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                {{ form.apellido.label_tag }}
+                {{ form.apellido }}
+                {% if form.apellido.errors %}
+                  <div class="text-danger small">{{ form.apellido.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                {{ form.dni.label_tag }}
+                {{ form.dni }}
+                {% if form.dni.errors %}
+                  <div class="text-danger small">{{ form.dni.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                {{ form.telefono.label_tag }}
+                {{ form.telefono }}
+                {% if form.telefono.errors %}
+                  <div class="text-danger small">{{ form.telefono.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                {{ form.emergencia.label_tag }}
+                {{ form.emergencia }}
+              </div>
+              <div class="col-md-6">
+                {{ form.domicilio.label_tag }}
+                {{ form.domicilio }}
+              </div>
+              <div class="col-md-6">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+              </div>
+              <div class="col-md-6">
+                {{ form.servicio.label_tag }}
+                {{ form.servicio }}
+                {% if form.servicio.errors %}
+                  <div class="text-danger small">{{ form.servicio.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-12">
+                {{ form.observaciones.label_tag }}
+                {{ form.observaciones }}
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -29,10 +71,7 @@
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           </div>
         </form>
-
       </div>
-
-
     </div>
   </div>
 </div>
@@ -40,48 +79,47 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('editarMembresiaModal');
-  const modalBody = document.getElementById('modalBody');
-
-  // Delegación: botones editar con data-pk
-  document.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.btn-editar-membresia');
-    if (!btn) return;
-    const pk = btn.dataset.pk;
-    if (!pk) return;
-
-    // cargar form vía AJAX
-    const url = `/membresias/${pk}/editar-partial/`;
-    const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    const html = await resp.text();
-    modalBody.innerHTML = html;
-
-    // mostrar modal (Bootstrap 5)
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
-
-    // enganchar submit del form ahora que existe en DOM
-    const form = modalBody.querySelector('form');
-    if (form) {
-      form.addEventListener('submit', async (ev) => {
-        ev.preventDefault();
-        const formData = new FormData(form);
+  
+  // Manejar el submit del formulario ya cargado en la página
+  const form = document.getElementById('membresia-editar-form');
+  if (form) {
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const formData = new FormData(form);
+      
+      try {
         const resp = await fetch(form.action, {
           method: 'POST',
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
           body: formData,
-          credentials: 'same-origin'
+          credentials: 'same-origin',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
         });
+        
         const data = await resp.json();
+        
         if (data.ok) {
-          bsModal.hide();
-          location.reload(); // refrescar lista o fila
+          // Cerrar modal
+          const bsModal = bootstrap.Modal.getInstance(modal);
+          if (bsModal) {
+            bsModal.hide();
+          }
+          // Recargar página para mostrar cambios
+          location.reload();
         } else {
-          modalBody.innerHTML = data.html; // reinyectar errores
+          // Mostrar errores sin recargar
+          if (data.html) {
+            document.getElementById('modalBody').innerHTML = data.html;
+          } else if (data.errors) {
+            alert('Error: ' + JSON.stringify(data.errors));
+          }
         }
-      }, { once: true });
-    }
-  });
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        alert('Hubo un error al guardar los cambios');
+      }
+    });
+  }
 });
 </script>
-
-

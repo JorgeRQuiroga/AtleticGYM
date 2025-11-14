@@ -4,6 +4,8 @@ from servicios.models import Servicio
 from .models import Membresia
 from django.utils import timezone
 from datetime import timedelta
+from django.core.exceptions import ValidationError
+import re
 
 class MembresiaInscripcionForm(forms.ModelForm):
     # Campos de Cliente
@@ -49,7 +51,47 @@ class MembresiaInscripcionForm(forms.ModelForm):
     class Meta:
         model = Membresia
         fields = ['servicio', 'observaciones']
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre', '').strip()
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', nombre):
+            raise ValidationError("El nombre solo puede contener letras y espacios.")
+        return nombre.title()
 
+    def clean_apellido(self):
+        apellido = self.cleaned_data.get('apellido', '').strip()
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', apellido):
+            raise ValidationError("El apellido solo puede contener letras y espacios.")
+        return apellido.title()
+
+    def clean_dni(self):
+        dni = self.cleaned_data.get('dni', '').strip()
+        if not dni.isdigit():
+            raise ValidationError("El DNI debe contener solo números.")
+        if len(dni) < 7 or len(dni) > 8:
+            raise ValidationError("El DNI debe tener entre 7 y 8 dígitos.")
+        return dni
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono', '').strip()
+        telefono_limpio = re.sub(r'[\s\-\(\)]', '', telefono)
+        if not re.match(r'^\+?[0-9]{8,15}$', telefono_limpio):
+            raise ValidationError("Ingrese un número de teléfono válido (mínimo 8 dígitos).")
+        return telefono
+
+    def clean_emergencia(self):
+        emergencia = self.cleaned_data.get('emergencia', '').strip()
+        if emergencia:
+            emergencia_limpio = re.sub(r'[\s\-\(\)]', '', emergencia)
+            if not re.match(r'^\+?[0-9]{8,15}$', emergencia_limpio):
+                raise ValidationError("Ingrese un número de emergencia válido (mínimo 8 dígitos).")
+        return emergencia
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if email and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            raise ValidationError("Ingrese un email válido.")
+        return email
+    
     def save(self, commit=True):
         servicio = self.cleaned_data['servicio']
         observaciones = self.cleaned_data.get('observaciones', '')
@@ -138,7 +180,47 @@ class MembresiaEdicionForm(forms.ModelForm):
             self.fields['emergencia'].initial = c.emergencia
             self.fields['domicilio'].initial = c.domicilio
             self.fields['email'].initial = c.email
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre', '').strip()
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', nombre):
+            raise ValidationError("El nombre solo puede contener letras y espacios.")
+        return nombre.title()
 
+    def clean_apellido(self):
+        apellido = self.cleaned_data.get('apellido', '').strip()
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', apellido):
+            raise ValidationError("El apellido solo puede contener letras y espacios.")
+        return apellido.title()
+
+    def clean_dni(self):
+        dni = self.cleaned_data.get('dni', '').strip()
+        if not dni.isdigit():
+            raise ValidationError("El DNI debe contener solo números.")
+        if len(dni) < 7 or len(dni) > 8:
+            raise ValidationError("El DNI debe tener entre 7 y 8 dígitos.")
+        return dni
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono', '').strip()
+        telefono_limpio = re.sub(r'[\s\-\(\)]', '', telefono)
+        if not re.match(r'^\+?[0-9]{8,15}$', telefono_limpio):
+            raise ValidationError("Ingrese un número de teléfono válido (mínimo 8 dígitos).")
+        return telefono
+
+    def clean_emergencia(self):
+        emergencia = self.cleaned_data.get('emergencia', '').strip()
+        if emergencia:
+            emergencia_limpio = re.sub(r'[\s\-\(\)]', '', emergencia)
+            if not re.match(r'^\+?[0-9]{8,15}$', emergencia_limpio):
+                raise ValidationError("Ingrese un número de emergencia válido (mínimo 8 dígitos).")
+        return emergencia
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        if email and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            raise ValidationError("Ingrese un email válido.")
+        return email
+    
     def save(self, commit=True):
         servicio = self.cleaned_data['servicio']
         observaciones = self.cleaned_data.get('observaciones', '')

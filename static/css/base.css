@@ -192,3 +192,29 @@ h1{
 .table-responsive { z-index: 0; 
   margin-bottom: 4rem !important;
 }
+
+/* Aplica a todos los inputs y textareas */
+.form-control::placeholder,
+.form-select::placeholder,
+textarea::placeholder {
+  color: #fff;        /* blanco */
+  opacity: 0.8;       /* opcional: un poco más tenue */
+}
+
+.form-select:focus {
+  border-color: #dc3545;    /* borde rojo al enfocar */
+  box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+}
+/* Aplica a todas las opciones dentro de selects */
+.form-select option {
+  background-color: rgba(255,255,255,0.02) !important; /* fondo gris/transparente */
+  color: #fff; /* texto blanco */
+}
+.form-select option:hover {
+  background-color: rgba(255,255,255,0.1) !important; /* fondo un poco más claro al pasar el mouse */
+}
+
+.bg-transparent option {
+    background-color: #212529 !important;
+    color: #fff !important;
+}
