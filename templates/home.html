@@ -2,22 +2,39 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-
-
 <div class="container py-5">
-    <h1 class="text-center fw-bold mb-4">
-        Panel Principal
-    </h1>
-    <p class="lead text-center">
+
+  {% if user.is_authenticated %}
+    <!-- Encabezado -->
+    <div class="text-center mb-5">
+      <h1 class="fw-bold text-danger">
+        <i class="bi bi-speedometer2"></i> Panel Principal
+      </h1>
+      <p class="lead text-light">
         Bienvenido al sistema que impulsa tu gimnasio: gestión clara, control total y enfoque en el crecimiento.
-    </p>
-    <hr class="my-4">
-    <div class="d-grid gap-3 col-md-6 mx-auto">
-      <a href="{% url 'cobros_lista' %}" class="btn btn-primary btn-lg"> Cobros</a>
+      </p>
+      <hr class="border-secondary">
     </div>
+
+    <!-- Accesos principales -->
+    <div class="d-grid gap-3 col-md-6 mx-auto">
+      <a href="{% url 'cobros_lista' %}" class="btn btn-outline-light btn-lg shadow-sm">
+        <i class="bi bi-cash-stack"></i> Cobros
+      </a>
+      <a href="{% url 'membresias:membresias_lista' %}" class="btn btn-outline-light btn-lg shadow-sm">
+        <i class="bi bi-card-checklist"></i> Membresías
+      </a>
+  
   {% else %}
-    <p>Por favor ingresa o regístrate para continuar.</p>
+    <!-- Mensaje para usuarios no autenticados -->
+    <div class="text-center text-light">
+      <h2 class="text-danger fw-bold mb-3">Acceso restringido</h2>
+      <p>Por favor ingresa o regístrate para continuar.</p>
+      <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+      </a>
+    </div>
   {% endif %}
+
 </div>
 {% endblock %}

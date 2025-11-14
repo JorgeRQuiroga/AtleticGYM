@@ -1,0 +1,39 @@
+<!-- Modal Efectivo -->
+<div class="modal fade" id="modalEfectivo" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title">Confirmar Pago en Efectivo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        ¿Se recibió el pago en efectivo?
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success" form="formCobro">Sí, confirmar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No se realizó</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Transferencia -->
+<div class="modal fade" id="modalTransferencia" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-bordo">
+        <h5 class="modal-title">Pago por Transferencia</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Escanee el QR o use el alias:</p>
+        <img src="{'#'}" alt="QR Transferencia" class="img-fluid mb-3">
+        <p><strong>Alias:</strong> gimnasio.atleticx</p>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success" form="formCobro">Confirmar Pago</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

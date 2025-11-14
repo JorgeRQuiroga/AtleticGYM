@@ -1,185 +1,181 @@
 {% extends "base.html" %}
 {% block title %}Cobros{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1>Cobros de membresias</h1>
-  <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#detallesCaja" aria-expanded="false" aria-controls="detallesCaja">
-    <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
-  </button>
-</div>
 
-<!-- Detalles de la caja colapsables -->
-<div class="collapse" id="detallesCaja">
-  <div class="card card-body bg-dark border-secondary mb-4">
-    <div class="row">
-      <div class="col-md-3"><strong>Usuario:</strong> {{ request.user.username }}</div>
-      <div class="col-md-3"><strong>Apertura:</strong> {{ caja.fecha_apertura }}</div>
-      <div class="col-md-3"><strong>Monto Inicial:</strong> ${{ caja.monto_apertura }}</div>
-      <div class="col-md-3"><strong>Total Actual:</strong> <span class="badge bg-success fs-6">${{ caja.total_en_caja }}</span></div>
-    </div>
-  </div>
-</div>
+<div class="container py-4">
 
-<!-- Botones de acción centrados -->
-{% include "partials/cobros_acciones.html" with active="cobros" %}
-<hr class="border-secondary">
-
-<!-- Sección de la lista de cobros colapsable -->
-<div class="container-fluid py-4">
+  <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="text-light">
-      {% if tipo == 'extracciones' %}
-        Historial de Extracciones
-      {% else %}
-        Historial de Cobros
-      {% endif %}
-    </h4>
-    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#listaCollapse" aria-expanded="true" aria-controls="listaCollapse">
-      Ocultar / Mostrar
+    <h1 class="fw-bold text-danger mb-0">
+      <i class="bi bi-cash-stack me-2"></i> Cobros
+    </h1>
+    <button class="btn btn-outline-light btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#detallesCaja" aria-expanded="false" aria-controls="detallesCaja">
+      <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
     </button>
   </div>
-  <!-- Filtros -->
-   <form method="get" class="row g-3 align-items-end mb-4">
-  <div class="col-md-6">
-    <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
-  </div>
-    <div class="col-md-3">
-      <select name="orden" class="form-select">
-        <option value="">-- Ordenar por --</option>
-        <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha: Reciente → Antiguo</option>
-        <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha: Antiguo → Reciente</option>
-        <option value="dni_desc" {% if orden == 'dni_desc' %}selected{% endif %}>DNI: Mayor → Menor</option>
-        <option value="dni_asc" {% if orden == 'dni_asc' %}selected{% endif %}>DNI: Menor → Mayor</option>
-      </select>
-    </div>
-    <div class="col-md-3 d-flex gap-2">
-      <button type="submit" class="btn btn-primary"><i class="bi bi-filter"></i> Aplicar
-</button>
-      <a href="{% url 'cobros_lista' %}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Limpiar</a>
-    </div>
-  </form>
 
-  <!-- Tabla dinámica -->
-  <div class="collapse show" id="listaCollapse">
-      <table class="table table-hover table-bordered align-middle text-center table-dark bg-dark text-light">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>DNI</th>
-            <th>Servicio</th>
-            <th>Precio</th>
-            <th>Método de Pago</th>
-            <th>Fecha y Hora</th>
-            <th>Usuario</th>
-            <th>Detalles</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in page_obj %}
-            <tr>
-              <td>
-                {% if c.cliente %}
-                  {{ c.cliente.apellido }} {{ c.cliente.nombre }}
-                {% else %}
-                  <span>-----</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if c.cliente %}
-                  {{ c.cliente.dni }}
-                {% else %}
-                  <span>-----</span>
-                {% endif %}
-              </td>
-              <td>{{ c.servicio.nombre }}</td>
-              <td>${{ c.servicio.precio }}</td>
-              <td>
-                {% for detalle in c.detalles_cobro.all %}
-                  {{ detalle.metodoDePago }}
-                {% empty %}
-                  <span class="text-muted">Sin detalle</span>
-                {% endfor %}
-              </td>
-              <td>{{ c.fecha_hora|date:"d/m/Y H:i" }}</td>
-              <td>{{ c.caja.usuario }}</td>
-              <td><a href="{% url 'cobros_detalle' c.id %}" class="btn btn-info btn-sm fw-bold">Ver</a></td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="8" class="text-center">No hay cobros registrados en esta caja.</td></tr>
-          {% endfor %}
-        </tbody>
-    
-      </table>
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-center custom-pagination">
-            {% if page_obj.has_previous %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&orden={{ orden }}">Anterior</a>
-              </li>
-            {% endif %}
-
-            <li class="page-item disabled">
-              <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-            </li>
-
-            {% if page_obj.has_next %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&orden={{ orden }}">Siguiente</a>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
-
-  </div>
-</div>
-
-<!-- Modal Inscripción -->
-<div class="modal fade" id="modalInscripcion" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-bordo">
-        <h5 class="modal-title text-primary">Inscribir Cliente</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="post" action="{% url 'membresias:membresias_inscribir' %}">
-        {% csrf_token %}
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-6">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
-            <div class="col-md-6">{{ form.apellido.label_tag }} {{ form.apellido }}</div>
-            <div class="col-md-6">{{ form.dni.label_tag }} {{ form.dni }}</div>
-            <div class="col-md-6">{{ form.telefono.label_tag }} {{ form.telefono }}</div>
-            <div class="col-md-6">{{ form.emergencia.label_tag }} {{ form.emergencia }}</div>
-            <div class="col-md-6">{{ form.domicilio.label_tag }} {{ form.domicilio }}</div>
-            <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
-            <div class="col-md-6">{{ form.servicio.label_tag }} {{ form.servicio }}</div>
-            <div class="col-12">{{ form.observaciones.label_tag }} {{ form.observaciones }}</div>
-
+  <!-- Detalles de la caja colapsables -->
+  <div class="collapse" id="detallesCaja">
+    <div class="card bg-dark text-light border-secondary mb-4">
+      <div class="card-body">
+        <div class="row gy-2">
+          <div class="col-md-3"><span class="text-danger fw-semibold">Usuario:</span> {{ request.user.username }}</div>
+          <div class="col-md-3"><span class="text-danger fw-semibold">Apertura:</span> {{ caja.fecha_apertura|date:"d/m/Y H:i" }}</div>
+          <div class="col-md-3"><span class="text-danger fw-semibold">Monto inicial:</span> ${{ caja.monto_apertura }}</div>
+          <div class="col-md-3">
+            <span class="text-danger fw-semibold">Total actual:</span>
+            <span class="badge bg-success ms-2 fs-6">${{ caja.total_en_caja }}</span>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal de decisión -->
-<div class="modal fade" id="modalDecision" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header">
-        <h5 class="modal-title">Tipo de Cobro</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  <!-- Botones de acción -->
+  {% include "partials/cobros_acciones.html" with active="cobros" %}
+  <hr class="border-secondary">
+
+  <!-- Sección de la lista de cobros -->
+  <div class="container-fluid py-2">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="text-danger mb-0">
+        {% if tipo == 'extracciones' %}
+          <i class="bi bi-box-arrow-down me-2"></i> Historial de Extracciones
+        {% else %}
+          <i class="bi bi-receipt me-2"></i> Historial de Cobros
+        {% endif %}
+      </h4>
+      <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#listaCollapse" aria-expanded="true" aria-controls="listaCollapse">
+        <i class="bi bi-eye me-1"></i> Ocultar / Mostrar
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <form method="get" class="row g-3 align-items-end mb-4">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
+        </div>
       </div>
-      <div class="modal-body text-center">
-        <p>¿Qué tipo de cobro desea registrar?</p>
-        <a href="{% url 'cobros_un_dia' %}" class="btn btn-outline-info me-2" id="btnClase">Por día de clase</a>
-        <a href="{% url 'cobros_nuevo' %}" class="btn btn-outline-success" id="btnCliente">Cliente con membresía</a>
+      <div class="col-md-3">
+        <select name="orden" class="form-select">
+          <option value="">-- Ordenar por --</option>
+          <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha ↓</option>
+          <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha ↑</option>
+          <option value="dni_desc" {% if orden == 'dni_desc' %}selected{% endif %}>DNI ↓</option>
+          <option value="dni_asc" {% if orden == 'dni_asc' %}selected{% endif %}>DNI ↑</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-filter me-1"></i> Aplicar
+        </button>
+        <a href="{% url 'cobros_lista' %}" class="btn btn-outline-light">
+          <i class="bi bi-x-circle me-1"></i> Limpiar
+        </a>
+      </div>
+    </form>
+
+    <!-- Tabla dinámica -->
+    <div class="collapse show" id="listaCollapse">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle text-center table-dark shadow-sm">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>DNI</th>
+              <th>Servicio</th>
+              <th>Precio</th>
+              <th>Método de pago</th>
+              <th>Fecha y hora</th>
+              <th>Usuario</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody class="text-light">
+            {% for c in page_obj %}
+              <tr>
+                <td>
+                  {% if c.cliente %}
+                    {{ c.cliente.apellido }} {{ c.cliente.nombre }}
+                  {% else %}
+                    <span class="text-muted">-----</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if c.cliente %}
+                    {{ c.cliente.dni }}
+                  {% else %}
+                    <span class="text-muted">-----</span>
+                  {% endif %}
+                </td>
+                <td>{{ c.servicio.nombre }}</td>
+                <td>${{ c.servicio.precio }}</td>
+                <td>
+                  {% for detalle in c.detalles_cobro.all %}
+                    <span class="badge bg-info text-dark me-1">{{ detalle.metodoDePago }}</span>
+                  {% empty %}
+                    <span class="text-muted">Sin detalle</span>
+                  {% endfor %}
+                </td>
+                <td>{{ c.fecha_hora|date:"d/m/Y H:i" }}</td>
+                <td>{{ c.caja.usuario }}</td>
+                <td>
+                  <a href="{% url 'cobros_detalle' c.id %}" class="btn btn-outline-info btn-sm fw-bold">
+                    <i class="bi bi-eye"></i> Ver
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="8" class="text-center text-muted">No hay cobros registrados en esta caja.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <nav aria-label="Paginación de cobros">
+        <ul class="pagination justify-content-center">
+        {% if page_obj.has_other_pages %}
+                <nav aria-label="Paginación de empleados">
+                  <ul class="pagination justify-content-center">
+                    {% for num in page_obj.paginator.page_range %}
+                      <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
+                          {{ num }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </nav>
+                {% endif %}        </ul>
+              </nav>
+            </div>
+          </div>
+
+  <!-- Modal Inscripción -->
+  {% include 'partials/modal_agregar_mem.html' %}
+
+  <!-- Modal de decisión -->
+  <div class="modal fade" id="modalDecision" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title text-danger"><i class="bi bi-question-circle me-2"></i> Tipo de Cobro</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="text-light mb-3">¿Qué tipo de cobro desea registrar?</p>
+          <a href="{% url 'cobros_un_dia' %}" class="btn btn-outline-info me-2">Por día de clase</a>
+          <a href="{% url 'cobros_nuevo' %}" class="btn btn-outline-success">Cliente con membresía</a>
+        </div>
       </div>
     </div>
   </div>
+
 </div>
 {% endblock %}

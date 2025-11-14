@@ -1,111 +1,165 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Servicios{% endblock %}
+
 {% block content %}
-  <h1>Servicios</h1>
+<div class="container-fluid py-4">
 
-  <a href="{% url 'servicios:servicio_agregar' %}" class="btn btn-primary mb-3">
-    + Nuevo Servicio
-  </a>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-danger mb-0">
+      <i class="bi bi-gear-fill me-2"></i> Servicios
+    </h1>
+    <a href="{% url 'servicios:servicio_agregar' %}" class="btn btn-outline-danger fw-bold">
+      <i class="bi bi-plus-circle me-1"></i> Nuevo Servicio
+    </a>
+  </div>
 
-<table class="table table-hover table-bordered align-middle text-center table-dark" id="tablaServicios">
-    <thead class="table-dark">
-      <tr>
-        <th>Nombre</th>
-        <th>Cantidad</th>
-        <th>Precio</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for servicio in page_obj %}
-        <tr>
-          <td>{{ servicio.nombre }}</td>
-          <td>{{ servicio.cantidad_clases }}</td>
-          <td>{{ servicio.precio }}</td>
-          <td>
-            {% if servicio.activo %}
-              <span class="badge bg-success">Activo</span>
+  <!-- Card contenedor -->
+  <div class="card bg-dark text-light shadow-sm border-secondary mb-4">
+    <div class="card-body">
+
+      <!-- Formulario de búsqueda y ordenamiento -->
+      <form method="get" class="row g-3 align-items-end mb-3">
+        <!-- Buscador -->
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-secondary text-light">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" name="q" value="{{ query|default_if_none:'' }}" 
+                   class="form-control text-white bg-transparent border-secondary" 
+                   placeholder="Buscar por nombre">
+          </div>
+        </div>
+
+        <!-- Ordenamiento -->
+        <div class="col-md-4">
+          <select name="orden" class="form-select text-white bg-transparent border-secondary">
+            <option value="">-- Ordenar --</option>
+            <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre ↑</option>
+            <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre ↓</option>
+            <option value="cantidad_asc" {% if orden == 'cantidad_asc' %}selected{% endif %}>Cantidad ↑</option>
+            <option value="cantidad_desc" {% if orden == 'cantidad_desc' %}selected{% endif %}>Cantidad ↓</option>
+            <option value="precio_asc" {% if orden == 'precio_asc' %}selected{% endif %}>Precio ↑</option>
+            <option value="precio_desc" {% if orden == 'precio_desc' %}selected{% endif %}>Precio ↓</option>
+          </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-md-4 d-flex gap-2">
+          <button type="submit" class="btn btn-danger flex-fill">
+            <i class="bi bi-filter me-1"></i> Aplicar
+          </button>
+          <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-outline-light flex-fill">
+            <i class="bi bi-x-circle me-1"></i> Limpiar
+          </a>
+        </div>
+      </form>
+
+      <!-- Tabla -->
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle text-center table-dark mb-0">
+          <thead>
+            <tr class="text-danger">
+              <th>Nombre</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for servicio in page_obj %}
+              <tr>
+                <td class="text-start">{{ servicio.nombre }}</td>
+                <td>{{ servicio.cantidad_clases }}</td>
+                <td>${{ servicio.precio }}</td>
+                <td>
+                  {% if servicio.activo %}
+                    <span class="badge bg-success">Activo</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'servicios:servicio_editar' servicio.pk %}" class="btn btn-outline-light btn-sm me-1">
+                    <i class="bi bi-pencil-square"></i> Editar
+                  </a>
+                  <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmarEliminar{{ servicio.pk }}">
+                    <i class="bi bi-trash-fill"></i> Borrar
+                  </button>
+                  <!-- Modal eliminación -->
+                  <div class="modal fade" id="confirmarEliminar{{ servicio.pk }}" tabindex="-1" aria-labelledby="modalLabel{{ servicio.pk }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content bg-dark text-light border-secondary">
+                        <div class="modal-header border-secondary">
+                          <h5 class="modal-title text-danger fw-bold" id="modalLabel{{ servicio.pk }}">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
+                          </h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p class="mb-0">¿Seguro que deseas borrar el servicio <strong class="text-warning">“{{ servicio.nombre }}”</strong>?</p>
+                        </div>
+                        <div class="modal-footer border-secondary">
+                          <form method="post" action="{% url 'servicios:servicio_eliminar' servicio.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger fw-bold">
+                              <i class="bi bi-trash-fill me-1"></i> Sí, eliminar
+                            </button>
+                          </form>
+                          <button type="button" class="btn btn-outline-light fw-bold" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">No hay servicios registrados.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de servicios" class="mt-3">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">«</a>
+              </li>
             {% else %}
-              <span class="badge bg-secondary">Inactivo</span>
+              <li class="page-item disabled"><span class="page-link bg-dark text-muted border-secondary">«</span></li>
             {% endif %}
-          </td>
-          <td>
-            <a href="{% url 'servicios:servicio_editar' servicio.pk %}" class="btn btn-sm btn-secondary">
-              Editar
-            </a>
-            <!-- Botón que abre el modal -->
-            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmarEliminar{{ servicio.pk }}">
-              Borrar
-            </button>
 
-            <!-- Modal -->
-            <div class="modal fade" id="confirmarEliminar{{ servicio.pk }}" tabindex="-1" aria-labelledby="modalLabel{{ servicio.pk }}" aria-hidden="true">
-              <div class="modal-dialog">
-                <div class="modal-content bg-dark text-light">
-                  <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-danger fw-bold" id="modalLabel{{ servicio.pk }}">
-                      <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Eliminación
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                  </div>
-                  <div class="modal-body">
-                    <p class="mb-0">
-                      ¿Seguro que deseas borrar el servicio 
-                      <strong class="text-warning">“{{ servicio.nombre }}”</strong>?
-                    </p>
-                  </div>
-                  <div class="modal-footer border-secondary">
-                    <form method="post" action="{% url 'servicios:servicio_eliminar' servicio.pk %}">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-danger fw-bold">
-                        <i class="bi bi-trash-fill me-1"></i> Sí, eliminar
-                      </button>
-                    </form>
-                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">
-                      <i class="bi bi-x-circle me-1"></i> Cancelar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {% for num in page_obj.paginator.page_range %}
+              <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                <a class="page-link {% if num == page_obj.number %}bg-danger text-white{% else %}bg-dark text-light border-secondary{% endif %}" 
+                   href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
+                  {{ num }}
+                </a>
+              </li>
+            {% endfor %}
 
-          </td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="5">No hay servicios registrados.</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  {% if page_obj.has_other_pages %}
-    <nav>
-      <ul class="pagination">
-        {% if page_obj.has_previous %}
-          <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a>
-          </li>
-        {% else %}
-          <li class="page-item disabled"><span class="page-link">«</span></li>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-          <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-          </li>
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-          <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a>
-          </li>
-        {% else %}
-          <li class="page-item disabled"><span class="page-link">»</span></li>
-        {% endif %}
-      </ul>
-    </nav>
-  {% endif %}
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link bg-dark text-light border-secondary" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">»</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link bg-dark text-muted border-secondary">»</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

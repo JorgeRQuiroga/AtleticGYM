@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views import View
@@ -6,72 +6,93 @@ from django.utils import timezone
 from .models import Asistencia
 from membresias.models import Membresia
 from datetime import timedelta
+from django.db.models import Q
+from django.utils.dateparse import parse_date
+
 
 @login_required
 def asistencia_opciones(request):
     # Vista que simplemente renderiza la página del menú de opciones de asistencia.
     return render(request, 'asistencia_opciones.html')
 
-class RegistrarAsistenciaView(View):
+def registrar_asistencia(request):
     template_name = 'asistencia_registrar.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+    if request.method == 'GET':
+        return render(request, template_name)
 
-    def post(self, request, *args, **kwargs):
-        dni = request.POST.get('dni', '').strip()
-        if not dni.isdigit():
-            messages.error(request, 'Por favor, ingrese un DNI válido (solo números).')
-            return render(request, self.template_name)
+    elif request.method == 'POST':
+        dni_str = request.POST.get('dni', '').strip()
+        dni_str = dni_str.replace('.', '').replace('-', '')
 
         try:
-            membresia = Membresia.objects.select_related('cliente', 'servicio').get(
-                cliente__dni=dni, activa=True
-            )
+            dni = int(dni_str)
+        except ValueError:
+            messages.error(request, 'Por favor, ingrese un DNI válido (solo números).')
+            return redirect('asistencias:asistencia_registrar')
+
+        try:
+            membresia = Membresia.objects.select_related('cliente', 'servicio').get(cliente__dni=dni)
         except Membresia.DoesNotExist:
-            messages.error(request, f'No se encontró una membresía activa para el DNI {dni}.')
-            return render(request, self.template_name)
+            messages.error(request, f'No se encontró ninguna membresía para el DNI {dni}.')
+            return redirect('asistencias:asistencia_registrar')
 
         hoy = timezone.now().date()
 
-        # 1. Verificar fecha de vencimiento
-        if membresia.fecha_fin < hoy:
-            messages.warning(request, f'Hola {membresia.cliente.nombre}, tu membresía ha vencido.')
-            return render(request, self.template_name, {'membresia': membresia})
+        # Validar membresía activa
+        if not membresia.activa or membresia.fecha_fin < hoy:
+            messages.warning(request, f'Hola {membresia.cliente.nombre}, tu membresía no está activa.')
+            return redirect('asistencias:asistencia_registrar')
 
-        # 2. Verificar clases restantes
-        if membresia.servicio.cantidad_clases > 0 and membresia.clases_restantes <= 0:
-            messages.warning(request, f'Hola {membresia.cliente.nombre}, no te quedan clases disponibles.')
-            return render(request, self.template_name, {'membresia': membresia})
+        # Registrar asistencia
+        Asistencia.objects.create(membresia=membresia, fecha_hora=timezone.now())
 
-        # 3. Verificar límite semanal
-        # asumimos que tu modelo Servicio tiene un campo `veces_por_semana`
-        if hasattr(membresia.servicio, 'veces_por_semana') and membresia.servicio.veces_por_semana:
-            inicio_semana = hoy - timedelta(days=hoy.weekday())  # lunes
-            fin_semana = inicio_semana + timedelta(days=6)       # domingo
-
-            usadas_esta_semana = membresia.asistencias.filter(
-                fecha__range=(inicio_semana, fin_semana)
-            ).count()
-
-            if usadas_esta_semana >= membresia.servicio.veces_por_semana:
-                messages.warning(
-                    request,
-                    f'Hola {membresia.cliente.nombre}, ya alcanzaste tu límite semanal '
-                    f'de {membresia.servicio.veces_por_semana} asistencias.'
-                )
-                return render(request, self.template_name, {'membresia': membresia})
-
-        # 4. Registrar asistencia
-        Asistencia.objects.create(membresia=membresia)
-
+        # Actualizar clases restantes si corresponde
         if membresia.servicio.cantidad_clases > 0:
             membresia.clases_restantes -= 1
             membresia.save()
 
-        return render(request, self.template_name, {'membresia': membresia})
-
+        messages.success(request, f"Asistencia registrada correctamente para {membresia.cliente.nombre}.")
+        return redirect('asistencias:asistencia_registrar')
+           
 @login_required
 def lista_asistencias(request):
-    asistencias = Asistencia.objects.select_related('membresia__cliente', 'membresia__servicio').order_by('-fecha_hora')[:100]
-    return render(request, 'asistencia_lista.html', {'asistencias': asistencias})
+    busqueda = request.GET.get('busqueda', '').strip()
+    fecha_str = request.GET.get('fecha', '').strip()
+    orden = request.GET.get('orden', '')
+
+    asistencias = Asistencia.objects.select_related('membresia__cliente', 'membresia__servicio')
+
+    if busqueda:
+        asistencias = asistencias.filter(
+            Q(membresia__cliente__nombre__icontains=busqueda) |
+            Q(membresia__cliente__apellido__icontains=busqueda)
+        )
+
+    if fecha_str:
+        fecha = parse_date(fecha_str)
+        if fecha:
+            asistencias = asistencias.filter(fecha_hora__date=fecha)
+
+    # Ordenamientos
+    if orden == 'nombre_asc':
+        asistencias = asistencias.order_by('membresia__cliente__nombre')
+    elif orden == 'nombre_desc':
+        asistencias = asistencias.order_by('-membresia__cliente__nombre')
+    elif orden == 'clases_asc':
+        asistencias = asistencias.order_by('membresia__clases_restantes')
+    elif orden == 'clases_desc':
+        asistencias = asistencias.order_by('-membresia__clases_restantes')
+    elif orden == 'fecha_asc':
+        asistencias = asistencias.order_by('fecha_hora')
+    else:
+        asistencias = asistencias.order_by('-fecha_hora')
+
+    asistencias = asistencias[:100]
+
+    return render(request, 'asistencia_lista.html', {
+        'asistencias': asistencias,
+        'busqueda': busqueda,
+        'fecha': fecha_str,
+        'orden': orden,
+    })

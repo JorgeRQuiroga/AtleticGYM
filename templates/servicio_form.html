@@ -1,22 +1,81 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Servicios{% endblock %}
+
 {% block content %}
-  <h1>
-    {% if servicio %}Editar Servicio{% else %}Nuevo Servicio{% endif %}
-  </h1>
+<div class="container-fluid py-4">
 
-  {% if messages %}
-    {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-danger mb-0">
+      {% if servicio %}
+        <i class="bi bi-pencil-square me-2"></i> Editar Servicio
+      {% else %}
+        <i class="bi bi-plus-circle me-2"></i> Nuevo Servicio
+      {% endif %}
+    </h1>
+  </div>
 
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    {{ form.non_field_errors }}
-    <button type="submit" class="btn btn-success">Guardar</button>
-    <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-link">Cancelar</a>
-  </form>
+  <!-- Card contenedor -->
+  <div class="card bg-dark text-light shadow-sm mb-4 border-secondary">
+    <div class="card-body">
+
+      <!-- Mensajes -->
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+            {{ msg }}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Formulario -->
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label text-danger fw-semibold">{{ form.nombre.label }}</label>
+          {{ form.nombre }}
+          {% if form.nombre.errors %}
+            <div class="text-warning small">{{ form.nombre.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-danger fw-semibold">{{ form.dias_semana.label }}</label>
+          {{ form.dias_semana }}
+          {% if form.dias_semana.errors %}
+            <div class="text-warning small">{{ form.dias_semana.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-danger fw-semibold">{{ form.precio.label }}</label>
+          {{ form.precio }}
+          {% if form.precio.errors %}
+            <div class="text-warning small">{{ form.precio.errors }}</div>
+          {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between mt-4">
+          <button type="submit" class="btn btn-danger fw-bold">
+            <i class="bi bi-save me-1"></i> Guardar
+          </button>
+          <a href="{% url 'servicios:servicio_listar' %}" class="btn btn-outline-light fw-bold">
+            <i class="bi bi-x-circle me-1"></i> Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   
   <!-- Usaremos el mismo CSS que el login para el fondo -->
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+  <link rel="stylesheet" href="{% static 'css/asistencia.css' %}">
   <style>
     /* Pequeño ajuste para que el contenido no se pegue a los bordes en móviles */
     .container-asistencia {
@@ -21,9 +21,102 @@
 </head>
 <body class="login-bg d-flex justify-content-center align-items-center">
 
-    <div class="container-asistencia">
-        {% block content %}{% endblock %}
+  {% if messages %}
+  <!-- Modal de mensajes -->
+  <div class="modal fade" id="messagesModal" tabindex="-1" aria-labelledby="messagesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light border-secondary shadow-lg">
+        
+        <!-- Encabezado -->
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title d-flex align-items-center" id="messagesModalLabel">
+            {% with first=messages.0 %}
+              {% if 'error' in first.tags %}
+                <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> Alerta
+              {% elif 'success' in first.tags %}
+                <i class="bi bi-check-circle-fill text-success me-2"></i> Éxito
+              {% elif 'warning' in first.tags %}
+                <i class="bi bi-exclamation-circle-fill text-warning me-2"></i> Atención
+              {% else %}
+                <i class="bi bi-info-circle-fill text-info me-2"></i> Información
+              {% endif %}
+            {% endwith %}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="modal-body">
+          <ul class="list-unstyled mb-0" aria-live="polite">
+            {% for message in messages %}
+              <li class="mb-2 d-flex gap-2 align-items-start">
+                {% if 'error' in message.tags %}
+                  <i class="bi bi-exclamation-triangle-fill text-danger fs-5 mt-1"></i>
+                {% elif 'success' in message.tags %}
+                  <i class="bi bi-check-circle-fill text-success fs-5 mt-1"></i>
+                {% elif 'warning' in message.tags %}
+                  <i class="bi bi-exclamation-circle-fill text-warning fs-5 mt-1"></i>
+                {% else %}
+                  <i class="bi bi-info-circle-fill text-info fs-5 mt-1"></i>
+                {% endif %}
+                <span class="flex-grow-1">{{ message }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i> Cerrar
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
+
+ <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var modalEl = document.getElementById('messagesModal');
+    if (modalEl) {
+      var modal = new bootstrap.Modal(modalEl);
+      modal.show();
+
+      // Cerrar automáticamente a los 3 segundos (3000 ms)
+      setTimeout(function () {
+        modal.hide();
+      }, 2000);
+    }
+  });
+</script>
+{% endif %}
+
+
+
+  <!-- Fallback para usuarios sin JS: usamos forloop.first para obtener la clase -->
+  <noscript>
+    {% for message in messages %}
+      {% if forloop.first %}
+        <div class="alert alert-{{ message.tags }} mb-3">
+          {% for m in messages %}{{ m }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </noscript>
+
+  
+
+  <div class="container py-5">
+  <div class="mx-auto" style="max-width: 520px;">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+
+
+    <div class="container-asistencia">
+      </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

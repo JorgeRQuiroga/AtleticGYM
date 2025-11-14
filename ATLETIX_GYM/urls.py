@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 from ATLETIX_GYM import views
+from django.conf.urls import handler403
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,4 +15,7 @@ urlpatterns = [
     path('membresias/', include('membresias.urls')),
     path('asistencias/', include('asistencias.urls')),
     path('empleados/', include('empleados.urls')),
+    path('graficos/', include('graficos.urls'))
 ]
+
+handler403 = 'login.views.error_403'

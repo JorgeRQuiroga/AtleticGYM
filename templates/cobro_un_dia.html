@@ -1,27 +1,173 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Cobro por Clase{% endblock %}
+
 {% block content %}
-<div class="container my-4">
-  <h2 class="mb-3">Registrar Cobro por Clase</h2>
-  <p><strong>Usuario:</strong> {{ request.user.username }}</p>
-  <p><strong>Caja abierta desde:</strong> {{ caja.fecha_apertura }}</p>
+<div class="container py-4">
 
-  <form method="post" class="card p-4 bg-dark text-light shadow">
-    {% csrf_token %}
-    <div class="mb-3">
-        {{ form.dni.label_tag }} {{ form.dni }}
-    </div>
-    <div class="mb-3">
-      {{ form.servicio.label_tag }} {{ form.servicio }}
-    </div>
-    <div class="mb-3">
-      {{ form.metodo_pago.label_tag }} {{ form.metodo_pago }}
-    </div>
-    <div class="d-flex gap-2">
-      <button type="submit" class="btn btn-success">Confirmar Cobro</button>
-      <a href="{% url 'cobros_lista' %}" class="btn btn-danger">Cancelar</a>
-    </div>
+  <!-- Encabezado -->
+  <div class="text-center mb-4">
+    <h1 class="fw-bold text-danger">
+      <i class="bi bi-calendar-day me-2"></i> Cobro por Clase
+    </h1>
+    <p class="text-light mb-0">Registrar cobro rápido y seguro desde la caja activa</p>
+    <small class="text-muted">
+      Usuario: <span class="text-light">{{ request.user.get_full_name|default:request.user.username }}</span>
+      · Caja abierta desde: <span class="text-light">{{ caja.fecha_apertura|date:"d/m/Y H:i" }}</span>
+    </small>
+  </div>
 
-  </form>
+  <!-- Formulario -->
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <form id="formCobro" method="post" class="card bg-dark text-light shadow-lg border-0 p-4 needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="row g-3">
+
+          <!-- DNI con búsqueda rápida -->
+          <div class="col-12">
+            <label for="{{ form.dni.id_for_label }}" class="form-label text-danger">DNI</label>
+            <div class="input-group">
+              {{ form.dni }}
+              <button type="button" class="btn btn-outline-light" title="Buscar cliente" id="btnBuscarCliente">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+            {% if form.dni.errors %}
+              <div class="form-text text-danger small">{{ form.dni.errors|striptags }}</div>
+            {% else %}
+              <div class="form-text text-muted small">Ingrese DNI para buscar o registrar el cobro manualmente.</div>
+            {% endif %}
+          </div>
+
+          <!-- Servicio -->
+          <div class="col-md-6">
+            <label for="{{ form.servicio.id_for_label }}" class="form-label text-danger">Servicio</label>
+            {{ form.servicio }}
+            {% if form.servicio.errors %}
+              <div class="form-text text-danger small">{{ form.servicio.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Método de pago -->
+          <div class="col-md-6">
+            <label for="{{ form.metodo_pago.id_for_label }}" class="form-label text-danger">Método de pago</label>
+            {{ form.metodo_pago }}
+            {% if form.metodo_pago.errors %}
+              <div class="form-text text-danger small">{{ form.metodo_pago.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <!-- Acciones -->
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-success" id="btnPagar">
+            <i class="bi bi-check-circle me-1"></i> Confirmar Cobro
+          </button>
+
+          <a href="{% url 'cobros_lista' %}" class="btn btn-outline-light">
+            <i class="bi bi-x-circle me-1"></i> Cancelar
+          </a>
+        </div>
+
+        <!-- Mensajes de validación accesibles -->
+        <div aria-live="polite" class="mt-3">
+          {% if form.errors %}
+            <div class="alert alert-danger mb-0 py-2">Por favor corrija los errores del formulario.</div>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- Modal de confirmación único y dinámico -->
+<div class="modal fade" id="modalConfirm" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title text-danger">Confirmar cobro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalConfirmBody" class="text-light">
+          ¿Desea confirmar este cobro?
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="modalConfirmBtn" data-confirm-submit>Confirmar</button>
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script: abre modal según método de pago y envía el formulario al confirmar -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btnPagar = document.getElementById('btnPagar');
+  const form = document.getElementById('formCobro');
+  const metodo = document.querySelector('[name="metodo_pago"]');
+  const modalEl = document.getElementById('modalConfirm');
+  const modalBody = modalEl ? modalEl.querySelector('#modalConfirmBody') : null;
+  const modalTitle = modalEl ? modalEl.querySelector('.modal-title') : null;
+  const modalConfirmBtn = modalEl ? modalEl.querySelector('[data-confirm-submit]') : null;
+
+  if (!btnPagar || !form || !modalEl) return;
+
+  const modalInstance = new bootstrap.Modal(modalEl);
+
+  btnPagar.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const val = metodo ? (metodo.value || '').toLowerCase() : '';
+
+    // Contenido dinámico según método de pago
+    if (val.includes('efectivo')) {
+      if (modalTitle) modalTitle.textContent = 'Confirmar pago en efectivo';
+      if (modalBody) modalBody.innerHTML = '<p class="mb-0">¿Se recibió el pago en efectivo?</p>';
+      modalInstance.show();
+      return;
+    }
+
+    if (val.includes('transfer') || val.includes('transferencia') || val.includes('qr')) {
+      if (modalTitle) modalTitle.textContent = 'Pago por transferencia';
+      if (modalBody) modalBody.innerHTML = `
+        <p class="mb-2">Escanee el QR o use el alias para confirmar la transferencia.</p>
+        <div class="text-center mb-2">
+          <img src="{% static 'img/qr_transferencia.png' %}" alt="QR Transferencia" class="img-fluid" style="max-height:200px;">
+        </div>
+        <p class="mb-0"><strong>Alias:</strong> <span class="text-light">gimnasio.atleticx</span></p>
+      `;
+      modalInstance.show();
+      return;
+    }
+
+    // Mensaje genérico si no se reconoce el método
+    if (modalTitle) modalTitle.textContent = 'Confirmar cobro';
+    if (modalBody) modalBody.innerHTML = '<p class="mb-0">¿Desea confirmar este cobro?</p>';
+    modalInstance.show();
+  });
+
+  // Enviar formulario al confirmar en el modal
+  if (modalConfirmBtn) {
+    modalConfirmBtn.addEventListener('click', function () {
+      // cerrar modal antes de enviar
+      modalInstance.hide();
+      // pequeño delay para evitar conflictos visuales
+      setTimeout(() => form.submit(), 150);
+    });
+  }
+
+  // foco en DNI si existe
+  try {
+    const dniId = "{{ form.dni.id_for_label }}";
+    const dniEl = document.getElementById(dniId);
+    if (dniEl) dniEl.focus();
+  } catch (err) { /* no bloquear si falla */ }
+});
+</script>
 {% endblock %}

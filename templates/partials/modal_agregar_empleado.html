@@ -1,0 +1,58 @@
+<!-- Modal -->
+<div class="modal fade" id="modalEmpleado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-light border-0 shadow-lg">
+      
+      <!-- Header con color corporativo -->
+      <div class="modal-header bg-primary text-white border-0">
+        <h5 class="modal-title">
+          <i class="bi bi-person-plus"></i> Registrar Empleado
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="post" action="{% url 'empleado_agregar' %}" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="modal-body">
+          {{ form.non_field_errors }}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="{{ form.dni.id_for_label }}" class="form-label text-light">DNI</label>
+              {{ form.dni }}
+              {{ form.dni.errors }}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.nombre.id_for_label }}" class="form-label text-light">Nombre</label>
+              {{ form.nombre }}
+              {{ form.nombre.errors }}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.apellido.id_for_label }}" class="form-label text-light">Apellido</label>
+              {{ form.apellido }}
+              {{ form.apellido.errors }}
+            </div>
+            <div class="col-md-6">
+              <label for="{{ form.telefono.id_for_label }}" class="form-label text-light">Teléfono</label>
+              {{ form.telefono }}
+              {{ form.telefono.errors }}
+            </div>
+            <div class="col-12">
+              <label for="{{ form.domicilio.id_for_label }}" class="form-label text-light">Domicilio</label>
+              {{ form.domicilio }}
+              {{ form.domicilio.errors }}
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-check-circle"></i> Guardar
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

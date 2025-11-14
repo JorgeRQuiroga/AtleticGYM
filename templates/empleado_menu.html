@@ -1,80 +1,43 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="container py-5 text-center">
-  <h1 class="mb-4">Menú de Empleados</h1>
+{% load widget_tweaks %}
 
-  <div class="d-flex flex-column align-items-center gap-3">
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <h1 class="fw-bold text-primary">
+      <i class="bi bi-person-workspace"></i> Menú de Empleados
+    </h1>
+    <p class="text-muted">Gestione el personal de forma rápida y sencilla</p>
+  </div>
 
-    <!-- Botón para ir a la página de alta de empleado -->
-  <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
-    <i class="bi bi-person-plus"></i> Nuevo Empleado
-  </button>
+  <div class="row justify-content-center g-4">
+    <!-- Botón para alta de empleado -->
+    <div class="col-md-4">
+      <button type="button" class="btn btn-outline-primary btn-lg w-100 shadow-sm" 
+              data-bs-toggle="modal" data-bs-target="#modalEmpleado">
+        <i class="bi bi-person-plus"></i> Nuevo Empleado
+      </button>
+    </div>
+
     <!-- Botón para listar empleados -->
-    <a href="{% url 'empleado_lista' %}" class="btn btn-primary btn-lg">
-       <i class="bi bi-people"></i>
-    Mostrar todos los empleados
-    </a>
+    <div class="col-md-4">
+      <a href="{% url 'empleado_lista' %}" class="btn btn-outline-success btn-lg w-100 shadow-sm">
+        <i class="bi bi-people"></i> Mostrar todos los empleados
+      </a>
+    </div>
 
     <!-- Botón para volver al home -->
-    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg w-50">
-       Volver al Inicio
-    </a>
+    <div class="col-md-4">
+      <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100 shadow-sm">
+        <i class="bi bi-house-door"></i> Volver al Inicio
+      </a>
+    </div>
   </div>
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="modalEmpleado" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content bg-dark text-light">
-      <div class="modal-header border-secondary">
-        <h5 class="modal-title text-primary">Registrar Empleado</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
 
-      <form method="post" action="{% url 'empleado_agregar' %}">
-        {% csrf_token %}
-        <div class="modal-body">
-          {{ form.non_field_errors }}
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="{{ form.dni.id_for_label }}" class="form-label">DNI</label>
-              {{ form.dni }}
-              {{ form.dni.errors }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
-              {{ form.nombre }}
-              {{ form.nombre.errors }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ form.apellido.id_for_label }}" class="form-label">Apellido</label>
-              {{ form.apellido }}
-              {{ form.apellido.errors }}
-            </div>
-            <div class="col-md-6">
-              <label for="{{ form.telefono.id_for_label }}" class="form-label">Teléfono</label>
-              {{ form.telefono }}
-              {{ form.telefono.errors }}
-            </div>
-            <div class="col-12">
-              <label for="{{ form.domicilio.id_for_label }}" class="form-label">Domicilio</label>
-              {{ form.domicilio }}
-              {{ form.domicilio.errors }}
-            </div>
-          </div>
-        </div>
+{% include 'partials/modal_agregar_empleado.html' %}
 
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">
-            <i class="bi bi-check-circle"></i> Guardar
-          </button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            <i class="bi bi-x-circle"></i> Cancelar
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 {% endblock %}
