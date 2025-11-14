@@ -7,15 +7,20 @@
 
   <div class="row g-3 mt-4">
     <div class="col-md-4">
-      <a href="{% url 'graficos:graficos_asistencias' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+      <a href="{% url 'graficos:graficos_asistencia' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
         <i class="bi bi-person-check-fill fs-5"></i> Gráfico de Asistencias
       </a>
     </div>
     <div class="col-md-4">
-      <a href="#" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+      <a href="{% url 'graficos:graficos_membresias' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
         <i class="bi bi-card-checklist fs-5"></i> Gráfico de Membresías
       </a>
     </div>
+    <div class="col-md-4">
+      <a href="{% url 'graficos:graficos_ingresos' %}" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
+        <i class="bi bi-currency-dollar fs-5"></i> Gráfico de Ingresos
+      </a>
+    </div>  
     <div class="col-md-4">
       <a href="#" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2">
         <i class="bi bi-people-fill fs-5"></i> Gráfico de Empleados

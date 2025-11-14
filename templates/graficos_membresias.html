@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+        <h2 class="text-center mb-5">📈 Graficos de Membresías</h2>
+
+        <!-- Gráfico 1: Distribución de membresías activas -->
+        <div class="card mb-4">
+            <div class="card-body-full bg-dark text-light">
+                <h4 class="text-center mb-3">Distribución de Membresías Activas</h4>
+                <canvas id="graficoDistribucion"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Altas vs Bajas (últimos 12 meses) -->
+        <div class="card mb-4">
+            <div class="card-body-full bg-dark text-light">
+                <h4 class="text-center mb-3">Altas vs Bajas Mensuales (últimos 12 meses)</h4>
+                <canvas id="graficoAltasBajas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <small>Generado automáticamente - {{ now|date:"d/m/Y" }}</small>
+    </footer>
+
+    <script>
+        // ======== Gráfico 1: Distribución de membresías activas ========
+        const ctxDistribucion = document.getElementById('graficoDistribucion').getContext('2d');
+        new Chart(ctxDistribucion, {
+            type: 'doughnut',
+            data: {
+                labels: {{ labels_membresias|safe }},
+                datasets: [{
+                    label: 'Membresías activas',
+                    data: {{ data_membresias|safe }},
+                    backgroundColor: [
+                        '#007bff', '#28a745', '#ffc107', '#dc3545',
+                        '#17a2b8', '#6610f2', '#fd7e14', '#20c997'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // ======== Gráfico 2: Altas vs Bajas mensuales ========
+        const ctxAltasBajas = document.getElementById('graficoAltasBajas').getContext('2d');
+        new Chart(ctxAltasBajas, {
+            type: 'bar',
+            data: {
+                labels: {{ meses|safe }},
+                datasets: [
+                    {
+                        label: 'Altas',
+                        data: {{ altas_data|safe }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Bajas',
+                        data: {{ bajas_data|safe }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Cantidad' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Mes' }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+
+{% endblock %}

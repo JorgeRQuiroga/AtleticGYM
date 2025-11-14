@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+      <h3 class="text-center mb-5">📊 Gráficos de Ingresos</h3>
+
+
+      <!-- Ingresos Semanales -->
+    <div class="card mb-4">
+        <div class="card-body-full bg-dark text-light">
+          <h5 class="text-center mb-3">Ingresos Semanales</h5>
+          <canvas id="graficoSemanal"></canvas>
+        </div>
+    </div>
+
+      <!-- Ingresos Anuales -->
+    <div class="card mb-4">
+        <div class="card-body-full bg-dark text-light">
+          <h5 class="text-center mb-3">Ingresos Anuales</h5>
+          <canvas id="graficoAnual"></canvas>
+        </div>
+    </div>
+
+
+  <script>
+    // --- Semanal ---
+    new Chart(document.getElementById('graficoSemanal'), {
+      type: 'bar',
+      data: {
+        labels: {{ labels_semanales|safe }},
+        datasets: [{
+          label: 'Ingresos Semanales ($)',
+          data: {{ data_semanales|safe }},
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // --- Anual ---
+    new Chart(document.getElementById('graficoAnual'), {
+      type: 'line',
+      data: {
+        labels: {{ labels_anuales|safe }},
+        datasets: [{
+          label: 'Ingresos Anuales ($)',
+          data: {{ data_anuales|safe }},
+          fill: true,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)', 
+          tension: 0.3
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+{% endblock %}
