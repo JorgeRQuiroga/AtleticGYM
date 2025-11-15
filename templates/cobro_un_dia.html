@@ -7,12 +7,12 @@
 
   <!-- Encabezado -->
   <div class="text-center mb-4">
-    <h1 class="fw-bold text-danger">
+    <h1 class="fw-bold">
       <i class="bi bi-calendar-day me-2"></i> Cobro por Clase
     </h1>
     <p class="text-light mb-0">Registrar cobro rápido y seguro desde la caja activa</p>
-    <small class="text-muted">
-      Usuario: <span class="text-light">{{ request.user.get_full_name|default:request.user.username }}</span>
+    <small class="text-white">
+      Usuario: <span class="text-white">{{ request.user.get_full_name|default:request.user.username }}</span>
       · Caja abierta desde: <span class="text-light">{{ caja.fecha_apertura|date:"d/m/Y H:i" }}</span>
     </small>
   </div>

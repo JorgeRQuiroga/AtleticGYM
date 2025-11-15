@@ -11,8 +11,8 @@
       <i class="bi bi-plus-circle me-2"></i> Nuevo Cobro
     </h1>
     <p class="text-light mb-1">Registrar cobro rápido desde la caja activa</p>
-    <div class="small text-muted">
-      <span class="me-3"><strong class="text-light">Usuario:</strong> {{ request.user.username }}</span>
+    <div class="small text-white">
+      <span class="me-3"><strong class="text-white">Usuario:</strong> {{ request.user.username }}</span>
       <span><strong class="text-light">Caja abierta desde:</strong> {{ caja.fecha_apertura }}</span>
     </div>
   </div>
@@ -29,22 +29,19 @@
           <!-- DNI con autocompletado -->
           <div class="col-12 position-relative">
             <label for="id_dni" class="form-label text-danger">DNI del Cliente</label>
-            <div class="input-group">
-              <input type="text" id="id_dni" name="dni" class="form-control bg-opacity-10" placeholder="Ingrese DNI..." autocomplete="off">
-              <button type="button" class="btn btn-outline-light" id="btnBuscarCliente" title="Buscar cliente">
-                <i class="bi bi-search"></i>
-              </button>
+            <div class="input-group bg-transparent">
+              <input type="text" id="id_dni" name="dni" class="form-control bg-opacity-10 bg-transparent" placeholder="Ingrese DNI..." autocomplete="off">
             </div>
             <div class="form-text text-muted small">Escriba al menos 2 dígitos para buscar clientes existentes.</div>
 
             <ul id="resultadosDNI"
                 class="list-group position-absolute w-100 mt-1"
-                style="z-index:1050; max-height:220px; overflow:auto; display:none;">
+                style="z-index:1050; max-height:220px; overflow:auto; display:none; background-color: #212529">
             </ul>
           </div>
 
           <!-- Método de pago -->
-          <div class="col-md-6">
+          <div class="col-md-6 bg-transparent">
             <label class="form-label text-danger">{{ form.metodo_pago.label }}</label>
             {{ form.metodo_pago }}
             {% if form.metodo_pago.errors %}
@@ -53,10 +50,10 @@
           </div>
 
           <!-- Servicio -->
-          <div class="col-md-6">
+          <div class="col-md-6 bg-transparent">
             <label class="form-label text-danger">{{ form.servicio.label }}</label>
             {{ form.servicio }}
-            <div class="form-text text-muted small">Modificar solo si el cliente lo solicita.</div>
+            <div class="text-white">Modificar solo si el cliente lo solicita.</div>
             {% if form.servicio.errors %}
               <div class="form-text text-danger small">{{ form.servicio.errors|striptags }}</div>
             {% endif %}
