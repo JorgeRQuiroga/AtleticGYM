@@ -1,3 +1,4 @@
+{% load static %}
 <!-- Modal Efectivo -->
 <div class="modal fade" id="modalEfectivo" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
@@ -27,7 +28,7 @@
       </div>
       <div class="modal-body text-center">
         <p>Escanee el QR o use el alias:</p>
-        <img src="{'#'}" alt="QR Transferencia" class="img-fluid mb-3">
+        <img src="{% static 'img/standard_qr-kode.webp' %}" alt="QR Transferencia" class="img-fluid mb-3">
         <p><strong>Alias:</strong> gimnasio.atleticx</p>
       </div>
       <div class="modal-footer">

@@ -129,7 +129,6 @@ class Cliente(models.Model):
 
     def save(self, *args, **kwargs):
         """Override save para ejecutar validaciones"""
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def get_nombre_completo(self):

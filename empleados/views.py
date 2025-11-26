@@ -82,64 +82,63 @@ def empleado_lista(request):
 def empleado_agregar(request):
     """Vista para registrar un nuevo empleado o reactivar uno existente"""
     if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        apellido = request.POST.get('apellido')
-        dni = request.POST.get('dni')
-        telefono = request.POST.get('telefono', '')
-        domicilio = request.POST.get('domicilio', '')
-        
-        try:
-            with transaction.atomic():
-                # Verificar si el empleado ya existe
-                empleado_existente = Empleado.objects.filter(dni=dni).first()
-                
-                if empleado_existente:
-                    if not empleado_existente.activo:
-                        # Reactivar empleado
-                        empleado_existente.activo = True
-                        empleado_existente.fecha_baja = None
-                        empleado_existente.nombre = nombre
-                        empleado_existente.apellido = apellido
-                        empleado_existente.telefono = telefono
-                        empleado_existente.domicilio = domicilio
-                        empleado_existente.save()
-                        
-                        messages.success(request, f'Empleado {nombre} {apellido} reactivado exitosamente.')
-                    else:
-                        messages.warning(request, f'El empleado con DNI {dni} ya existe y está activo.')
-                    
-                    return redirect('empleado_lista')
-                
-                # Crear nuevo usuario con DNI como username
-                username = dni
-                user = User.objects.create_user(
-                username=username,
-                first_name=nombre,
-                last_name=apellido,
-                password=dni,  # directamente acá
-                )
-                grupo_empleado, created = Group.objects.get_or_create(name="Empleado")
+        form = EmpleadoForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    dni = form.cleaned_data['dni']
+                    nombre = form.cleaned_data['nombre']
+                    apellido = form.cleaned_data['apellido']
+                    telefono = form.cleaned_data.get('telefono', '')
+                    domicilio = form.cleaned_data.get('domicilio', '')
 
-                # Asignar el usuario al grupo
-                user.groups.add(grupo_empleado)
-                user.save()
-                # Crear nuevo empleado
-                empleado = Empleado.objects.create(
-                    user=user,
-                    nombre=nombre,
-                    apellido=apellido,
-                    dni=dni,
-                    telefono=telefono,
-                    domicilio=domicilio
-                )
-                
-                messages.success(request, f'Empleado {nombre} {apellido} registrado exitosamente.')
-                return redirect('empleado_lista')
-                
-        except Exception as e:
-            messages.error(request, f'Error al registrar el empleado: {str(e)}')
+                    # Verificar si el empleado ya existe
+                    empleado_existente = Empleado.objects.filter(dni=dni).first()
+                    if empleado_existente:
+                        if not empleado_existente.activo:
+                            # Reactivar empleado
+                            empleado_existente.activo = True
+                            empleado_existente.fecha_baja = None
+                            empleado_existente.nombre = nombre
+                            empleado_existente.apellido = apellido
+                            empleado_existente.telefono = telefono
+                            empleado_existente.domicilio = domicilio
+                            empleado_existente.save()
+                            messages.success(request, f'Empleado {nombre} {apellido} reactivado exitosamente.')
+                        else:
+                            messages.warning(request, f'El empleado con DNI {dni} ya existe y está activo.')
+                        return redirect('empleado_lista')
+
+                    # Crear nuevo usuario con DNI como username
+                    user = User.objects.create_user(
+                        username=dni,
+                        first_name=nombre,
+                        last_name=apellido,
+                        password=dni,
+                    )
+                    grupo_empleado, created = Group.objects.get_or_create(name="Empleado")
+                    user.groups.add(grupo_empleado)
+                    user.save()
+
+                    # Crear nuevo empleado usando datos validados
+                    empleado = form.save(commit=False)
+                    empleado.user = user
+                    empleado.save()
+
+                    messages.success(request, f'Empleado {nombre} {apellido} registrado exitosamente.')
+                    return redirect('empleado_lista')
+
+            except Exception as e:
+                messages.error(request, f'Error al registrar el empleado: {str(e)}')
+        else:
+            # Si el form no es válido, mostrar errores
+            messages.error(request, "Hay errores en el formulario. Verifique los datos ingresados.")
+    else:
+        form = EmpleadoForm()
     
-    return render(request, 'empleado_lista.html')
+    return render(request, 'empleado_lista.html',
+                  {'form': form,
+                   })
 
 # --- Editar ---
 @login_required
