@@ -22,32 +22,44 @@ def nuevo_cobro(request):
         messages.error(request, "No hay una caja abierta para registrar el cobro.")
         return redirect('cobros_lista')
 
-    # Queryset base: todos los servicios excepto el que se llame "Por Clase" (case-insensitive)
-    servicios_base = Servicio.objects.exclude(nombre__iexact='Por Clase')
+    # 1. FILTRO DE SERVICIOS: Agregamos .filter(activo=True)
+    # Esto asegura que solo traiga servicios activos y excluya "Por Clase"
+    servicios_base = Servicio.objects.filter(activo=True).exclude(nombre__iexact='Por Clase')
 
     if request.method == 'POST':
-        # obtener dni crudo para poder conocer la membresía antes de validar el form
         raw_dni = request.POST.get('dni', '').strip()
-        cliente = Cliente.objects.filter(dni=raw_dni).exclude(nombre="-----").first()
+        
+        # 2. FILTRO DE CLIENTE (Búsqueda inicial): 
+        # Agregamos .exclude(nombre="CLASE", apellido="UNA")
+        cliente = Cliente.objects.filter(dni=raw_dni)\
+                                 .exclude(nombre="Prueba")\
+                                 .exclude(nombre="CLASE", apellido="UNA")\
+                                 .first()
+                                 
         membresia = None
         if cliente:
             membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
 
-        # si querés permitir usar la membresía aunque su servicio sea "Por Clase",
-        # incluí ese servicio en el queryset
         servicios_qs = servicios_base
         if membresia and membresia.servicio:
             if membresia.servicio.nombre.lower() == 'por clase':
+                # Aquí también nos aseguramos que servicios_base ya viene filtrado por activo=True
                 servicios_qs = Servicio.objects.filter(pk=membresia.servicio.pk) | servicios_base
                 servicios_qs = servicios_qs.distinct()
 
         form = CobroForm(request.POST)
-        # asignar el queryset al campo antes de validar
         form.fields['servicio'].queryset = servicios_qs
 
         if form.is_valid():
             dni = form.cleaned_data['dni'].strip()
-            cliente = get_object_or_404(Cliente.objects.exclude(nombre="-----"), dni=dni)
+            
+            # 3. FILTRO DE CLIENTE (Obtención final):
+            # Aplicamos el mismo exclude aquí para evitar errores si el DNI existe pero es del usuario prohibido
+            cliente = get_object_or_404(
+                Cliente.objects.exclude(nombre="-----").exclude(nombre="Clase", apellido="Una"), 
+                dni=dni
+            )
+            
             membresia = Membresia.objects.filter(cliente=cliente).select_related('servicio').first()
             if not membresia:
                 messages.error(request, "El cliente no tiene ninguna membresía registrada.")
@@ -88,7 +100,6 @@ def nuevo_cobro(request):
             return redirect('cobros_lista')
     else:
         form = CobroForm()
-        # asignar queryset para GET (lista de servicios sin "Por Clase")
         form.fields['servicio'].queryset = servicios_base
 
     return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
@@ -124,8 +135,8 @@ def cobro_un_dia(request):
             cliente, created = Cliente.objects.get_or_create(
                 dni=dni,
                 defaults={
-                    'nombre': "Prueba",      # Solo letras para pasar validación
-                    'apellido': "Cliente de ",       # Solo letras para pasar validación
+                    'nombre': "CLASE",      # Solo letras para pasar validación
+                    'apellido': "UNA ",       # Solo letras para pasar validación
                     'telefono': "0000000000",   # Default válido
                     'emergencia': "",
                     'email': "",                # Email vacío es permitido por blank=True
@@ -234,7 +245,10 @@ def buscar_dni(request):
     q = request.GET.get('q', '')
     resultados = []
     if q:
-        clientes = Cliente.objects.filter(dni__icontains=q).exclude(nombre__iexact="-----")[:10]
+        clientes = Cliente.objects.filter(dni__icontains=q)\
+                                  .exclude(nombre__iexact="-----")\
+                                  .exclude(nombre="CLASE", apellido="UNA")[:10]
+        
         resultados = [
             {"id": c.id, "dni": c.dni, "nombre": f"{c.apellido}, {c.nombre}"}
             for c in clientes

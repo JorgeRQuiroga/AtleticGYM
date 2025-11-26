@@ -52,13 +52,13 @@
     <form method="get" class="row g-3 align-items-end mb-4">
       <div class="col-md-6">
         <div class="input-group">
-          <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
-          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por usuario, apellido o DNI">
+          <span class="input-group-text bg-transparent text-light"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control bg-transparent" placeholder="Buscar por usuario, apellido o DNI">
         </div>
       </div>
 
       <div class="col-md-3">
-        <select name="orden" class="form-select">
+        <select name="orden" class="form-select bg-transparent text-light">
           <option value="">-- Ordenar por --</option>
           <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha ↓</option>
           <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha ↑</option>

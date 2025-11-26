@@ -9,12 +9,12 @@ class CobroForm(forms.ModelForm):
     )
     servicio = forms.ModelChoiceField(
         queryset=Servicio.objects.filter(activo=True),
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'}),
         required=False
     )
     metodo_pago = forms.ModelChoiceField(
         queryset=MetodoDePago.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'}),
         label="Método de Pago"
     )
 

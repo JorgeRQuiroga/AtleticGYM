@@ -93,36 +93,44 @@ class MembresiaInscripcionForm(forms.ModelForm):
         return email
     
     def save(self, commit=True):
-        servicio = self.cleaned_data['servicio']
-        observaciones = self.cleaned_data.get('observaciones', '')
+            servicio = self.cleaned_data['servicio']
+            observaciones = self.cleaned_data.get('observaciones', '')
+            dni_ingresado = self.cleaned_data['dni']
 
-        # Crear cliente nuevo
-        cliente = Cliente.objects.create(
-            nombre=self.cleaned_data['nombre'],
-            apellido=self.cleaned_data['apellido'],
-            dni=self.cleaned_data['dni'],
-            telefono=self.cleaned_data['telefono'],
-            emergencia=self.cleaned_data.get('emergencia'),
-            domicilio=self.cleaned_data.get('domicilio'),
-            email=self.cleaned_data.get('email'),
-        )
+            # Lógica principal: Buscar si existe, o crear uno nuevo
+            # get_or_create devuelve una tupla (objeto, creado_boolean)
+            cliente, created = Cliente.objects.get_or_create(dni=dni_ingresado)
 
-        hoy = timezone.now().date()
-        fecha_fin = hoy + timedelta(days=30)
-        clases = getattr(servicio, 'cantidad_clases', 0)
+            # Independientemente de si es nuevo o viejo (de la clase de prueba),
+            # ACTUALIZAMOS sus datos con la información real del formulario.
+            cliente.nombre = self.cleaned_data['nombre']
+            cliente.apellido = self.cleaned_data['apellido']
+            cliente.telefono = self.cleaned_data['telefono']
+            cliente.emergencia = self.cleaned_data.get('emergencia')
+            cliente.domicilio = self.cleaned_data.get('domicilio')
+            cliente.email = self.cleaned_data.get('email')
+            
+            if commit:
+                cliente.save()
 
-        membresia = Membresia(
-            cliente=cliente,
-            servicio=servicio,
-            fecha_fin=fecha_fin,
-            clases_restantes=clases,
-            activa=True,
-            observaciones=observaciones
-        )
-        if commit:
-            membresia.save()
-        return membresia
+            # Crear la membresía asociada a este cliente (actualizado o nuevo)
+            hoy = timezone.now().date()
+            fecha_fin = hoy + timedelta(days=30)
+            clases = getattr(servicio, 'cantidad_clases', 0)
 
+            membresia = Membresia(
+                cliente=cliente,
+                servicio=servicio,
+                fecha_fin=fecha_fin,
+                clases_restantes=clases,
+                activa=True,
+                observaciones=observaciones
+            )
+            
+            if commit:
+                membresia.save()
+                
+            return membresia
 
 class MembresiaEdicionForm(forms.ModelForm):
     # Campos de Cliente (se precargan con instance)
