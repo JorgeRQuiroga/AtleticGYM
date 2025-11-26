@@ -151,7 +151,7 @@ LOGOUT_REDIRECT_URL = 'login'
 AUTH_USER_MODEL = 'auth.User'
 
 # La sesión expira a los 50 minutos (3000 segundos)
-SESSION_COOKIE_AGE = 3000
+# SESSION_COOKIE_AGE = 3000
 
 # Cada request válido renueva la cookie y reinicia el contador
 SESSION_SAVE_EVERY_REQUEST = True  

@@ -94,6 +94,8 @@ def nuevo_cobro(request):
     return render(request, 'cobro_nuevo.html', {'form': form, 'caja': caja})
 
 
+# En cobros/views.py
+
 @login_required
 @caja_abierta_required
 def cobro_un_dia(request):
@@ -106,17 +108,32 @@ def cobro_un_dia(request):
         form = CobroClaseForm(request.POST)
         if form.is_valid():
             dni = form.cleaned_data['dni'].strip()
-            servicio = Servicio.objects.get(nombre="Por clase")
+            # Obtenemos el servicio "Por clase" (Asegúrate que exista en BD)
+            servicio = Servicio.objects.filter(nombre__iexact="Por clase").first()
+            
+            if not servicio:
+                messages.error(request, "El servicio 'Por clase' no está configurado en el sistema.")
+                return redirect('cobros_lista')
+
             metodo_pago = form.cleaned_data['metodo_pago']
 
-            cliente = Cliente.objects.create(
+            # --- SOLUCIÓN AQUÍ ---
+            # Usamos get_or_create para manejar si el DNI ya existe o es nuevo.
+            # Los defaults usan 'Visitante' y 'Diario' para pasar el validador 'validar_nombre'
+            # que solo acepta letras.
+            cliente, created = Cliente.objects.get_or_create(
                 dni=dni,
-                nombre="-----",
-                apellido="",
-                telefono="",
-                email=""
+                defaults={
+                    'nombre': "Prueba",      # Solo letras para pasar validación
+                    'apellido': "Cliente de ",       # Solo letras para pasar validación
+                    'telefono': "0000000000",   # Default válido
+                    'emergencia': "",
+                    'email': "",                # Email vacío es permitido por blank=True
+                    'domicilio': "No especificado"
+                }
             )
-            # Crear el cobro
+
+            # Crear el cobro asociado a este cliente (nuevo o existente)
             cobro = Cobro.objects.create(
                 caja=caja,
                 cliente=cliente,
@@ -136,13 +153,12 @@ def cobro_un_dia(request):
             # Actualizar caja
             caja.registrar_ingreso(servicio.precio)
 
-            messages.success(request, f"Cobro por clase registrado (${servicio.precio}).")
+            messages.success(request, f"Cobro por clase registrado (${servicio.precio}) a DNI {dni}.")
             return redirect('cobros_lista')
     else:
         form = CobroClaseForm()
 
-    return render(request, 'cobro_un_dia.html', {'form': form, 'caja': caja})   
-
+    return render(request, 'cobro_un_dia.html', {'form': form, 'caja': caja})
 
 @login_required
 @caja_abierta_required
