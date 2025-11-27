@@ -5,11 +5,11 @@
 <h2 class="text-center mb-5">📊 Gráficos de Asistencias</h2>
 
 <div class="row">
-  <!-- Gráfico 1: Asistencias por Mes -->
+  <!-- Gráfico 1: Asistencias Mensual del año -->
   <div class="col-md-6 mb-4">
     <div class="card h-100">
       <div class="card-body bg-dark text-light text-center">
-        <h5 class="mb-3">Asistencias por Mes ({% now "Y" %})</h5>
+        <h5 class="mb-3">Asistencias Mensual del {% now "Y" %}</h5>
         <div class="chart-container" style="position: relative; height:220px; width:100%">
           <canvas id="graficoMes"></canvas>
         </div>
@@ -29,7 +29,7 @@
     </div>
   </div>
 
-  <!-- Gráfico 3: Asistencias por Hora -->
+  <!-- Gráfico 3: Asistencias por Hora pico -->
   <div class="col-md-12 mb-4">
     <div class="card h-100">
       <div class="card-body bg-dark text-light text-center">
@@ -52,8 +52,7 @@
       datasets: [{
         label: 'Cantidad de asistencias',
         data: {{ totales_mes|safe }},
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(0,188,212,0.35)',
         borderWidth: 1
       }]
     },
@@ -68,16 +67,13 @@
   // Gráfico 2: Asistencias por día de la semana
   const ctxDia = document.getElementById('graficoDia').getContext('2d');
   new Chart(ctxDia, {
-    type: 'pie',
+    type: 'bar',
     data: {
       labels: {{ dias_semana_labels|safe }},
       datasets: [{
         label: 'Asistencias',
         data: {{ totales_dia|safe }},
-        backgroundColor: [
-          '#007bff', '#28a745', '#ffc107', '#dc3545',
-          '#17a2b8', '#6610f2', '#fd7e14'
-        ]
+        backgroundColor: 'rgba(25,62,185,1)'
       }]
     },
     options: {

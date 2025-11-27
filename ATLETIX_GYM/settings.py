@@ -89,9 +89,9 @@ WSGI_APPLICATION = 'ATLETIX_GYM.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'atletixgym_db',
+        'NAME': 'gym257',
         'USER': 'root',
-        'PASSWORD': '112233',
+        'PASSWORD': 'gym257',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {

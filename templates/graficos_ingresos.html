@@ -2,14 +2,14 @@
 
 {% block content %}
 
-<h3 class="text-center mb-5">📊 Gráficos de Ingresos</h3>
+<h2 class="text-center mb-5">📊 Gráficos de Ingresos</h2>
 
 <div class="row">
   <!-- Ingresos Semanales -->
   <div class="col-md-6 mb-4">
     <div class="card h-100">
       <div class="card-body bg-dark text-light text-center">
-        <h5 class="mb-3">Ingresos Semanales</h5>
+        <h5 class="mb-3">Ingresos por Día de la Semana</h5>
         <div class="chart-container" style="position: relative; height:220px; width:100%">
           <canvas id="graficoSemanal"></canvas>
         </div>
@@ -17,11 +17,11 @@
     </div>
   </div>
 
-  <!-- Ingresos Anuales -->
+  <!-- Ingresos mensual del utlimo año -->
   <div class="col-md-6 mb-4">
     <div class="card h-100">
       <div class="card-body bg-dark text-light text-center">
-        <h5 class="mb-3">Ingresos Anuales</h5>
+        <h5 class="mb-3">Ingresos Mensual del {% now "Y" %}</h5>
         <div class="chart-container" style="position: relative; height:220px; width:100%">
           <canvas id="graficoAnual"></canvas>
         </div>
@@ -39,8 +39,8 @@
       datasets: [{
         label: 'Ingresos Semanales ($)',
         data: {{ data_semanales|safe }},
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(85, 182, 162, 1)',
+
         borderWidth: 1
       }]
     },
@@ -58,15 +58,14 @@
 
   // --- Anual ---
   new Chart(document.getElementById('graficoAnual'), {
-    type: 'line',
+    type: 'bar',
     data: {
       labels: {{ labels_anuales|safe }},
       datasets: [{
         label: 'Ingresos Anuales ($)',
         data: {{ data_anuales|safe }},
         fill: true,
-        borderColor: 'rgba(54, 162, 235, 1)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)', 
+        backgroundColor:  'rgba(165, 50, 150, 1)',
         tension: 0.3
       }]
     },

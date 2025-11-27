@@ -4,15 +4,21 @@ from django.utils import timezone
 from asistencias.models import Asistencia
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractWeekDay, ExtractHour
+from membresias.models import Membresia
+from django.db.models.functions import TruncMonth
+from datetime import date, timedelta
+import calendar
+from cajas.models import Caja
+from django.db.models import Sum
+
 
 # Vista menú principal
 def menu_graficos(request):
     return render(request, "graficos_menu.html")
 
 def grafico_asistencias(request):
-    # Fecha actual para filtrar el año
-    hoy = timezone.now()
-    año_actual = hoy.year
+    # Año fijo 2025 (o poné año_actual si querés que sea dinámico)
+    año_actual = 2025  
 
     # --- Gráfico 1: Asistencias por mes ---
     asistencias_mes = (
@@ -23,11 +29,19 @@ def grafico_asistencias(request):
         .order_by('mes')
     )
 
-    meses = [r['mes'] for r in asistencias_mes]
-    totales_mes = [r['total'] for r in asistencias_mes]
+    # Lista de meses del 1 al 12
+    meses = [        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
-    # --- Gráfico 2: Asistencias por día de la semana ---
-    # Django: domingo=1 ... sábado=7
+
+    # Inicializar totales en 0
+    totales_mes = [0] * 12
+
+    # Cargar los datos reales
+    for r in asistencias_mes:
+        totales_mes[r['mes'] - 1] = r['total']
+
+    # --- Gráfico 2: Asistencias por día ---
     asistencias_dia = (
         Asistencia.objects
         .annotate(dia=ExtractWeekDay('fecha_hora'))
@@ -36,8 +50,9 @@ def grafico_asistencias(request):
         .order_by('dia')
     )
 
-    dias_semana_labels = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    dias_semana_labels = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
     totales_dia = [0] * 7
+
     for r in asistencias_dia:
         totales_dia[r['dia'] - 1] = r['total']
 
@@ -50,8 +65,12 @@ def grafico_asistencias(request):
         .order_by('hora')
     )
 
-    horas = [r['hora'] for r in asistencias_hora]
-    totales_hora = [r['total'] for r in asistencias_hora]
+    # Lista de horas 0–23
+    horas = list(range(24))
+    totales_hora = [0] * 24
+
+    for r in asistencias_hora:
+        totales_hora[r['hora']] = r['total']
 
     contexto = {
         'meses': meses,
@@ -61,14 +80,15 @@ def grafico_asistencias(request):
         'horas': horas,
         'totales_hora': totales_hora,
     }
+
     return render(request, 'graficos_asistencia.html', contexto)
 
-from membresias.models import Membresia
-from django.db.models.functions import TruncMonth
-from datetime import date, timedelta
+
+###
 
 def grafico_membresias(request):
-    # --- 1. Distribución de membresías activas ---
+
+    # === Distribución de membresías activas ===
     distribucion = (
         Membresia.objects
         .filter(activa=True)
@@ -76,113 +96,117 @@ def grafico_membresias(request):
         .annotate(total=Count('id'))
         .order_by('servicio__nombre')
     )
+
     labels_membresias = [d['servicio__nombre'] for d in distribucion]
     data_membresias = [d['total'] for d in distribucion]
- 
-    # --- 2. Altas vs Bajas mensuales últimos 12 meses ---
+
+    # === Altas últimos 12 meses ===
     hoy = date.today()
-    hace_un_anio = hoy - timedelta(days=365)
- 
-    # Altas por mes
+    año_actual = hoy.year
+    mes_actual = hoy.month
+
+    meses_labels = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ]
+
+    altas_data = [0] * 12
+
     altas = (
         Membresia.objects
-        .filter(fecha_inicio__gte=hace_un_anio)
-        .annotate(mes=TruncMonth('fecha_inicio'))
+        .filter(
+            fecha_inicio__gte=hoy.replace(year=hoy.year - 1),
+            fecha_inicio__lte=hoy
+        )
+        .annotate(mes=ExtractMonth('fecha_inicio'))
         .values('mes')
         .annotate(total=Count('id'))
-        .order_by('mes')
-    )
- 
-    # Bajas por mes (cuando se desactivan)
-    bajas = (
-        Membresia.objects
-        .filter(activa=False, fecha_fin__gte=hace_un_anio)
-        .annotate(mes=TruncMonth('fecha_fin'))
-        .values('mes')
-        .annotate(total=Count('id'))
-        .order_by('mes')
     )
 
-    meses = [a['mes'].strftime("%b %Y") for a in altas]
-    altas_data = [a['total'] for a in altas]
-    bajas_data = [b['total'] for b in bajas]
-    
-    # --- Combinación de datos para alinear meses ---
-    # Creamos un diccionario para cada mes de los últimos 12
-    meses_dict = {}
-    for i in range(12):
-        mes_actual = (hoy.replace(day=1) - timedelta(days=i*30)).replace(day=1)
-        meses_dict[mes_actual.strftime('%Y-%m')] = {'altas': 0, 'bajas': 0}
+    for a in altas:
+        idx = a['mes'] - 1
+        altas_data[idx] = a['total']
 
-    # Llenamos con los datos de altas
-    for alta in altas:
-        mes_key = alta['mes'].strftime('%Y-%m')
-        if mes_key in meses_dict:
-            meses_dict[mes_key]['altas'] = alta['total']
-
-    # Llenamos con los datos de bajas
-    for baja in bajas:
-        mes_key = baja['mes'].strftime('%Y-%m')
-        if mes_key in meses_dict:
-            meses_dict[mes_key]['bajas'] = baja['total']
-
-    meses_ordenados = sorted(meses_dict.keys())
-    # Render
     context = {
         'labels_membresias': labels_membresias,
         'data_membresias': data_membresias,
-        'meses': meses,
+        'meses': meses_labels,
         'altas_data': altas_data,
-        'bajas_data': bajas_data,
-        'meses': [date.fromisoformat(m + '-01').strftime('%b %Y') for m in meses_ordenados],
-        'altas_data': [meses_dict[m]['altas'] for m in meses_ordenados],
-        'bajas_data': [meses_dict[m]['bajas'] for m in meses_ordenados],
-
     }
+
     return render(request, 'graficos_membresias.html', context)
 
+###
 
-
-from django.db.models import Sum
-from django.db.models.functions import TruncWeek, TruncMonth
-from datetime import date, timedelta
-from cajas.models import Caja
 
 def grafico_ingresos(request):
     hoy = date.today()
-    hace_un_anio = hoy - timedelta(days=365)
 
-    # --- 1. Ingresos semanales (últimas 8 semanas) ---
-    ingresos_semanales = (
+    # ============================================================
+    # 1) INGRESOS POR DÍA DE LA SEMANA (LUN → DOM)
+    # Últimos 30 días
+    # ============================================================
+    hace_30_dias = hoy - timedelta(days=30)
+
+    registros = (
         Caja.objects
-        .filter(fecha_apertura__gte=hoy - timedelta(weeks=8))
-        .annotate(semana=TruncWeek('fecha_apertura'))
-        .values('semana')
+        .filter(fecha_apertura__gte=hace_30_dias)
+        .values('fecha_apertura')
         .annotate(total=Sum('monto_cierre'))
-        .order_by('semana')
     )
 
-    labels_semanales = [i['semana'].strftime('%d %b') for i in ingresos_semanales]
-    data_semanales = [float(i['total']) if i['total'] else 0 for i in ingresos_semanales]
+    # Días en español
+    dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 
-    # --- 2. Ingresos anuales (últimos 12 meses) ---
-    ingresos_anuales = (
+    # Inicializo con 0 los 7 días
+    ingresos_por_dia = {i: 0 for i in range(7)}  # lunes=0 ... domingo=6
+
+    for r in registros:
+        dia = r['fecha_apertura'].weekday()  # lunes=0 ... domingo=6
+        ingresos_por_dia[dia] += float(r['total']) if r['total'] else 0
+
+    labels_semanales = dias_semana
+    data_semanales = [ingresos_por_dia[i] for i in range(7)]
+
+    # ============================================================
+    # 2) INGRESOS POR MES DEL AÑO ACTUAL (ENE → DIC)
+    # ============================================================
+    año_actual = hoy.year
+
+    registros_mensuales = (
         Caja.objects
-        .filter(fecha_apertura__gte=hace_un_anio)
-        .annotate(mes=TruncMonth('fecha_apertura'))
-        .values('mes')
+        .filter(fecha_apertura__year=año_actual)
+        .values('fecha_apertura__month')
         .annotate(total=Sum('monto_cierre'))
-        .order_by('mes')
     )
 
-    labels_anuales = [i['mes'].strftime('%b %Y') for i in ingresos_anuales]
-    data_anuales = [float(i['total']) if i['total'] else 0 for i in ingresos_anuales]
+    # Meses en español
+    meses_es = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ]
 
+    ingresos_por_mes = {m: 0 for m in range(1, 13)}
+
+    for r in registros_mensuales:
+        mes = r['fecha_apertura__month']
+        ingresos_por_mes[mes] += float(r['total']) if r['total'] else 0
+
+    labels_anuales = meses_es
+    data_anuales = [ingresos_por_mes[m] for m in range(1, 13)]
+
+    # ============================================================
+    # CONTEXTO
+    # ============================================================
     context = {
         'labels_semanales': labels_semanales,
         'data_semanales': data_semanales,
         'labels_anuales': labels_anuales,
         'data_anuales': data_anuales,
+        'anio': año_actual,
     }
 
     return render(request, 'graficos_ingresos.html', context)
+
+
+
