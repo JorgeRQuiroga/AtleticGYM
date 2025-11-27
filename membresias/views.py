@@ -135,7 +135,6 @@ def inscribir_cliente(request):
 
 @login_required
 def lista_membresias(request):
-    form = MembresiaInscripcionForm()
     # Base queryset
     membresias = Membresia.objects.select_related('cliente', 'servicio').order_by('-activa', 'id')
 
@@ -177,11 +176,25 @@ def lista_membresias(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    if request.method == 'POST':
+        form = MembresiaInscripcionForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "Membresía registrada correctamente.")
+                return redirect('membresias_lista')
+            except Exception as e:
+                # Si falla el save() (ej. DNI duplicado al crear Cliente), capturamos el error
+                form.add_error(None, f"Error al guardar: {e}")
+    else:
+        form = MembresiaInscripcionForm()
+
     return render(request, 'membresias_lista.html', {
         'page_obj': page_obj,
         'query': query,
         'orden': orden,
         'form': form,
+        'membresias': membresias,
     })
     
     

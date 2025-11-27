@@ -154,7 +154,7 @@ AUTH_USER_MODEL = 'auth.User'
 # SESSION_COOKIE_AGE = 3000
 
 # Cada request válido renueva la cookie y reinicia el contador
-SESSION_SAVE_EVERY_REQUEST = True  
+# SESSION_SAVE_EVERY_REQUEST = True  
 
 # Opcional: que la cookie se borre al cerrar el navegador
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

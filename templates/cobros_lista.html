@@ -34,7 +34,8 @@
   <!-- Botones de acción -->
   {% include "partials/cobros_acciones.html" with active="cobros" %}
   <hr class="border-secondary">
-
+  <div class="card bg-dark text-light shadow-sm mb-4 border-secondary">
+    <div class="card-body">
   <!-- Sección de la lista de cobros -->
   <div class="container-fluid py-2">
 
@@ -55,12 +56,12 @@
     <form method="get" class="row g-3 align-items-end mb-4">
       <div class="col-md-6">
         <div class="input-group">
-          <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
-          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control" placeholder="Buscar por nombre, apellido o DNI">
+          <span class="input-group-text bg-transparent text-light"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ query|default:'' }}" class="form-control bg-transparent" placeholder="Buscar por nombre, apellido o DNI">
         </div>
       </div>
       <div class="col-md-3">
-        <select name="orden" class="form-select">
+        <select name="orden" class="form-select bg-transparent text-light">
           <option value="">-- Ordenar por --</option>
           <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha ↓</option>
           <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha ↑</option>
@@ -77,7 +78,6 @@
         </a>
       </div>
     </form>
-
     <!-- Tabla dinámica -->
     <div class="collapse show" id="listaCollapse">
       <div class="table-responsive">
@@ -135,27 +135,29 @@
             {% endfor %}
           </tbody>
         </table>
+              </div>
+              {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginación de empleados">
+          <ul class="pagination justify-content-center mt-3">
+            {% for num in page_obj.paginator.page_range %}
+              <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
+                  {{ num }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+        {% endif %}
+        </nav>
+    </div>
       </div>
-
-      <!-- Paginación -->
-      <nav aria-label="Paginación de cobros">
-        <ul class="pagination justify-content-center">
-        {% if page_obj.has_other_pages %}
-                <nav aria-label="Paginación de empleados">
-                  <ul class="pagination justify-content-center">
-                    {% for num in page_obj.paginator.page_range %}
-                      <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">
-                          {{ num }}
-                        </a>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </nav>
-                {% endif %}        </ul>
-              </nav>
+        <!-- Paginación -->
             </div>
           </div>
+        </div>     
+    </div>
+  </div>
 
   <!-- Modal Inscripción -->
   {% include 'partials/modal_agregar_mem.html' %}

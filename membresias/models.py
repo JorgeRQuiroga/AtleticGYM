@@ -17,3 +17,10 @@ class Membresia(models.Model):
     def borrar(self):
         self.activa = False
         self.save()
+    
+    def save(self, *args, **kwargs):
+        # Verificamos si las clases se acabaron
+        if self.clases_restantes <= 0:
+            self.activa = False
+        
+        super(Membresia, self).save(*args, **kwargs)

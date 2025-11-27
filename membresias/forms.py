@@ -6,51 +6,57 @@ from django.utils import timezone
 from datetime import timedelta
 from django.core.exceptions import ValidationError
 import re
+from cobros.models import MetodoDePago
 
 class MembresiaInscripcionForm(forms.ModelForm):
     # Campos de Cliente
     nombre = forms.CharField(
         required=True, label="Nombre",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Nombre'})
     )
     apellido = forms.CharField(
         required=True, label="Apellido",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Apellido'})
     )
     dni = forms.CharField(
         required=True, label="DNI",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Documento de identidad'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Documento de identidad'})
     )
     telefono = forms.CharField(
         required=True, label="Teléfono",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono principal'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Teléfono principal'})
     )
     emergencia = forms.CharField(
         required=False, label="Teléfono de emergencia",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono de emergencia'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Teléfono de emergencia'})
     )
     domicilio = forms.CharField(
         required=False, label="Domicilio",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Dirección'})
     )
     email = forms.EmailField(
         required=False, label="Email",
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico'})
+        widget=forms.EmailInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Correo electrónico'})
     )
 
     servicio = forms.ModelChoiceField(
         queryset=Servicio.objects.filter(activo=True).exclude(nombre__icontains='Por clase'),
         required=True, label="Servicio",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'})
     )
     observaciones = forms.CharField(
         required=False, label="Observaciones",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Observaciones adicionales'})
+        widget=forms.Textarea(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Observaciones adicionales'})
+    )
+    metodo_pago = forms.ModelChoiceField(
+        queryset=MetodoDePago.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'}),
+        label="Método de Pago"
     )
 
     class Meta:
         model = Membresia
-        fields = ['servicio', 'observaciones']
+        fields = ['servicio', 'observaciones', 'metodo_pago']
     def clean_nombre(self):
         nombre = self.cleaned_data.get('nombre', '').strip()
         if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', nombre):
@@ -79,90 +85,108 @@ class MembresiaInscripcionForm(forms.ModelForm):
         return telefono
 
     def clean_emergencia(self):
-        emergencia = self.cleaned_data.get('emergencia', '').strip()
-        if emergencia:
-            emergencia_limpio = re.sub(r'[\s\-\(\)]', '', emergencia)
-            if not re.match(r'^\+?[0-9]{8,15}$', emergencia_limpio):
-                raise ValidationError("Ingrese un número de emergencia válido (mínimo 8 dígitos).")
+        emergencia = (self.cleaned_data.get('emergencia') or '').strip()
+        # Si está vacío, lo devolvemos directamente
+        if not emergencia:
+            return emergencia
+
+    # Si tiene contenido, validamos formato
+        emergencia_limpio = re.sub(r'[\s\-\(\)]', '', emergencia)
+        if not re.match(r'^\+?[0-9]{8,15}$', emergencia_limpio):
+            raise ValidationError("Ingrese un número de emergencia válido (mínimo 8 dígitos).")
         return emergencia
 
+
     def clean_email(self):
-        email = self.cleaned_data.get('email', '').strip().lower()
-        if email and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+        email = (self.cleaned_data.get('email') or '').strip().lower()
+        # Si está vacío, lo devolvemos directamente
+        if not email:
+            return email
+
+        # Si tiene contenido, validamos formato
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
             raise ValidationError("Ingrese un email válido.")
         return email
     
     def save(self, commit=True):
-        servicio = self.cleaned_data['servicio']
-        observaciones = self.cleaned_data.get('observaciones', '')
+            servicio = self.cleaned_data['servicio']
+            observaciones = self.cleaned_data.get('observaciones', '')
+            dni_ingresado = self.cleaned_data['dni']
 
-        # Crear cliente nuevo
-        cliente = Cliente.objects.create(
-            nombre=self.cleaned_data['nombre'],
-            apellido=self.cleaned_data['apellido'],
-            dni=self.cleaned_data['dni'],
-            telefono=self.cleaned_data['telefono'],
-            emergencia=self.cleaned_data.get('emergencia'),
-            domicilio=self.cleaned_data.get('domicilio'),
-            email=self.cleaned_data.get('email'),
-        )
+            # Lógica principal: Buscar si existe, o crear uno nuevo
+            # get_or_create devuelve una tupla (objeto, creado_boolean)
+            cliente, created = Cliente.objects.get_or_create(dni=dni_ingresado)
 
-        hoy = timezone.now().date()
-        fecha_fin = hoy + timedelta(days=30)
-        clases = getattr(servicio, 'cantidad_clases', 0)
+            # Independientemente de si es nuevo o viejo (de la clase de prueba),
+            # ACTUALIZAMOS sus datos con la información real del formulario.
+            cliente.nombre = self.cleaned_data['nombre']
+            cliente.apellido = self.cleaned_data['apellido']
+            cliente.telefono = self.cleaned_data['telefono']
+            cliente.emergencia = self.cleaned_data.get('emergencia')
+            cliente.domicilio = self.cleaned_data.get('domicilio')
+            cliente.email = self.cleaned_data.get('email')
+            
+            if commit:
+                cliente.save()
 
-        membresia = Membresia(
-            cliente=cliente,
-            servicio=servicio,
-            fecha_fin=fecha_fin,
-            clases_restantes=clases,
-            activa=True,
-            observaciones=observaciones
-        )
-        if commit:
-            membresia.save()
-        return membresia
+            # Crear la membresía asociada a este cliente (actualizado o nuevo)
+            hoy = timezone.now().date()
+            fecha_fin = hoy + timedelta(days=30)
+            clases = getattr(servicio, 'cantidad_clases', 0)
 
+            membresia = Membresia(
+                cliente=cliente,
+                servicio=servicio,
+                fecha_fin=fecha_fin,
+                clases_restantes=clases,
+                activa=True,
+                observaciones=observaciones
+            )
+            
+            if commit:
+                membresia.save()
+                
+            return membresia
 
 class MembresiaEdicionForm(forms.ModelForm):
     # Campos de Cliente (se precargan con instance)
     nombre = forms.CharField(
         required=True, label="Nombre",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     apellido = forms.CharField(
         required=True, label="Apellido",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     dni = forms.CharField(
         required=True, label="DNI",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     telefono = forms.CharField(
         required=True, label="Teléfono",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     emergencia = forms.CharField(
         required=False, label="Teléfono de emergencia",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     domicilio = forms.CharField(
         required=False, label="Domicilio",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     email = forms.EmailField(
         required=False, label="Email",
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
+        widget=forms.EmailInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
 
     servicio = forms.ModelChoiceField(
         queryset=Servicio.objects.filter(activo=True).exclude(nombre__icontains='Por clase'),
         required=True, label="Servicio",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'})
     )
     observaciones = forms.CharField(
         required=False, label="Observaciones",
-        widget=forms.Textarea(attrs={'class': 'form-control'})
+        widget=forms.Textarea(attrs={'class': 'form-control bg-transparent text-white'})
     )
 
     class Meta:

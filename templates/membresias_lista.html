@@ -110,7 +110,9 @@
         </table>
 
         <!-- Paginación -->
-        {% if page_obj.has_other_pages %}
+
+      </div>
+              {% if page_obj.has_other_pages %}
         <nav aria-label="Paginación de empleados">
           <ul class="pagination justify-content-center">
             {% for num in page_obj.paginator.page_range %}
@@ -123,12 +125,12 @@
           </ul>
         </nav>
         {% endif %}
-          </ul>
         </nav>
-      </div>
     </div>
+    
   </div>
 </div>
+
 
 <!-- Modales fuera de la tabla (solo para las visibles en la página actual) -->
 {% for m in page_obj %}

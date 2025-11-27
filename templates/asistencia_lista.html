@@ -19,9 +19,12 @@
       <form method="get" class="row g-3 align-items-end">
         <!-- Buscador -->
         <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent text-light"><i class="bi bi-search"></i></span>
           <input type="text" name="busqueda" value="{{ busqueda|default_if_none:'' }}"
                  class="form-control text-white bg-transparent border-secondary"
                  placeholder="Buscar por nombre o apellido">
+          </div>
         </div>
 
         <!-- Ordenamiento -->

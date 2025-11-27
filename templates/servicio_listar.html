@@ -25,7 +25,7 @@
         <!-- Buscador -->
         <div class="col-md-4">
           <div class="input-group">
-            <span class="input-group-text bg-secondary text-light">
+            <span class="input-group-text bg-transparent text-light">
               <i class="bi bi-search"></i>
             </span>
             <input type="text" name="q" value="{{ query|default_if_none:'' }}" 
@@ -73,16 +73,11 @@
           <tbody>
             {% for servicio in page_obj %}
               <tr>
+                {% if servicio.activo %}
                 <td class="text-start">{{ servicio.nombre }}</td>
                 <td>{{ servicio.cantidad_clases }}</td>
                 <td>${{ servicio.precio }}</td>
-                <td>
-                  {% if servicio.activo %}
-                    <span class="badge bg-success">Activo</span>
-                  {% else %}
-                    <span class="badge bg-secondary">Inactivo</span>
-                  {% endif %}
-                </td>
+                <td> <span class="badge bg-success">Activo</span> </td>
                 <td>
                   <a href="{% url 'servicios:servicio_editar' servicio.pk %}" class="btn btn-outline-light btn-sm me-1">
                     <i class="bi bi-pencil-square"></i> Editar
@@ -118,6 +113,8 @@
                     </div>
                   </div>
                 </td>
+                {% endif %}
+
               </tr>
             {% empty %}
               <tr>
