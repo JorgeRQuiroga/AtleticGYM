@@ -6,6 +6,7 @@ class Asistencia(models.Model):
     # La asistencia siempre está ligada a una membresía de un cliente
     membresia = models.ForeignKey(Membresia, null=True, blank=True, on_delete=models.SET_NULL)
     fecha_hora = models.DateTimeField(default=timezone.now)
+    clases_al_momento = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         if self.membresia and self.membresia.cliente:

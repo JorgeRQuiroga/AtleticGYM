@@ -12,7 +12,6 @@ from django.utils.dateparse import parse_date
 
 @login_required
 def asistencia_opciones(request):
-    # Vista que simplemente renderiza la página del menú de opciones de asistencia.
     return render(request, 'asistencia_opciones.html')
 
 def registrar_asistencia(request):
@@ -43,18 +42,20 @@ def registrar_asistencia(request):
         if not membresia.activa or membresia.fecha_fin < hoy:
             messages.warning(request, f'Hola {membresia.cliente.nombre}, tu membresía no está activa.')
             return redirect('asistencias:asistencia_registrar')
-
-        # Registrar asistencia
-        Asistencia.objects.create(membresia=membresia, fecha_hora=timezone.now())
-
-        # Actualizar clases restantes si corresponde
+        
         if membresia.servicio.cantidad_clases > 0:
             membresia.clases_restantes -= 1
             membresia.save()
 
+        Asistencia.objects.create(
+            membresia=membresia, 
+            fecha_hora=timezone.now(),
+            clases_al_momento=membresia.clases_restantes
+        )
+
         messages.success(request, f"Asistencia registrada correctamente para {membresia.cliente.nombre}.")
         return redirect('asistencias:asistencia_registrar')
-           
+            
 @login_required
 def lista_asistencias(request):
     busqueda = request.GET.get('busqueda', '').strip()

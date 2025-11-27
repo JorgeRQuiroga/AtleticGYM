@@ -69,13 +69,17 @@
               <tr>
                 <td class="text-start">{{ asistencia.membresia.cliente.apellido }}, {{ asistencia.membresia.cliente.nombre }}</td>
                 <td class="text-start">{{ asistencia.membresia.servicio.nombre }}</td>
-                <td>
-                  {% if asistencia.membresia.servicio.cantidad_clases > 0 %}
-                    {{ asistencia.membresia.clases_restantes }}
-                  {% else %}
-                    Ilimitadas
-                  {% endif %}
-                </td>
+<td>
+  {% if asistencia.membresia.servicio.cantidad_clases > 0 %}
+    {% if asistencia.clases_al_momento is not None %}
+        {{ asistencia.clases_al_momento }}
+    {% else %}
+        {{ asistencia.membresia.clases_restantes }}
+    {% endif %}
+  {% else %}
+    Ilimitadas
+  {% endif %}
+</td>
                 <td>
                   {% if asistencia.membresia.activa %}
                     <span class="badge bg-success">Activa</span>
