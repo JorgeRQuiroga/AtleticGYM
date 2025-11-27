@@ -30,12 +30,12 @@ class CobroClaseForm(forms.Form):
     dni = forms.CharField(
         label="DNI del Alumno",
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese DNI...'})
+        widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Ingrese DNI...'})
     )
     metodo_pago = forms.ModelChoiceField(
         queryset=MetodoDePago.objects.all(),
         label="Método de Pago",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'})
     )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,7 +43,7 @@ class CobroClaseForm(forms.Form):
         self.fields['servicio'] = forms.ModelChoiceField(
             queryset=Servicio.objects.filter(id=servicio.id),
             initial=servicio,
-            widget=forms.Select(attrs={'class': 'form-select', 'readonly': 'readonly'})
+            widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white', 'readonly': 'readonly'})
         )
         
 class ExtraccionForm(forms.ModelForm):
