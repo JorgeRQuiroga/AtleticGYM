@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Términos y Condiciones{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold text-danger mb-0">
+      <i class="bi bi-shield-lock-fill me-2"></i> Términos y Condiciones
+    </h1>
+    <a href="{% url 'home' %}" class="btn btn-outline-light">
+      <i class="bi bi-house-door-fill me-1"></i> Volver al Inicio
+    </a>
+  </div>
+
+  <!-- Card contenedor -->
+  <div class="card bg-dark text-light shadow-sm border-secondary">
+    <div class="card-body">
+      <p class="text-muted mb-4">
+        Última actualización: {% now "d/m/Y" %}. Al utilizar este sitio, aceptás estos términos y condiciones. Si no estás de acuerdo, por favor no utilices el servicio.
+      </p>
+
+      <!-- Introducción -->
+      <h2 class="h5 text-danger mb-2">Introducción</h2>
+      <p>
+        Bienvenido/a a <strong class="text-warning">{{ site_name|default:"Nuestro Sitio" }}</strong>. Estos términos regulan el uso de todas las funcionalidades, contenidos y servicios ofrecidos por
+        <strong class="text-warning">{{ company_name|default:"la empresa" }}</strong> a través del sitio.
+      </p>
+
+      <!-- Aceptación de términos -->
+      <h2 class="h5 text-danger mb-2">Aceptación de los términos</h2>
+      <p>
+        Al acceder, navegar o utilizar el sitio, confirmás que leíste, comprendiste y aceptaste estos términos. Nos reservamos el derecho de modificarlos en cualquier momento. Los cambios se publicarán en esta página y serán efectivos desde su publicación.
+      </p>
+
+      <!-- Cuentas de usuario -->
+      <h2 class="h5 text-danger mb-2">Cuentas y responsabilidades del usuario</h2>
+      <ul class="mb-3">
+        <li><strong>Registro:</strong> La información proporcionada debe ser veraz, completa y mantenerse actualizada.</li>
+        <li><strong>Acceso:</strong> Sos responsable de la confidencialidad de tus credenciales y de toda actividad realizada con tu cuenta.</li>
+        <li><strong>Seguridad:</strong> Notificanos inmediatamente cualquier uso no autorizado o incidente de seguridad.</li>
+      </ul>
+
+      <!-- Pagos -->
+      <h2 class="h5 text-danger mb-2">Pagos, membresías y facturación</h2>
+      <ul class="mb-3">
+        <li><strong>Precios:</strong> Pueden cambiar con previo aviso. Los importes se muestran en moneda local.</li>
+        <li><strong>Métodos de pago:</strong> Efectivo, transferencia u otros habilitados en el sistema. Las confirmaciones pueden requerir comprobantes.</li>
+        <li><strong>Facturación:</strong> Emitimos comprobantes según normativa aplicable y datos registrados por el usuario.</li>
+      </ul>
+
+      <!-- Cancelaciones y reembolsos -->
+      <h2 class="h5 text-danger mb-2">Cancelaciones y reembolsos</h2>
+      <ul class="mb-3">
+        <li><strong>Plazos:</strong> Las solicitudes se evaluarán según las políticas vigentes del servicio contratado.</li>
+        <li><strong>Condiciones:</strong> No se realizan reembolsos por uso parcial, incumplimientos del usuario o vencimientos de membresías, salvo disposición expresa.</li>
+      </ul>
+
+      <!-- Contenido e IP -->
+      <h2 class="h5 text-danger mb-2">Propiedad intelectual y uso del contenido</h2>
+      <ul class="mb-3">
+        <li><strong>Derechos:</strong> El contenido, marca, diseño y software del sitio pertenecen a {{ company_name|default:"la empresa" }} o a sus licenciantes.</li>
+        <li><strong>Licencia de uso:</strong> Se otorga un uso personal y no comercial, sin transferencia de titularidad.</li>
+        <li><strong>Restricciones:</strong> Prohibida la reproducción, distribución o ingeniería inversa sin autorización.</li>
+      </ul>
+
+      <!-- Privacidad y datos -->
+      <h2 class="h5 text-danger mb-2">Privacidad y protección de datos</h2>
+      <p>
+        Tratamos tus datos conforme a nuestra política de privacidad y la normativa aplicable. Utilizamos la información para operar el servicio, mejorar la experiencia y cumplir obligaciones legales. Podés ejercer tus derechos de acceso, rectificación y otros conforme la ley.
+      </p>
+
+      <!-- Cookies -->
+      <h2 class="h5 text-danger mb-2">Cookies y tecnologías similares</h2>
+      <p>
+        El sitio puede utilizar cookies para recordar preferencias, medir desempeño y mejorar funcionalidades. Podés configurar tu navegador para bloquearlas, aunque algunas funciones podrían verse afectadas.
+      </p>
+
+      <!-- Usos prohibidos -->
+      <h2 class="h5 text-danger mb-2">Usos prohibidos</h2>
+      <ul class="mb-3">
+        <li><strong>Fraude o abuso:</strong> No se permiten actividades ilícitas, engañosas o que comprometan la seguridad del sitio.</li>
+        <li><strong>Interferencias:</strong> Prohibido intentar vulnerar medidas de seguridad o afectar la disponibilidad del servicio.</li>
+        <li><strong>Contenido indebido:</strong> No publiques ni transmitas material ofensivo, difamatorio o ilegal.</li>
+      </ul>
+
+      <!-- Limitación de responsabilidad -->
+      <h2 class="h5 text-danger mb-2">Limitación de responsabilidad</h2>
+      <p>
+        El sitio se ofrece “tal cual” y “según disponibilidad”. En la máxima medida permitida por la ley, {{ company_name|default:"la empresa" }} no será responsable por daños indirectos, incidentales o consecuentes derivados del uso del servicio.
+      </p>
+
+      <!-- Modificaciones y disponibilidad -->
+      <h2 class="h5 text-danger mb-2">Modificaciones del servicio</h2>
+      <p>
+        Podemos modificar, suspender o discontinuar funciones del sitio en cualquier momento. Intentaremos comunicar cambios que afecten servicios críticos con antelación razonable.
+      </p>
+
+      <!-- Contacto -->
+      <h2 class="h5 text-danger mb-2">Contacto</h2>
+      <p class="mb-0">
+        Para consultas sobre estos términos, escribinos a
+        <strong class="text-warning">{{ contact_email|default:"contacto@tuempresa.com" }}</strong>
+        o comunicate por los canales oficiales publicados en el sitio.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_styles %}{% endblock %}
+{% block extra_scripts %}{% endblock %}

@@ -12,10 +12,17 @@
       <i class="bi bi-people-fill me-2"></i> Membresías
     </h1>
 
-    <!-- Botón que abre el modal (diseño coherente con el tema oscuro) -->
-    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
-      <i class="bi bi-person-plus me-1"></i> Inscribir Cliente
-    </button>
+    <!-- Botones alineados a la derecha -->
+    <div class="d-flex gap-2">
+      <!-- Botón que abre el modal -->
+      <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalInscripcion">
+        <i class="bi bi-person-plus me-1"></i> Inscribir Cliente
+      </button>
+      <!-- Botón para volver al menú de membresías -->
+      <a href="{% url 'membresias:membresias_menu' %}" class="btn btn-outline-light fw-bold">
+        <i class="bi bi-arrow-left-circle me-1"></i> Volver al Menú
+      </a>
+    </div>
   </div>
 
   <!-- Card contenedor -->
@@ -110,9 +117,7 @@
         </table>
 
         <!-- Paginación -->
-
-      </div>
-              {% if page_obj.has_other_pages %}
+        {% if page_obj.has_other_pages %}
         <nav aria-label="Paginación de empleados">
           <ul class="pagination justify-content-center">
             {% for num in page_obj.paginator.page_range %}
@@ -125,14 +130,11 @@
           </ul>
         </nav>
         {% endif %}
-        </nav>
     </div>
-    
   </div>
 </div>
 
-
-<!-- Modales fuera de la tabla (solo para las visibles en la página actual) -->
+<!-- Modales fuera de la tabla -->
 {% for m in page_obj %}
   {% if m.activa %}
     {% include 'partials/modal_eliminacion_mem.html' %}
