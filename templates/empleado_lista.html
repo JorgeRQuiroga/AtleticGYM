@@ -6,10 +6,16 @@
   <h1 class="fw-bold text-primary">
     <i class="bi bi-people"></i> Empleados
   </h1>
-  <button type="button" class="btn btn-outline-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
-    <i class="bi bi-person-plus"></i> Nuevo Empleado
-  </button>
+  <div class="d-flex gap-2">
+    <button type="button" class="btn btn-outline-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEmpleado">
+      <i class="bi bi-person-plus"></i> Nuevo Empleado
+    </button>
+    <a href="{% url 'empleado_menu' %}" class="btn btn-outline-light shadow-sm">
+      <i class="bi bi-house-door-fill"></i> Ir al Menú
+    </a>
+  </div>
 </div>
+
 
 <!-- Buscador + Ordenamiento -->
 <form method="get" action="{% url 'empleado_lista' %}" class="row g-3 mb-4">

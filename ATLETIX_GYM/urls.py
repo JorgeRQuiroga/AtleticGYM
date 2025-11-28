@@ -15,7 +15,8 @@ urlpatterns = [
     path('membresias/', include('membresias.urls')),
     path('asistencias/', include('asistencias.urls')),
     path('empleados/', include('empleados.urls')),
-    path('graficos/', include('graficos.urls'))
+    path('graficos/', include('graficos.urls')),
+    path('terminos-y-condiciones/', views.terminos_condiciones, name='terminos_condiciones'),
 ]
 
 handler403 = 'login.views.error_403'

@@ -11,19 +11,19 @@ from cobros.models import MetodoDePago
 class MembresiaInscripcionForm(forms.ModelForm):
     # Campos de Cliente
     nombre = forms.CharField(
-        required=True, label="Nombre",
+        required=True, label="Nombre *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Nombre'})
     )
     apellido = forms.CharField(
-        required=True, label="Apellido",
+        required=True, label="Apellido *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Apellido'})
     )
     dni = forms.CharField(
-        required=True, label="DNI",
+        required=True, label="DNI *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Documento de identidad'})
     )
     telefono = forms.CharField(
-        required=True, label="Teléfono",
+        required=True, label="Teléfono *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Teléfono principal'})
     )
     emergencia = forms.CharField(
@@ -41,7 +41,7 @@ class MembresiaInscripcionForm(forms.ModelForm):
 
     servicio = forms.ModelChoiceField(
         queryset=Servicio.objects.filter(activo=True).exclude(nombre__icontains='Por clase'),
-        required=True, label="Servicio",
+        required=True, label="Servicio *",
         widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'})
     )
     observaciones = forms.CharField(
@@ -49,9 +49,10 @@ class MembresiaInscripcionForm(forms.ModelForm):
         widget=forms.Textarea(attrs={'class': 'form-control bg-transparent text-white', 'placeholder': 'Observaciones adicionales'})
     )
     metodo_pago = forms.ModelChoiceField(
+        required=True,
         queryset=MetodoDePago.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'}),
-        label="Método de Pago"
+        label="Método de Pago *"
     )
 
     class Meta:
@@ -151,19 +152,19 @@ class MembresiaInscripcionForm(forms.ModelForm):
 class MembresiaEdicionForm(forms.ModelForm):
     # Campos de Cliente (se precargan con instance)
     nombre = forms.CharField(
-        required=True, label="Nombre",
+        required=True, label="Nombre *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     apellido = forms.CharField(
-        required=True, label="Apellido",
+        required=True, label="Apellido *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     dni = forms.CharField(
-        required=True, label="DNI",
+        required=True, label="DNI *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     telefono = forms.CharField(
-        required=True, label="Teléfono",
+        required=True, label="Teléfono *",
         widget=forms.TextInput(attrs={'class': 'form-control bg-transparent text-white'})
     )
     emergencia = forms.CharField(
@@ -181,7 +182,7 @@ class MembresiaEdicionForm(forms.ModelForm):
 
     servicio = forms.ModelChoiceField(
         queryset=Servicio.objects.filter(activo=True).exclude(nombre__icontains='Por clase'),
-        required=True, label="Servicio",
+        required=True, label="Servicio *",
         widget=forms.Select(attrs={'class': 'form-select bg-transparent text-white'})
     )
     observaciones = forms.CharField(
