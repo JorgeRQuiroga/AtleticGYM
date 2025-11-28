@@ -22,12 +22,12 @@
   <div class="col-md-6">
     <div class="input-group">
       <span class="input-group-text bg-transparent text-light"><i class="bi bi-search"></i></span>
-      <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent" placeholder="Buscar por nombre, apellido o DNI">
+      <input type="text" name="q" value="{{ query }}" class="form-control bg-transparent text-white " placeholder="Buscar por nombre, apellido o DNI">
     </div>
   </div>
   <div class="col-md-4">
     <select name="orden" class="form-select bg-transparent form-control text-light">
-      <option value="">Ordenar por...</option>
+      <option value="">--- Ordenar ---</option>
       <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre ↑</option>
       <option value="nombre_desc" {% if orden == 'nombre_desc' %}selected{% endif %}>Nombre ↓</option>
       <option value="apellido_asc" {% if orden == 'apellido_asc' %}selected{% endif %}>Apellido ↑</option>
@@ -38,9 +38,11 @@
       <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha Alta ↓</option>
     </select>
   </div>
-  <div class="col-md-2 d-grid">
-    <button class="btn btn-outline-primary" type="submit">Aplicar</button>
+  <div class="col-md-2 d-flex gap-2 align-items-center">
+    <button class="btn btn-outline-primary flex-fill" type="submit">Aplicar</button>
+    <a href="{% url 'empleado_lista' %}" class="btn btn-outline-light flex-fill">Limpiar</a>
   </div>
+  
 </form>
 
 <!-- Tabla de empleados -->

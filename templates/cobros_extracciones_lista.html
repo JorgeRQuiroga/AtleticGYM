@@ -16,7 +16,7 @@
         <i class="bi bi-cash-coin me-1"></i> Detalles de Caja
       </button>
       <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm">
-        <i class="bi bi-house-door-fill me-1"></i> Home
+        <i class="bi bi-house-door-fill me-1"></i> Volver al Inicio
       </a>
     </div>
   </div>
@@ -65,7 +65,7 @@
 
       <div class="col-md-3">
         <select name="orden" class="form-select bg-transparent text-light">
-          <option value="">-- Ordenar por --</option>
+          <option value="">-- Ordenar --</option>
           <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Fecha ↓</option>
           <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Fecha ↑</option>
           <option value="monto_desc" {% if orden == 'monto_desc' %}selected{% endif %}>Monto ↓</option>
@@ -119,7 +119,7 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="6" class="text-center text-muted">No hay extracciones registradas en esta caja.</td>
+                <td colspan="6" class="text-center white-text">No hay extracciones registradas en esta caja.</td>
               </tr>
             {% endfor %}
           </tbody>

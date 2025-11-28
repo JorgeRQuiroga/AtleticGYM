@@ -41,16 +41,6 @@
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editarMembresiaModal">
         <i class="bi bi-pencil me-1"></i> Editar
       </button>
-      {% if membresia.activa %}
-        <form method="post" action="{% url 'membresias:membresia_borrar' membresia.id %}" style="display: inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de desactivar esta membresía?');">
-            <i class="bi bi-slash-circle me-1"></i> Desactivar
-          </button>
-        </form>
-      {% else %}
-        <span class="text-white">Esta membresía está inactiva.</span>
-      {% endif %}
     </div>
   </div>
 </div>

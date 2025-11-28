@@ -270,7 +270,7 @@ def extraccion_cobros(request):
 
             #Verificar saldo suficiente
             saldo_actual = getattr(caja, 'saldo_actual', getattr(caja, 'total_en_caja', 0))
-            if monto > saldo_actual:
+            if monto > saldo_actual or saldo_actual <= 0:
                 messages.error(request, f"No hay fondos suficientes en la caja. Saldo disponible: ${saldo_actual}")
                 return render(request, 'cobros_extraccion.html', {'form': form, 'caja': caja})
 
