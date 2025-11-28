@@ -1,5 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="d-flex justify-content-end mb-3">
+  <a href="{% url 'home' %}" class="btn btn-outline-primary">
+    <i class="bi bi-house-door-fill me-1"></i> Volver al inicio
+  </a>
+</div>
+
 <h2>Estado de Caja</h2>
 {% if caja %}
   <p><strong>Usuario:</strong> {{ caja.usuario.username }}</p>
@@ -20,5 +26,4 @@
     <p class="mb-0">Para abrir una nueva caja, dirígete a la sección de <strong>Cobros</strong> o cualquier otra área que requiera una caja activa.</p>
   </div>
 {% endif %}
-
 {% endblock %}
