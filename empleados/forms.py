@@ -2,6 +2,7 @@ import re
 from django import forms
 from .models import Empleado
 
+
 class EmpleadoForm(forms.ModelForm):
     class Meta:
         model = Empleado
@@ -32,17 +33,15 @@ class EmpleadoForm(forms.ModelForm):
 
     def clean_dni(self):
         dni = (self.cleaned_data.get('dni') or '').strip()
-        # Solo números
         if not dni.isdigit():
             raise forms.ValidationError("El DNI solo puede contener números.")
-        # Unicidad
-        if self.instance.pk:
-            if Empleado.objects.filter(dni=dni).exclude(pk=self.instance.pk).exists():
-                raise forms.ValidationError("Ya existe un empleado con este DNI")
-        else:
-            if Empleado.objects.filter(dni=dni).exists():
-                raise forms.ValidationError("Ya existe un empleado con este DNI")
         return dni
+
+    def validate_unique(self):
+        # Evita que el ModelForm ejecute las validaciones de unique del modelo.
+        # La vista ya se encarga de la unicidad, por eso aquí no hacemos nada.
+        return
+
 
     def clean_nombre(self):
         nombre = (self.cleaned_data.get('nombre') or '').strip()
