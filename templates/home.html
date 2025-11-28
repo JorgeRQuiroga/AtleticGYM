@@ -16,6 +16,29 @@
       <hr class="border-secondary">
     </div>
 
+    <!-- Nombre del empleado con sesión iniciada -->
+    <div class="text-center mb-4">
+      <p class="white-text mb-1">Sesión de:</p>
+      <h4 class="text-white fw-semibold">
+        {# Prioridad: nombre completo del User -> first_name/last_name -> relación Empleado (user.empleado) -> primer empleado relacionado -> username #}
+        {% if user.get_full_name %}
+          {{ user.get_full_name }}
+        {% elif user.first_name %}
+          {{ user.first_name }} {{ user.last_name }}
+        {% elif user.empleado %}
+          {{ user.empleado.nombre }} {{ user.empleado.apellido }}
+        {% elif user.empleado_set.all %}
+          {% for emp in user.empleado_set.all %}
+            {% if forloop.first %}
+              {{ emp.nombre }} {{ emp.apellido }}
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {{ user.username }}
+        {% endif %}
+      </h4>
+    </div>
+
     <!-- Accesos principales -->
     <div class="d-grid gap-3 col-md-6 mx-auto">
       <a href="{% url 'cobros_lista' %}" class="btn btn-outline-light btn-lg shadow-sm">
@@ -24,7 +47,8 @@
       <a href="{% url 'membresias:membresias_menu' %}" class="btn btn-outline-light btn-lg shadow-sm">
         <i class="bi bi-card-checklist"></i> Membresías
       </a>
-  
+    </div>
+
   {% else %}
     <!-- Mensaje para usuarios no autenticados -->
     <div class="text-center text-light">

@@ -33,7 +33,7 @@
       <form method="get" class="row g-3 align-items-end mb-3">
         <div class="col-md-4">
           <div class="input-group">
-            <span class="input-group-text bg-secondary text-light"><i class="bi bi-search"></i></span>
+            <span class="input-group-text bg-transparent text-light"><i class="bi bi-search"></i></span>
             <input type="text" name="q" value="{{ query|default_if_none:'' }}" 
                    class="form-control text-light" placeholder="Buscar por DNI o nombre/apellido" aria-label="Buscar membresías">
           </div>
@@ -41,7 +41,7 @@
 
         <div class="col-md-4">
           <select name="orden" class="form-select bg-transparent text-light">
-            <option value="">-- Ordenar / Filtrar --</option>
+            <option value="">-- Ordenar --</option>
             <option value="fecha_asc" {% if orden == 'fecha_asc' %}selected{% endif %}>Inscripción ↑</option>
             <option value="fecha_desc" {% if orden == 'fecha_desc' %}selected{% endif %}>Inscripción ↓</option>
             <option value="nombre_asc" {% if orden == 'nombre_asc' %}selected{% endif %}>Nombre ↑</option>
@@ -96,16 +96,6 @@
                   <a href="{% url 'membresias:membresias_detalle' m.id %}" class="btn btn-outline-info btn-sm me-1">
                     <i class="bi bi-eye"></i> Ver
                   </a>
-
-                  {% if m.activa %}
-                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmarEliminar{{ m.id }}">
-                      <i class="bi bi-trash-fill me-1"></i> Eliminar
-                    </button>
-                  {% else %}
-                    <button class="btn btn-secondary btn-sm" disabled>
-                      <i class="bi bi-trash-fill me-1"></i> Eliminar
-                    </button>
-                  {% endif %}
                 </td>
               </tr>
             {% empty %}
@@ -116,7 +106,8 @@
           </tbody>
         </table>
 
-        <!-- Paginación -->
+    </div>
+            <!-- Paginación -->
         {% if page_obj.has_other_pages %}
         <nav aria-label="Paginación de empleados">
           <ul class="pagination justify-content-center">
@@ -130,8 +121,9 @@
           </ul>
         </nav>
         {% endif %}
-    </div>
+
   </div>
+  
 </div>
 
 <!-- Modales fuera de la tabla -->

@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
 {% load widget_tweaks %}
-
 <div class="container py-5">
   <div class="text-center mb-5">
     <h1 class="fw-bold text-primary">
@@ -12,30 +11,36 @@
   </div>
 
   <div class="row justify-content-center g-4">
-    <!-- Botón para alta de empleado -->
-    <div class="col-md-4">
-      <button type="button" class="btn btn-outline-primary btn-lg w-100 shadow-sm" 
-              data-bs-toggle="modal" data-bs-target="#modalEmpleado">
-        <i class="bi bi-person-plus"></i> Nuevo Empleado
-      </button>
+    <!-- Fila con los dos botones uno al lado del otro -->
+    <div class="col-12">
+      <div class="d-flex justify-content-center gap-3">
+        <div class="w-100" style="max-width:360px;">
+          <button type="button" class="btn btn-outline-primary btn-lg w-100 shadow-sm"
+                  data-bs-toggle="modal" data-bs-target="#modalEmpleado">
+            <i class="bi bi-person-plus"></i> Nuevo Empleado
+          </button>
+        </div>
+
+        <div class="w-100" style="max-width:360px;">
+          <a href="{% url 'empleado_lista' %}" class="btn btn-outline-success btn-lg w-100 shadow-sm">
+            <i class="bi bi-people"></i>  Lista de empleados
+          </a>
+        </div>
+      </div>
     </div>
 
-    <!-- Botón para listar empleados -->
-    <div class="col-md-4">
-      <a href="{% url 'empleado_lista' %}" class="btn btn-outline-success btn-lg w-100 shadow-sm">
-        <i class="bi bi-people"></i> Mostrar todos los empleados
-      </a>
-    </div>
-
-    <!-- Botón para volver al home -->
-    <div class="col-md-4">
-      <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100 shadow-sm">
-        <i class="bi bi-house-door"></i> Volver al Inicio
-      </a>
+    <!-- Botón Volver al Inicio debajo, ocupando el ancho de los dos botones -->
+    <div class="col-12">
+      <div class="d-flex justify-content-center mt-3">
+        <div class="w-100" style="max-width:740px;">
+          <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100 shadow-sm">
+            <i class="bi bi-house-door"></i> Volver al Inicio
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-
 <!-- Modal -->
 
 {% include 'partials/modal_agregar_empleado.html' %}
