@@ -1,17 +1,39 @@
 # servicios/forms.py
 from django import forms
 from .models import Servicio
+import re
 
 class ServicioForm(forms.ModelForm):
     class Meta:
         model = Servicio
         fields = ['nombre', 'dias_semana', 'precio']
-        labels = {'nombre':   'Nombre del Servicio','dias_semana': 'Días por Semana', 'precio':   'Precio' }
-        widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Yoga para principiantes'}),
-            'dias_semana': forms.NumberInput(attrs={'class': 'form-control','placeholder': 'Ej: 3'}),
-            'precio': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 1500.00', 'inputmode': 'decimal'}),
+        labels = {
+            'nombre': 'Nombre del Servicio',
+            'dias_semana': 'Días por Semana',
+            'precio': 'Precio'
         }
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: Yoga para principiantes'
+            }),
+            'dias_semana': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 3'
+            }),
+            'precio': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 1500.00',
+                'inputmode': 'decimal'
+            }),
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre')
+        if nombre and not re.match(r'^[A-Za-z0-9\s]+$', nombre):
+            raise forms.ValidationError("El nombre solo puede contener letras y números.")
+        return nombre
+
     def clean_precio(self):
         precio = self.cleaned_data.get('precio')
         if precio is not None and precio <= 0:

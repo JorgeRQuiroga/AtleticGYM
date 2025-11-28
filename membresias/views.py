@@ -169,7 +169,8 @@ def lista_membresias(request):
         membresias = membresias.filter(activa=False)
     else:
         # Por defecto: primero activas, luego inactivas
-        membresias = membresias.order_by('-activa', 'cliente__apellido')
+        membresias = membresias.order_by('-id', '-activa')
+
 
     # --- Paginación ---
     paginator = Paginator(membresias, 10)  # 10 por página
