@@ -94,11 +94,13 @@
 {% endif %}
 
 
-  <div class="container my-5 pt-4">
-    <div class="content-card p-4 shadow rounded bg-dark text-light">
-      {% block content %}{% endblock %}
-    </div>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="content-card p-5 shadow rounded bg-dark text-light w-100">
+    {% block content %}{% endblock %}
   </div>
+</div>
+
+
 
 </div>
 

@@ -5,6 +5,7 @@
   <div class="d-flex justify-content-center">
     <div class="card bg-dark text-light border-secondary shadow-sm w-100" style="max-width:920px;">
       <div class="card-body p-4">
+
         <div class="d-flex align-items-center mb-3 gap-3">
           <div class="rounded bg-secondary d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
             <i class="bi bi-clock-history fs-4 text-white"></i>
@@ -21,14 +22,11 @@
         <div class="row g-3 mt-4">
           <div class="col-12 col-md-6">
             <a href="{% url 'asistencias:asistencia_registrar' %}" target="_blank"
-               class="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+               class="btn btn-outline-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2 bold"
                role="button" aria-label="Abrir Modo TOTEM" title="Abrir Modo TOTEM en nueva pestaña">
               <i class="bi bi-person-check-fill fs-5"></i>
               <span class="fw-semibold">Abrir Modo TOTEM</span>
             </a>
-            <div class="mt-2 text-start">
-              <small class="text-muted">Modo optimizado para kiosco; se abre en una nueva pestaña.</small>
-            </div>
           </div>
 
           <div class="col-12 col-md-6">
@@ -38,9 +36,18 @@
               <i class="bi bi-list-task fs-5"></i>
               <span class="fw-semibold">Ver Historial</span>
             </a>
-            <div class="mt-2 text-start">
-              <small class="text-muted">Consulta y filtra registros de asistencia.</small>
-            </div>
+          </div>
+        </div>
+
+        <!-- Botón de volver al Home debajo de los dos -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <a href="{% url 'home' %}"
+               class="btn btn-outline-light btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+               role="button" aria-label="Volver al Inicio" title="Volver al Inicio">
+              <i class="bi bi-house-door-fill fs-5"></i>
+              <span class="fw-semibold">Volver al Inicio</span>
+            </a>
           </div>
         </div>
 
@@ -50,7 +57,6 @@
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block extra_scripts %}
