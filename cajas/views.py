@@ -1,23 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Caja
+from .models import Caja , ConfiguracionCaja
 from .forms import AperturaCajaForm, CierreCajaForm
 from django.utils import timezone
 from django.contrib import messages
+from django.conf import settings
 
 @login_required
 def abrir_caja(request):
-    # Si la caja ya está abierta, no mostramos el modal de apertura.
-    # En su lugar, redirigimos al usuario a donde iba o a la lista de cobros.
     if Caja.objects.filter(usuario=request.user, estado='abierta').exists():
         next_url = request.GET.get('next')
-        if next_url:
-            return redirect(next_url)
-        return redirect('cobros_lista') # Opción por defecto si no hay 'next'
+        return redirect(next_url or 'cobros_lista')
 
-    ultima_caja = Caja.objects.filter(usuario=request.user, estado='cerrada').order_by('-fecha_cierre').first()
-    monto_inicial = ultima_caja.monto_cierre if ultima_caja else 0
-
+    # Usar el valor fijo en lugar de la última caja
+    config = ConfiguracionCaja.objects.first()
+    monto_inicial = config.monto_inicial if config else 0.0
     if request.method == 'POST':
         form = AperturaCajaForm(request.POST)
         if form.is_valid():
@@ -26,14 +23,8 @@ def abrir_caja(request):
             caja.estado = 'abierta'
             caja.fecha_apertura = timezone.now()
             caja.total_en_caja = caja.monto_apertura
-
             caja.save()
-            
-            # Redirigir a la página siguiente si existe, o a la lista de cobros por defecto
-            next_url = request.POST.get('next') # Lo tomamos del POST
-            if next_url:
-                return redirect(next_url)
-            return redirect('cobros_lista')
+            return redirect(request.POST.get('next') or 'cobros_lista')
     else:
         form = AperturaCajaForm(initial={'monto_apertura': monto_inicial})
 
@@ -41,7 +32,7 @@ def abrir_caja(request):
         'form': form,
         'usuario': request.user,
         'monto_sugerido': monto_inicial,
-        'next': request.GET.get('next', '') # Pasar el 'next' a la plantilla
+        'next': request.GET.get('next', '')
     })
 
 @login_required

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
 
 class Caja(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -20,3 +22,15 @@ class Caja(models.Model):
     def registrar_egreso(self, monto):
         self.total_en_caja -= monto
         self.save()
+        
+    def cerrar(self):
+        self.estado = 'cerrada'
+        self.fecha_cierre = timezone.now()
+        self.monto_cierre = self.total_en_caja
+        self.save()
+
+class ConfiguracionCaja(models.Model):
+    monto_inicial = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+
+    def __str__(self):
+        return f"Configuración de Caja - Monto Inicial: {self.monto_inicial}"
